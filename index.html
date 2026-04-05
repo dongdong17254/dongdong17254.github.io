@@ -1,0 +1,2017 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>越冬皇帝的进步日记</title>
+    <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #F0F4F4;
+            --primary-color: #6C8D87;
+            --sidebar-active: #E2EBE9;
+            --card-bg: #FFFFFF;
+            --text-main: #333333;
+            --text-muted: #8E9E9B;
+            --border-color: #E2EAE8;
+            --title-color: #364F4A;
+            --accent-color: #83A09A;
+            --danger-color: #D48A88;
+            --warning-color: #D1B48C;
+            --star-color: #D1B48C;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.6;}
+
+        .header { text-align: center; margin-bottom: 20px; }
+        .header h1 { font-size: 28px; font-weight: bold; color: var(--title-color); margin-bottom: 6px; letter-spacing: 1px; }
+        .quote-container { color: var(--text-muted); font-size: 14px; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 8px; font-style: italic; }
+        .edit-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; transition: 0.3s; }
+        .edit-btn:hover { color: var(--primary-color); }
+
+        .layout { display: flex; width: 100%; max-width: 1320px; gap: 18px; align-items: flex-start; position: relative; }
+
+        .sidebar { width: 220px; background: var(--card-bg); border-radius: 20px; padding: 18px 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-shrink: 0; position: sticky; top: 20px; z-index: 8; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; margin-bottom: 3px; border-radius: 12px; cursor: pointer; font-size: 14px; line-height: 1.2; transition: 0.2s; font-weight: 500; color: #555; user-select:none; }
+        .nav-item:hover { background-color: #FAFCFC; }
+        .nav-item.active { background-color: var(--sidebar-active); color: var(--title-color); font-weight: bold; }
+        .nav-icon { margin-right: 0; font-size: 16px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; text-align: center; opacity: 0.95; flex-shrink: 0; }
+
+        .status-widget { background: #F9FBFB; border-radius: 12px; padding: 13px; margin-top: 14px; border: 1px solid var(--border-color); }
+        .status-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; color: var(--text-muted); }
+        .cloud-actions { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 12px; }
+        .cloud-btn { width: 100%; background: #fff; border: 1px solid var(--border-color); color: var(--title-color); padding: 9px 12px; border-radius: 10px; cursor: pointer; font-size: 13px; transition: 0.2s; }
+        .cloud-btn:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-1px); }
+        .cloud-btn.primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .cloud-btn.primary:hover { opacity: 0.95; color: #fff; }
+        .cloud-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-top: 10px; }
+        .cloud-pill { display: inline-block; max-width: 136px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 8px; border-radius: 999px; background: rgba(108,141,135,0.08); color: #667f7a; font-size: 11.5px; text-align: right; }
+        .autosave-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cfd8d6; margin-right: 6px; vertical-align: middle; }
+        .autosave-dot.on { background: var(--primary-color); box-shadow: 0 0 0 3px rgba(108,141,135,0.12); }
+        .search-card { padding: 18px 22px; }
+        .search-toolbar { display: flex; gap: 10px; align-items: center; }
+        .search-input-wrap { position: relative; flex: 1; }
+        .search-input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; pointer-events: none; }
+        .search-input { padding-left: 42px; margin-bottom: 0; background: #fff; }
+        .search-results { margin-top: 14px; display: grid; gap: 10px; }
+        .search-result-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; background: #fff; cursor: pointer; transition: 0.2s; }
+        .search-result-item:hover { border-color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03); transform: translateY(-1px); }
+        .search-result-top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; align-items: center; }
+        .search-result-title { font-size: 14px; font-weight: bold; color: var(--title-color); }
+        .search-result-badge { font-size: 11px; color: var(--primary-color); background: var(--sidebar-active); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+        .search-result-snippet { font-size: 13px; color: #566; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+        .search-result-meta { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+        .search-empty { font-size: 13px; color: var(--text-muted); padding: 4px 2px; }
+        .search-kbd { font-size: 11px; color: var(--text-muted); padding: 2px 7px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; }
+        .focus-time-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+        .focus-duration { font-weight: bold; font-size: 15px; color: var(--title-color); min-width: 74px; text-align: right; }
+
+
+        .main-content { flex-grow: 1; min-width: 0; position: relative; z-index: 1; }
+        .content-section { display: none; animation: fadeIn 0.3s ease; }
+        .content-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card { background: var(--card-bg); border-radius: 20px; padding: 22px 26px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); margin-bottom: 18px; border: 1px solid #F4F8F8; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 18px; color: var(--title-color); display: flex; align-items: center; justify-content: space-between; gap: 8px;}
+
+        .grid-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; margin-bottom: 18px; }
+        .grid-split-half { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .sub-box { background-color: #F9FBFB; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); }
+
+        .timer-box { background: #F0F6F5; border-radius: 16px; padding: 20px 30px; text-align: center; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        .time-display { font-size: 54px; font-weight: bold; color: var(--title-color); margin: 15px 0 25px 0; font-variant-numeric: tabular-nums; line-height: 1;}
+        .timer-btn-grid { display: flex; gap: 10px; width: 100%; max-width: 220px; margin-bottom: 15px; }
+        .timer-btn { flex: 1; padding: 10px 0; border-radius: 12px; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.3s; border: none; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .timer-btn:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+        .timer-btn-primary { background: var(--primary-color); color: white; }
+        .timer-btn-secondary { background: var(--sidebar-active); color: var(--title-color); }
+        .timer-btn-full { width: 100%; max-width: 220px; background: #fff; border: 1px solid var(--border-color); color: var(--title-color); padding: 10px; border-radius: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .timer-btn-full:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
+        .timer-btn-text { background: transparent; color: var(--text-muted); font-size: 13px; padding: 5px; cursor: pointer; border: none; transition: 0.2s;}
+        .timer-btn-text:hover { color: var(--primary-color); }
+
+        .shortcut-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+        .shortcut-tag { font-size: 12px; background: var(--sidebar-active); color: var(--title-color); padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent;}
+        .shortcut-tag:hover, .shortcut-tag.active { background: var(--primary-color); color: #fff; }
+        .shortcut-tag.add-btn { background: transparent; border: 1px dashed var(--primary-color); color: var(--primary-color); }
+
+        .progress-bar-bg { width: 100%; background: #E2EAE8; height: 10px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .progress-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #A8C2BB, var(--primary-color)); transition: width 0.3s ease; }
+
+        .status-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .status-tab { flex: 1; text-align: center; padding: 10px; border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; font-size: 14px; color: var(--text-muted); background: #FAFCFC; transition: 0.2s;}
+        .status-tab:hover { background: #FFF; border-color: var(--accent-color); }
+        .status-tab.active { border-color: var(--primary-color); background: var(--sidebar-active); color: var(--title-color); font-weight: bold; box-shadow: 0 0 0 1px var(--primary-color);}
+        .status-tab.checked::after { content: '✓ 已打卡'; display: block; font-size: 10px; color: var(--primary-color); margin-top: 2px;}
+
+        .status-records-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 15px;}
+        .status-col { background: #FAFCFC; border-radius: 10px; padding: 10px; border: 1px solid var(--border-color); }
+        .status-col-title { font-size: 13px; font-weight: bold; text-align: center; margin-bottom: 10px; color: var(--title-color); display: flex; justify-content:center; align-items:center; gap:4px;}
+        .status-card { background: #fff; padding: 12px; border-radius: 8px; font-size: 13px; margin-bottom: 8px; border: 1px solid var(--border-color); position: relative; transition: 0.2s; }
+        .status-card:hover { border-color: var(--primary-color); box-shadow: 0 2px 6px rgba(0,0,0,0.03);}
+        .status-card:hover .action-group { opacity: 1; }
+        .status-card-time { font-size: 11px; color: var(--primary-color); font-weight: bold; margin-bottom: 6px; display:flex; justify-content:space-between; align-items:center;}
+        .status-card-content { color: var(--text-main); white-space: pre-wrap; line-height: 1.5; word-break: break-all;}
+
+        .custom-input, .custom-textarea { width: 100%; padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none; background: #FAFCFC; transition: 0.2s; color: #333; line-height: 1.5;}
+        .custom-input:focus, .custom-textarea:focus { border-color: var(--primary-color); background: #FFF; box-shadow: 0 0 0 2px rgba(108, 141, 135, 0.1);}
+        .code-textarea { font-family: "Consolas", "Monaco", monospace; background: #2D333B; color: #ADBAC7; border: none; padding: 15px; font-size: 13px; min-height: 120px;}
+        .code-textarea:focus { background: #22272E; box-shadow: 0 0 0 2px var(--primary-color); }
+
+        .btn { background-color: var(--primary-color); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; cursor: pointer; transition: 0.2s; font-weight: 500;}
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: transparent; border: 1px solid var(--primary-color); color: var(--primary-color); }
+        .btn-outline:hover { background: var(--primary-color); color: #fff; }
+
+        .text-btn { font-size: 11px; padding: 3px 7px; border-radius: 6px; cursor: pointer; transition: 0.3s ease; font-weight: normal; user-select: none; border: 1px solid transparent; line-height: 1; }
+        .text-btn.edit { color: var(--primary-color); background: transparent; border-color: var(--border-color); }
+        .text-btn.edit:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+        .text-btn.delete { color: var(--danger-color); background: transparent; border-color: var(--border-color); }
+        .text-btn.delete:hover { background: var(--danger-color); color: #fff; border-color: var(--danger-color); }
+        .action-group { display: flex; gap: 6px; opacity: 0; transition: 0.2s; }
+
+        .todo-list, .record-list { list-style: none; max-height: 350px; overflow-y: auto; padding-right: 5px; }
+        .todo-item { display: flex; align-items: center; padding: 9px 12px; background: #FFF; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 9px; transition: 0.2s; gap: 10px;}
+        .todo-item:hover { border-color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
+        .todo-item:hover .action-group { opacity: 1; }
+        .todo-checkbox { appearance: none; width: 18px; height: 18px; border: 2px solid #DCDCDC; border-radius: 50%; margin-right: 0; margin-top: 0; cursor: pointer; position: relative; flex-shrink: 0; }
+        .todo-checkbox:checked { background-color: var(--primary-color); border-color: var(--primary-color); }
+        .todo-checkbox:checked::after { content: '✓'; color: white; position: absolute; left: 3px; top: -1px; font-size: 14px; font-weight: bold; }
+        .todo-content { flex-grow: 1; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; min-width: 0; }
+        .todo-text { font-size: 14px; color: #333; line-height: 1.35; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .todo-text.done { text-decoration: line-through; color: var(--text-muted); opacity: 0.7;}
+        .todo-meta { font-size: 11px; color: var(--text-muted); display: inline-block; margin-top: 0; background: #F4F8F8; padding: 3px 8px; border-radius: 6px; width: fit-content; flex-shrink: 0; white-space: nowrap; }
+
+        .prio-select-group { display: flex; gap: 4px; background: var(--sidebar-active); padding: 4px; border-radius: 10px; margin-bottom: 0; align-items: center; }
+        .prio-opt { font-size: 12px; padding: 6px 12px; border-radius: 8px; cursor: pointer; color: var(--text-muted); transition: 0.2s; font-weight: bold; line-height: 1; }
+        .prio-opt:hover { background: rgba(255,255,255,0.5); }
+        .prio-opt.active.prio-1 { background: var(--danger-color); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .prio-opt.active.prio-2 { background: var(--warning-color); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .prio-opt.active.prio-3 { background: var(--primary-color); color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .prio-tag { font-size: 11px; padding: 2px 7px; border-radius: 6px; color: #fff; margin-right: 6px; font-weight: normal; vertical-align: middle; }
+        .prio-tag-1 { background-color: var(--danger-color); }
+        .prio-tag-2 { background-color: var(--warning-color); }
+        .prio-tag-3 { background-color: var(--primary-color); }
+
+        .focus-item { display: flex; justify-content: space-between; align-items: center; padding: 13px 14px; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 10px; background: #fff; transition: 0.2s;}
+        .focus-item:hover { border-color: var(--accent-color); box-shadow: 0 2px 8px rgba(0,0,0,0.02);}
+        .focus-item:hover .action-group { opacity: 1; }
+
+        .word-stats-bar { display: flex; gap: 12px; background: var(--sidebar-active); padding: 9px 16px; border-radius: 10px; margin-bottom: 12px; font-size: 13px; color: var(--title-color); align-items: center; line-height: 1.2;}
+        .word-stats-bar strong { font-size: 15px; color: var(--primary-color); margin-left: 4px;}
+        .stat-wrapper { display: flex; gap: 15px; margin-bottom: 24px; flex-wrap: wrap;}
+        .stat-box { flex: 1; min-width: 150px; border-radius: 12px; padding: 20px; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border-color); border-top-width: 4px; }
+        .stat-box-title { font-size: 15px; font-weight: bold; margin-bottom: 15px; display: flex; align-items: center; gap: 6px; color: var(--title-color);}
+        .stat-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; color: var(--text-main); }
+        .stat-row span:last-child { font-weight: bold; font-size: 14px; color: var(--title-color); }
+        .chart-container { width: 100%; height: 220px; position: relative; margin-top: 10px; }
+
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 0 10px; }
+        .calendar-nav { cursor: pointer; color: var(--text-muted); padding: 5px 10px; border-radius: 6px; font-size: 14px; }
+        .calendar-nav:hover { background: #F0F0F0; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+        .calendar-day-name { text-align: center; font-size: 13px; color: var(--text-muted); padding-bottom: 10px; }
+        .calendar-cell { background: #FDFDFD; border: 1px solid #F0F0F0; border-radius: 12px; min-height: 110px; padding: 8px; display: flex; flex-direction: column; transition: 0.2s; }
+        .calendar-cell:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.03); transform: translateY(-2px); }
+        .calendar-cell.today { border: 2px solid #5C9CE6; background: #F5FAFF; }
+        .calendar-date { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; text-align: left; padding-left: 4px; }
+        .calendar-task { font-size: 11px; background: #FFF4E5; color: #D37A20; padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .record-item { background: #fff; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; position: relative; transition: 0.2s;}
+        .record-item:hover { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
+        .record-item:hover .action-group { opacity: 1; }
+        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .record-time { font-size: 12px; color: var(--text-muted); }
+        .record-content { font-size: 14px; color: var(--text-main); white-space: pre-wrap; word-wrap: break-word; line-height: 1.52;}
+
+        /* 文献卡片与学习笔记样式 */
+        .lit-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 15px; overflow: hidden; transition: 0.3s; }
+        .lit-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+        .lit-summary { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; background: #FAFCFC; }
+        .lit-summary:hover { background: #F0F6F5; }
+        .lit-id { font-size: 15px; font-weight: bold; color: var(--title-color); display: flex; align-items: center; gap: 8px;}
+        .lit-tag { font-size: 11px; background: var(--sidebar-active); color: var(--primary-color); padding: 2px 8px; border-radius: 6px; }
+        .lit-details { padding: 20px; border-top: 1px dashed var(--border-color); display: none; background: #fff;}
+        .lit-details.open { display: block; animation: fadeIn 0.3s ease; }
+        .lit-params { font-size: 13px; color: #555; background: #F9FBFB; padding: 10px; border-radius: 8px; margin-bottom: 15px; border-left: 3px solid var(--accent-color); }
+        
+        .learn-card { background: #fff; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: 0.3s; }
+        .learn-card:hover { border-color: var(--primary-color); box-shadow: 0 4px 15px rgba(0,0,0,0.04); }
+        .learn-card:hover .action-group { opacity: 1; }
+
+        .life-item { background: #fff; border: 1px solid var(--border-color); border-radius: 10px; padding: 15px; margin-bottom: 10px; position: relative; transition: 0.2s;}
+        .life-item:hover { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
+        .life-item:hover .action-group { opacity: 1; }
+        .life-title { font-size: 15px; font-weight: bold; color: var(--title-color); display: flex; align-items: center; gap: 6px; line-height: 1.4;}
+        .life-time-badge { background: var(--sidebar-active); color: var(--primary-color); font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: normal; margin-bottom: 8px; display: inline-block;}
+        
+        .unified-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+        .unified-cal-cell { font-size: 13px; background: #FAFCFC; border-radius: 8px; border: 1px solid var(--border-color); padding: 6px 2px; transition: 0.2s; min-height: 50px;}
+        .unified-cal-cell.has-record { background: var(--sidebar-active); border-color: var(--primary-color); color: var(--title-color); font-weight: bold; cursor: help;}
+
+        
+        .compact-record .record-content { font-size: 14px; line-height: 1.35; }
+        .compact-record .record-time { font-size: 12px; }
+        .compact-record strong { font-size: 15px; }
+.media-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px; margin-top: 20px; }
+        .media-card { background: #fff; border-radius: 16px; overflow: hidden; border: 1px solid var(--border-color); position: relative; transition: 0.3s; display: flex; flex-direction: column;}
+        .media-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); border-color: var(--accent-color);}
+        .media-img { width: 100%; max-height: 240px; object-fit: contain; background: #FAFCFC; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; font-size: 13px; color: #aaa; padding: 10px;}
+        .media-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; }
+        .media-title-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;}
+        .media-title { font-size: 16px; font-weight: bold; color: var(--title-color); }
+        .media-desc { font-size: 14px; white-space: pre-wrap; word-wrap: break-word; line-height: 1.66; color: #555; text-align: justify; max-height: 200px; overflow-y: auto; margin-top: 5px; padding-right: 5px; flex-grow: 1;}
+        .media-rating-badge { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #fff; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; z-index: 10; backdrop-filter: blur(2px);}
+        .media-card .action-group { position: absolute; top: 15px; right: 15px; z-index: 10; background: rgba(255,255,255,0.9); padding: 4px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);}
+        .media-card:hover .action-group { opacity: 1; }
+
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: var(--border-color); border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { border: 2px solid #FFF; height: 16px; width: 16px; border-radius: 50%; background: var(--primary-color); cursor: pointer; -webkit-appearance: none; margin-top: -5px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .file-upload-label { cursor: pointer; display: inline-flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 10px; font-size: 13px; color: var(--text-main); transition: 0.2s; }
+        .file-upload-label:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .file-upload-label input[type="file"] { display: none; }
+
+        .annual-item { position: relative; background: #FFF; border-radius: 12px; margin-bottom: 15px; overflow: hidden; padding: 18px 20px; border: 1px solid var(--border-color); transition: 0.2s;}
+        .annual-item:hover { border-color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
+        .annual-item:hover .action-group { opacity: 1; }
+        .annual-bg { position: absolute; top: 0; left: 0; height: 100%; z-index: 1; transition: width 0.4s ease; border-radius: 0 12px 12px 0; background: var(--sidebar-active);}
+        .annual-content { position: relative; z-index: 2; }
+        .annual-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;}
+        .annual-badge { background: #FFF; padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 13px; color: var(--title-color); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .annual-manual-btn { border: 1px solid var(--primary-color); background: transparent; color: var(--primary-color); border-radius: 4px; padding: 2px 8px; cursor: pointer; font-size: 12px; margin-left: 5px; transition: 0.2s;}
+        .annual-manual-btn:hover { background: var(--primary-color); color: #fff; }
+
+
+
+        #section-reading .media-title, #section-reading .media-desc,
+        #section-movie .media-title, #section-movie .media-desc,
+        #section-blog .media-title, #section-blog .media-desc,
+        #section-ideas .record-content,
+        #section-reading #input-reading-title, #section-reading #input-reading-desc,
+        #section-movie #input-movie-title, #section-movie #input-movie-desc,
+        #section-blog #input-blog-title, #section-blog #input-blog-desc,
+        #input-cns-full, #list-cns-full .record-content, #list-cns .record-content {
+            font-family: "STZhongsong", "华文中宋", "Songti SC", "SimSun", serif;
+        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
+        .modal-overlay.show { display: flex; opacity: 1; }
+        .modal-card { background: var(--card-bg); width: 450px; max-width: 90%; max-height: 90vh; overflow-y: auto; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); transform: translateY(-20px); transition: transform 0.3s; }
+        .modal-overlay.show .modal-card { transform: translateY(0); }
+        .modal-title { font-size: 18px; color: var(--title-color); margin-bottom: 20px; font-weight: bold; }
+        .modal-body { display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px; }
+        .modal-input-group { display: flex; flex-direction: column; gap: 6px; }
+        .modal-input-group label { font-size: 13px; color: var(--text-muted); font-weight: bold; }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 12px; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #D0DCDA; border-radius: 6px; }
+
+        @media (max-width: 1024px) { .grid-split { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) {
+            body { padding: 10px; } .layout { flex-direction: column; }
+            .sidebar { width: 100%; position: static; display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; }
+            .nav-item { flex: 1; min-width: 70px; text-align: center; font-size: 12px; padding: 8px 4px; }
+            .nav-icon { margin-right: 4px; }
+            .grid-split, .grid-split-half, .grid-3 { grid-template-columns: 1fr; }
+            .time-display { font-size: 38px; } .status-widget { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>越冬皇帝的进步日记</h1>
+    <div class="quote-container">
+        <span id="quote-text">光荣在于平淡，艰巨在于漫长</span>
+        <button class="edit-btn" onclick="editQuote()">✎</button>
+    </div>
+    <p id="current-date" style="font-size: 13px; color: var(--text-muted);"></p>
+</div>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="nav-item active" data-section="home" onclick="switchTab(event, \'home\')"><span class="nav-icon">👑</span> 帝王总览</div>
+        <div class="nav-item" data-section="literature" onclick="switchTab(event, \'literature\')"><span class="nav-icon">📖</span> 文献指南</div>
+        <div class="nav-item" data-section="learning" onclick="switchTab(event, \'learning\')"><span class="nav-icon">💡</span> 学习笔记</div>
+        <div class="nav-item" data-section="annual" onclick="switchTab(event, \'annual\')"><span class="nav-icon">🎯</span> 年计划</div>
+        <div class="nav-item" data-section="life" onclick="switchTab(event, \'life\')"><span class="nav-icon">🍱</span> 生活碎片</div>
+        <div class="nav-item" data-section="reading" onclick="switchTab(event, \'reading\')"><span class="nav-icon">📚</span> 阅读指南</div>
+        <div class="nav-item" data-section="movie" onclick="switchTab(event, \'movie\')"><span class="nav-icon">🎬</span> 观影指南</div>
+        <div class="nav-item" data-section="blog" onclick="switchTab(event, \'blog\')"><span class="nav-icon">🎧</span> 播客指南</div>
+        <div class="nav-item" data-section="quotes" onclick="switchTab(event, \'quotes\')"><span class="nav-icon">✒️</span> 抄点好句</div>
+        <div class="nav-item" data-section="ideas" onclick="switchTab(event, \'ideas\')"><span class="nav-icon">⚡</span> 闪念归档</div>
+
+        <div style="border-top: 1px dashed var(--border-color); margin: 20px 0 10px 0; padding-top: 15px;">
+            <div class="nav-item" onclick="exportData()" style="color: var(--primary-color); font-size: 13px;"><span class="nav-icon">💾</span> 导出备份</div>
+            <div class="nav-item" onclick="document.getElementById('importFile').click()" style="color: var(--text-muted); font-size: 13px;"><span class="nav-icon">📂</span> 恢复数据</div>
+            <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+        </div>
+
+
+        <div class="status-widget">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--primary-color);">☁️ OneDrive 同步</div>
+            <div class="status-row"><span>账户:</span> <span id="cloud-account" class="cloud-pill">未登录</span></div>
+            <div class="status-row"><span>状态:</span> <span id="cloud-state">仅本地</span></div>
+            <div class="status-row"><span>最后同步:</span> <span id="cloud-last-sync">未同步</span></div>
+            <div class="status-row"><span>自动保存:</span> <span><span id="cloud-autosave-dot" class="autosave-dot"></span><span id="cloud-autosave-text">已开启</span></span></div>
+            <div class="cloud-actions">
+                <button id="cloud-login-btn" type="button" class="cloud-btn primary" onclick="loginMicrosoft()">登录 Microsoft</button>
+                <button class="cloud-btn" onclick="loadCloudData()">从云端读取</button>
+                <button class="cloud-btn" onclick="saveCloudData()">保存到云端</button>
+            </div>
+            <div class="cloud-note">已启用自动保存：登录后，本地每次保存会在约 2 秒后自动同步到 OneDrive。</div>
+        </div>
+
+        <div class="status-widget">
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--primary-color);">📌 今日概况</div>
+            <div class="status-row"><span>本周码字:</span> <span id="sidebar-words">0 字</span></div>
+            <div class="status-row"><span>待办奏折:</span> <span id="sidebar-todos" style="color: var(--title-color);">0 份</span></div>
+        </div>
+    </aside>
+
+
+    <main class="main-content">
+        <div class="card search-card">
+            <div class="section-title"><span>🔎 全站搜索</span><span class="search-kbd">Ctrl / ⌘ + K</span></div>
+            <div class="search-toolbar">
+                <div class="search-input-wrap">
+                    <span class="search-input-icon">🔍</span>
+                    <input id="global-search-input" class="custom-input search-input" type="text" placeholder="搜索文献、学习笔记、任务、专注记录、阅读/观影/播客、闪念等...">
+                </div>
+                <button class="btn" type="button" onclick="performGlobalSearch()">搜索</button>
+                <button class="btn btn-outline" type="button" onclick="clearGlobalSearch()">清空</button>
+            </div>
+            <div id="global-search-results" class="search-results">
+                <div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>
+            </div>
+        </div>
+
+        <!-- 首页总览 -->
+        <section id="section-home" class="content-section active">
+            <div class="grid-split">
+                <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                    <div class="section-title">⏱️ 今日理政时间</div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 20px;">
+                        <div class="timer-box" style="flex: 1.2;">
+                            <div style="font-size: 13px; color: var(--text-muted);">当前正计时</div>
+                            <div class="time-display" id="focus-stopwatch">00:00:00</div>
+                            <div class="timer-btn-grid">
+                                <button class="timer-btn timer-btn-primary" onclick="focusTimerCtrl('start')">开始</button>
+                                <button class="timer-btn timer-btn-secondary" onclick="focusTimerCtrl('pause')">暂停</button>
+                            </div>
+                            <button class="timer-btn-full" onclick="focusTimerCtrl('stop')">结束并保存</button>
+                            <button class="timer-btn-text" onclick="focusTimerCtrl('reset')">清零计时</button>
+                        </div>
+                        <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+                            <div>
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: var(--title-color);">快捷主题 (点击即续接)</div>
+                                <div id="focus-shortcuts" class="shortcut-tags"></div>
+                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; margin-top:15px; color: var(--title-color);">当前目标(分)</div>
+                                <input type="number" id="focus-target" class="custom-input" placeholder="240" onchange="updateOverviewStats()">
+                                <input type="hidden" id="focus-topic" value="未命名">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sub-box" style="flex-grow: 1;">
+                        <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--title-color);">今日理政纪要</h4>
+                        <ul id="list-focus-today" style="list-style:none; max-height: 180px; overflow-y: auto; padding-right:5px;"></ul>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                    <div class="section-title">📊 今日概览</div>
+                    <div class="sub-box" style="margin-bottom: 15px; padding: 20px;">
+                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:10px;">
+                            <span style="font-weight: bold; color: var(--title-color);">目标进度</span><span id="progress-text" style="color: var(--text-muted);">0/240 分钟</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="progress-bar" class="progress-bar-fill"></div></div>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="sub-box" style="flex: 1; text-align: center; padding: 15px 10px;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">打卡完成率</div>
+                            <div style="font-size: 26px; font-weight: bold; color: var(--title-color);" id="stat-checkin-rate">0%</div>
+                        </div>
+                        <div class="sub-box" style="flex: 1; text-align: center; padding: 15px 10px;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">任务完成率</div>
+                            <div style="font-size: 26px; font-weight: bold; color: var(--title-color);" id="stat-todo-rate">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="sub-box" style="flex-grow: 1; display: flex; flex-direction: column;">
+                        <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--title-color);">🌈 状态与打卡</h4>
+                        <div class="status-tabs">
+                            <div class="status-tab active" id="tab-0" onclick="selectStatusTab(0)">🌅 上午</div>
+                            <div class="status-tab" id="tab-1" onclick="selectStatusTab(1)">☀️ 下午</div>
+                            <div class="status-tab" id="tab-2" onclick="selectStatusTab(2)">🌙 晚上</div>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:flex-start;">
+                            <textarea id="input-daily-status" class="custom-textarea" placeholder="记录当前选中频道的感受... (Ctrl+Enter 提交)" style="flex-grow:1; min-height:50px; margin-bottom:0;"></textarea>
+                            <button class="btn" style="padding:10px 15px; align-self:stretch; background:var(--title-color);" onclick="saveDailyStatus()">打卡</button>
+                        </div>
+                        <div class="status-records-grid" id="status-records-grid"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">✅ 奏折管理 (任务)</div>
+                <div class="grid-split-half">
+                    <div class="sub-box" style="background: #fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                            <h4 style="font-size: 15px; color: var(--title-color);">🗓️ 近期任务</h4><span style="font-size:12px; color:var(--text-muted);">已按重要度及 DDL 排序</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                            <div class="prio-select-group" id="prio-group-long">
+                                <div class="prio-opt prio-1" onclick="setPrio('long', 1)">急</div>
+                                <div class="prio-opt prio-2" onclick="setPrio('long', 2)">重</div>
+                                <div class="prio-opt prio-3 active" onclick="setPrio('long', 3)">普</div>
+                            </div>
+                            <input type="text" id="input-todo-long" class="custom-input" placeholder="任务名称..." style="margin-bottom: 0; flex: 2;">
+                            <input type="date" id="input-todo-ddl" class="custom-input" style="margin-bottom: 0; flex: 1.2; padding: 8px 12px;">
+                            <button class="btn" onclick="addTodo('long')">添加</button>
+                        </div>
+                        <ul class="todo-list" id="list-todo-long"></ul>
+                    </div>
+                    <div class="sub-box" style="background: #fff;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                            <h4 style="font-size: 15px; color: var(--title-color);">🔥 今日任务</h4><span style="font-size:12px; color:var(--danger-color);">未完成自动顺延</span>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center;">
+                            <div class="prio-select-group" id="prio-group-today">
+                                <div class="prio-opt prio-1" onclick="setPrio('today', 1)">急</div>
+                                <div class="prio-opt prio-2" onclick="setPrio('today', 2)">重</div>
+                                <div class="prio-opt prio-3 active" onclick="setPrio('today', 3)">普</div>
+                            </div>
+                            <input type="text" id="input-todo-today" class="custom-input" placeholder="今日研究或琐事..." style="margin-bottom: 0; flex: 2;">
+                            <button class="btn" style="background: var(--title-color);" onclick="addTodo('today')">添加</button>
+                        </div>
+                        <ul class="todo-list" id="list-todo-today"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">📝 码字进度</div>
+                <div class="word-stats-bar" id="word-stats"></div>
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                    <input type="number" id="input-words" class="custom-input" placeholder="今日新增字数..." style="margin-bottom: 0; flex: 1;">
+                    <button class="btn" onclick="saveRecord('words')">记录打卡</button>
+                </div>
+                <ul id="list-words" class="record-list"></ul>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="section-title">🔮 理政统计</div>
+                <div class="stat-wrapper">
+                    <div class="stat-box" style="border-top-color: var(--primary-color);">
+                        <div class="stat-box-title">📅 本周</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-w-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-w-time">0 min</span></div>
+                    </div>
+                    <div class="stat-box" style="border-top-color: var(--title-color);">
+                        <div class="stat-box-title">🗓️ 本月</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-m-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-m-time">0 min</span></div>
+                    </div>
+                    <div class="stat-box" style="border-top-color: var(--accent-color);">
+                        <div class="stat-box-title">📈 本年</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-y-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-y-time">0 min</span></div>
+                    </div>
+                </div>
+                <div style="font-size: 14px; font-weight: bold; color: var(--title-color); margin-top: 20px; margin-bottom: 15px;">📉 近7天批阅趋势</div>
+                <div class="chart-container"><canvas id="trendChart"></canvas></div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">🗺️ 江山社稷图</div>
+                <div class="calendar-header"><span class="calendar-nav" onclick="changeMonth(-1)">❮ 上一月</span><strong id="calendar-title" style="font-size: 16px;"></strong><span class="calendar-nav" onclick="changeMonth(1)">下一月 ❯</span></div>
+                <div class="calendar-grid" id="calendar-grid"></div>
+            </div>
+        </section>
+
+        <!-- 文献指南 -->
+        <section id="section-literature" class="content-section">
+            <div class="card">
+                <div class="section-title">
+                    <span>📖 文献指南 <span style="font-size:12px;font-weight:normal;color:var(--text-muted);">科研文献专区</span></span>
+                    <button class="btn btn-outline" style="padding: 6px 12px; font-size:12px;" onclick="exportCSV('literature')">⬇️ 导出CSV表格</button>
+                </div>
+                
+                <div class="sub-box" style="margin-bottom: 20px;">
+                    <div class="grid-split-half" style="margin-bottom: 0;">
+                        <div>
+                            <input type="text" id="input-lit-id" class="custom-input" placeholder="文献标识 (如 Zhang2021) *" style="font-weight: bold;">
+                            <input type="text" id="input-lit-journal" class="custom-input" placeholder="期刊与年份 (如 NeuroImage, 2021)">
+                        </div>
+                        <div>
+                            <input type="text" id="input-lit-tags" class="custom-input" placeholder="分类标签 (如 fMRI, Meta-analysis) *以逗号分隔" list="lit-tags-list">
+                            <datalist id="lit-tags-list"></datalist>
+                            <input type="text" id="input-lit-params" class="custom-input" placeholder="核心参数简记 (如 N=50, tDCS, DLPFC)">
+                        </div>
+                    </div>
+                    <textarea id="input-lit-desc" class="custom-textarea" style="min-height: 120px;" placeholder="详细文献笔记... (可详写推导逻辑、创新点等)"></textarea>
+                    <button class="btn" style="width: 100%; font-size: 14px;" onclick="saveLiterature()">💾 录入文献卡片</button>
+                </div>
+
+                <div style="margin-bottom: 15px;" id="lit-filter-tags" class="shortcut-tags"></div>
+                <div id="list-literature"></div>
+            </div>
+        </section>
+
+        <!-- 学习笔记 -->
+        <section id="section-learning" class="content-section">
+            <div class="card">
+                <div class="section-title">💡 学习与方法笔记</div>
+                <div class="sub-box" style="margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px;">
+                        <input type="text" id="input-learn-title" class="custom-input" placeholder="笔记标题 (如 fMRIPrep 预处理报错解决) *" style="flex: 2; font-weight: bold;">
+                        <input type="text" id="input-learn-tags" class="custom-input" placeholder="工具/概念标签 (如 MATLAB, 认知控制)" style="flex: 1;">
+                    </div>
+                    <textarea id="input-learn-desc" class="custom-textarea" style="min-height: 100px;" placeholder="知识点梳理 / 报错原因分析..."></textarea>
+                    <textarea id="input-learn-code" class="custom-textarea code-textarea" placeholder="在此粘贴代码片段、终端命令或运行日志..."></textarea>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <label class="file-upload-label">🖼️ 附加说明图<input type="file" id="input-learn-img" accept="image/*" onchange="previewImage(this, 'learn')"></label>
+                            <img id="preview-learn" style="max-height: 40px; display: none; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        </div>
+                        <button class="btn" onclick="saveLearning()" style="padding: 10px 25px;">💾 保存笔记</button>
+                    </div>
+                </div>
+                <div id="list-learning"></div>
+            </div>
+        </section>
+
+        <!-- 年计划 -->
+        <section id="section-annual" class="content-section">
+            <div class="card">
+                <div class="section-title">🎯 年计划 <span style="font-size:13px; font-weight:normal; color:var(--text-muted); margin-left:10px;">添加计划后，对应的指南记录会自动同步更新进度</span></div>
+                <div style="display: flex; gap: 15px; margin-bottom: 25px; background: #FAFCFC; padding: 20px; border-radius: 16px; border: 1px dashed var(--border-color);">
+                    <select id="annual-type" class="custom-input" style="flex:1; margin-bottom:0;" onchange="toggleAnnualCustom(this)">
+                        <option value="reading">📚 阅读指南</option>
+                        <option value="movie">🎬 观影指南</option>
+                        <option value="blog">🎧 播客指南</option>
+                        <option value="other">🧩 自定义目标 (手动打卡)</option>
+                    </select>
+                    <input type="text" id="annual-custom-title" class="custom-input" placeholder="输入自定义目标名称" style="display:none; flex:1.5; margin-bottom:0;">
+                    <input type="number" id="annual-target" class="custom-input" placeholder="设定目标数量 (如 20)" style="flex:1; margin-bottom:0;">
+                    <button class="btn" onclick="addAnnualPlan()">添加计划</button>
+                </div>
+                <div id="list-annual"></div>
+            </div>
+        </section>
+
+        <!-- 生活碎片 -->
+        <section id="section-life" class="content-section">
+            <div class="card">
+                <div class="section-title">🍱 生活碎片打卡 <span style="font-size:12px;font-weight:normal;color:var(--text-muted);">(记录带有精确时间戳)</span></div>
+                <div class="grid-3">
+                    <div class="sub-box" style="padding: 20px;">
+                        <h4 style="font-size: 15px; color:var(--title-color); margin-bottom:15px;">🏅 运动记录</h4>
+                        <input type="text" id="input-sport-name" class="custom-input" placeholder="运动项目">
+                        <input type="number" id="input-sport-time" class="custom-input" placeholder="时长(分)">
+                        <button class="btn" style="width:100%;" onclick="saveRecord('sport')">保存</button>
+                        <ul id="list-sport" class="record-list" style="padding:0; margin-top:20px;"></ul>
+                    </div>
+                    <div class="sub-box" style="padding: 20px;">
+                        <h4 style="font-size: 15px; color:var(--title-color); margin-bottom:15px;">🍱 饮食打卡</h4>
+                        <input type="text" id="input-food" class="custom-input" placeholder="吃了什么？">
+                        <button class="btn" style="width:100%; margin-top:52px;" onclick="saveRecord('food')">保存</button>
+                        <ul id="list-food" class="record-list" style="padding:0; margin-top:20px;"></ul>
+                    </div>
+                    <div class="sub-box" style="padding: 20px;">
+                        <h4 style="font-size: 15px; color:var(--title-color); margin-bottom:15px;">🍵 饮品打卡</h4>
+                        <input type="text" id="input-drink" class="custom-input" placeholder="喝了什么？">
+                        <button class="btn" style="width:100%; margin-top:52px;" onclick="saveRecord('drink')">保存</button>
+                        <ul id="list-drink" class="record-list" style="padding:0; margin-top:20px;"></ul>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; border-top: 1px dashed var(--border-color); padding-top: 25px;">
+                    <div style="font-size:16px; font-weight:bold; color:var(--title-color); margin-bottom:15px; text-align:center;" id="unified-cal-title">📅 本月综合生活追踪</div>
+                    <div class="unified-cal-grid" id="unified-cal-grid"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 阅读指南 (原阅读指南) -->
+        <section id="section-reading" class="content-section">
+            <div class="card">
+                <div class="section-title">📚 阅读指南</div>
+                <input type="text" id="input-reading-title" class="custom-input" placeholder="书名" style="font-weight: bold;">
+                <textarea id="input-reading-desc" class="custom-textarea" style="min-height: 200px;" placeholder="写下感悟... (Ctrl+Enter 快速保存)"></textarea>
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex:1;">
+                        <span style="font-size: 14px; font-weight: bold; color: var(--title-color);">打个分吧: </span>
+                        <input type="range" id="input-reading-rating" min="1" max="10" value="8" style="flex:1;" oninput="document.getElementById('reading-rating-val').innerText = this.value + ' 分'">
+                        <span id="reading-rating-val" style="font-size: 16px; font-weight: bold; width: 45px; color:var(--primary-color);">8 分</span>
+                    </div>
+                    <label class="file-upload-label">🖼️ 上传封面<input type="file" id="input-reading-img" accept="image/*" onchange="previewImage(this, 'reading')"></label>
+                    <img id="preview-reading" style="max-height: 40px; display: none; border-radius: 4px;">
+                </div>
+                <button class="btn" style="width: 100%; font-size: 15px; padding: 12px;" onclick="saveMedia('reading')">保存排版卡片</button>
+                <div id="list-reading" class="media-gallery"></div>
+            </div>
+        </section>
+
+        <!-- 观影指南 -->
+        <section id="section-movie" class="content-section">
+            <div class="card">
+                <div class="section-title">🎬 观影指南</div>
+                <input type="text" id="input-movie-title" class="custom-input" placeholder="电影 / 剧集名称" style="font-weight: bold;">
+                <textarea id="input-movie-desc" class="custom-textarea" style="min-height: 200px;" placeholder="写下观后感... (Ctrl+Enter 快速保存)"></textarea>
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex:1;">
+                        <span style="font-size: 14px; font-weight: bold; color: var(--title-color);">打个分吧: </span>
+                        <input type="range" id="input-movie-rating" min="1" max="10" value="8" style="flex:1;" oninput="document.getElementById('movie-rating-val').innerText = this.value + ' 分'">
+                        <span id="movie-rating-val" style="font-size: 16px; font-weight: bold; width: 45px; color:var(--primary-color);">8 分</span>
+                    </div>
+                    <label class="file-upload-label">🖼️ 上传海报<input type="file" id="input-movie-img" accept="image/*" onchange="previewImage(this, 'movie')"></label>
+                    <img id="preview-movie" style="max-height: 40px; display: none; border-radius: 4px;">
+                </div>
+                <button class="btn" style="width: 100%; font-size: 15px; padding: 12px;" onclick="saveMedia('movie')">保存排版卡片</button>
+                <div id="list-movie" class="media-gallery"></div>
+            </div>
+        </section>
+
+        <!-- 播客指南 -->
+        <section id="section-blog" class="content-section">
+            <div class="card">
+                <div class="section-title">🎧 播客指南</div>
+                <input type="text" id="input-blog-title" class="custom-input" placeholder="播客标题或主题" style="font-weight: bold;">
+                <textarea id="input-blog-desc" class="custom-textarea" style="min-height: 200px;" placeholder="播客大纲或笔记... (Ctrl+Enter 快速保存)"></textarea>
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex:1;">
+                        <span style="font-size: 14px; font-weight: bold; color: var(--title-color);">打个分吧: </span>
+                        <input type="range" id="input-blog-rating" min="1" max="10" value="8" style="flex:1;" oninput="document.getElementById('blog-rating-val').innerText = this.value + ' 分'">
+                        <span id="blog-rating-val" style="font-size: 16px; font-weight: bold; width: 45px; color:var(--primary-color);">8 分</span>
+                    </div>
+                    <label class="file-upload-label">🖼️ 上传播客配图<input type="file" id="input-blog-img" accept="image/*" onchange="previewImage(this, 'blog')"></label>
+                    <img id="preview-blog" style="max-height: 40px; display: none; border-radius: 4px;">
+                </div>
+                <button class="btn" style="width: 100%; font-size: 15px; padding: 12px;" onclick="saveMedia('blog')">保存排版卡片</button>
+                <div id="list-blog" class="media-gallery"></div>
+            </div>
+        </section>
+
+        <!-- 抄点好句 -->
+        <section id="section-quotes" class="content-section">
+            <div class="card">
+                <div class="section-title">✒️ 抄点好句</div>
+                <textarea id="input-memorable-quote" class="custom-textarea" placeholder="摘抄金句... (Ctrl+Enter 快速珍藏)" style="min-height: 150px; font-size: 15px;"></textarea>
+                <div style="text-align:right;"><button class="btn" onclick="saveRecord('memorableQuotes')" style="padding: 10px 25px; font-size: 14px;">💾 珍藏佳句</button></div>
+                <ul id="list-memorableQuotes" class="record-list" style="margin-top: 30px;"></ul>
+            </div>
+        </section>
+
+        <!-- 闪念归档 -->
+        <section id="section-ideas" class="content-section">
+            <div class="card">
+                <div class="section-title">⚡ 闪念归档</div>
+                <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">你马上要发顶刊了！</p>
+                <textarea id="input-cns-full" class="custom-textarea" placeholder="记录当下的奇思妙想... (Ctrl+Enter 快速封存)" style="min-height: 180px; font-size: 15px;"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <label class="file-upload-label">🖼️ 附加图片<input type="file" id="input-cns-img" accept="image/*" onchange="previewImage(this, 'cns')"></label>
+                        <img id="preview-cns" style="max-height: 40px; display: none; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    </div>
+                    <button class="btn" onclick="saveRecord('cns')" style="padding: 10px 25px; font-size: 14px;">💾 封存灵感</button>
+                </div>
+                <ul id="list-cns-full" class="record-list" style="margin-top: 30px;"></ul>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+        <div class="modal-title" id="modal-title">修改内容</div>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-footer">
+            <button class="btn btn-outline" style="border:none; color:#555;" onclick="closeModal()">取消</button>
+            <button class="btn" onclick="confirmModal()">保存修改</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// =============================================================================
+// 数据状态与初始化
+// =============================================================================
+let db = {
+    cns: [], words: [], sport: [], food: [], drink: [],
+    reading: [], movie: [], blog: [], memorableQuotes: [],
+    todos: [], focusRecords: [], loginDays: [], annualPlans: [],
+    statusRecords: [], checkins: {},
+    literature: [], learning: [], // 新增学术模块
+    focusShortcuts: ["📖 看文献", "✍️ 写论文", "💻 数据分析"],
+    focusTarget: 240,
+    quote: "光荣在于平淡，艰巨在于漫长",
+    activeTimer: { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null }
+};
+
+let currentCalMonth = new Date();
+let tempImages = { reading: null, movie: null, blog: null, cns: null, learn: null };
+let resumeFocusId = null;
+let activeStatusTab = 0;
+let currentInputPrio = { long: 3, today: 3 };
+let modalSaveCallback = null;
+let timerInterval = null;
+let currentFilterTag = null; // 用于文献过滤
+
+const periodNames = ["🌅 上午", "☀️ 下午", "🌙 晚上"];
+const ICON_EDIT = '&#9998;';
+const ICON_DELETE = '&#128465;';
+
+const ONEDRIVE_CLIENT_ID = "4591bdaa-c394-4ca0-887a-7a54d7fbb774";
+const ONEDRIVE_REDIRECT_URI = "http://localhost:5500";
+const ONEDRIVE_SCOPES = ["User.Read", "Files.ReadWrite.AppFolder"];
+const ONEDRIVE_DB_URL = "https://graph.microsoft.com/v1.0/me/drive/special/approot:/emperor-diary-db.json:/content";
+const ONEDRIVE_IMAGE_FOLDER = "images";
+const IMAGE_ENABLED_TYPES = ["reading", "movie", "blog", "cns", "learn"];
+let msalInstance = null;
+let cloudImageObjectUrls = {};
+let cloudImageFetchPromises = {};
+let cloudAutoSaveTimer = null;
+let cloudSyncInProgress = false;
+
+
+// 获取完整的 年-月-日 时:分
+function getFullTime() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+// 获取仅 年-月-日 (用于日历和按天过滤)
+function getDateKey(date) {
+    const d = date ? new Date(date) : new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function getMondayWeekStart(date = new Date()) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    d.setDate(d.getDate() + diff);
+    d.setHours(0, 0, 0, 0);
+    return d;
+}
+
+function formatSyncTime(value) {
+    if (!value) return '未同步';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return '未同步';
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+function ensureDbCompatibility() {
+    if (!db.statusRecords) db.statusRecords = [];
+    if (!db.focusShortcuts) db.focusShortcuts = ["📖 看文献", "✍️ 写论文", "💻 数据分析"];
+    if (!db.checkins) db.checkins = {};
+    if (!db.activeTimer) db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
+    if (db.activeTimer && db.activeTimer.sessionStartAt === undefined) db.activeTimer.sessionStartAt = null;
+    if (!Array.isArray(db.focusRecords)) db.focusRecords = [];
+    db.focusRecords = db.focusRecords.map(rec => {
+        if (!rec || typeof rec !== 'object') return rec;
+        if (!rec.endAt && rec.date) rec.endAt = rec.date;
+        if (!rec.startAt && (rec.endAt || rec.date) && rec.seconds) {
+            const end = new Date(rec.endAt || rec.date);
+            if (!Number.isNaN(end.getTime())) rec.startAt = new Date(end.getTime() - (rec.seconds || 0) * 1000).toISOString();
+        }
+        if (!rec.date && rec.endAt) rec.date = rec.endAt;
+        return rec;
+    });
+    if (!db.loginDays) db.loginDays = [];
+    if (!db.literature) db.literature = [];
+    if (!db.learning) db.learning = [];
+    if (!db.__meta) db.__meta = {};
+    if (!db.__meta.schemaVersion || db.__meta.schemaVersion < 3) db.__meta.schemaVersion = 3;
+    if (!db.__meta.lastLocalWriteAt) db.__meta.lastLocalWriteAt = null;
+    if (!db.__meta.lastCloudSyncAt) db.__meta.lastCloudSyncAt = null;
+    IMAGE_ENABLED_TYPES.forEach(type => {
+        if (!Array.isArray(db[type])) db[type] = [];
+        db[type] = db[type].map(item => {
+            if (!item || typeof item !== 'object') return item;
+            if (item.imgPath && !item.imgStorage) item.imgStorage = 'onedrive';
+            if (item.img && typeof item.img === 'string' && item.img.startsWith('data:') && !item.imgStorage) item.imgStorage = 'inline';
+            return item;
+        });
+    });
+}
+
+function initMsal() {
+    if (msalInstance) return msalInstance;
+    msalInstance = new msal.PublicClientApplication({
+        auth: {
+            clientId: ONEDRIVE_CLIENT_ID,
+            authority: "https://login.microsoftonline.com/consumers",
+            redirectUri: ONEDRIVE_REDIRECT_URI
+        },
+        cache: { cacheLocation: "localStorage", storeAuthStateInCookie: false }
+    });
+    return msalInstance;
+}
+
+function buildOneDriveImageContentUrl(imgPath) {
+    return `https://graph.microsoft.com/v1.0/me/drive/special/approot:/${imgPath}:/content`;
+}
+
+function sanitizeFileName(name) {
+    return (name || 'image').replace(/[^a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_').slice(-80);
+}
+
+function getExtFromMime(mimeType) {
+    const map = {
+        'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif', 'image/bmp': 'bmp', 'image/svg+xml': 'svg'
+    };
+    return map[mimeType] || 'png';
+}
+
+function dataUrlToBlob(dataUrl) {
+    const parts = dataUrl.split(',');
+    const mime = parts[0].match(/:(.*?);/)[1];
+    const bstr = atob(parts[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+}
+
+function revokeCloudImageObjectUrls() {
+    Object.values(cloudImageObjectUrls).forEach(url => { try { URL.revokeObjectURL(url); } catch (e) {} });
+    cloudImageObjectUrls = {};
+    cloudImageFetchPromises = {};
+}
+
+function isCloudLoggedIn() {
+    try {
+        const client = initMsal();
+        return !!(client.getActiveAccount() || client.getAllAccounts()[0]);
+    } catch (e) {
+        return false;
+    }
+}
+
+function updateCloudUI(message) {
+    const accountEl = document.getElementById('cloud-account');
+    const stateEl = document.getElementById('cloud-state');
+    const lastSyncEl = document.getElementById('cloud-last-sync');
+    const autoDot = document.getElementById('cloud-autosave-dot');
+    const autoText = document.getElementById('cloud-autosave-text');
+    if (!accountEl || !stateEl || !lastSyncEl) return;
+
+    let accountName = '未登录';
+    try {
+        const client = initMsal();
+        const account = client.getActiveAccount() || client.getAllAccounts()[0];
+        if (account) {
+            accountName = account.username || account.name || '已登录';
+            client.setActiveAccount(account);
+        }
+    } catch (e) {}
+
+    accountEl.textContent = accountName;
+    const lastLocal = db.__meta?.lastLocalWriteAt;
+    const lastCloud = db.__meta?.lastCloudSyncAt;
+    const dirty = !!(lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud)));
+    stateEl.textContent = message || (dirty ? '本地有未同步修改' : '本地与云端大致一致');
+    lastSyncEl.textContent = formatSyncTime(lastCloud);
+    if (autoDot && autoText) {
+        const loggedIn = isCloudLoggedIn();
+        autoDot.classList.toggle('on', loggedIn);
+        autoText.textContent = loggedIn ? '已开启' : '登录后启用';
+    }
+}
+
+async function ensureMicrosoftAccount() {
+    const client = initMsal();
+    const accounts = client.getAllAccounts();
+    let account = client.getActiveAccount() || accounts[0];
+    if (!account) {
+        const loginResp = await client.loginPopup({ scopes: ONEDRIVE_SCOPES });
+        account = loginResp.account;
+        client.setActiveAccount(account);
+    }
+    return account;
+}
+
+async function getMicrosoftAccessToken() {
+    const client = initMsal();
+    const account = await ensureMicrosoftAccount();
+    try {
+        const tokenResp = await client.acquireTokenSilent({ scopes: ONEDRIVE_SCOPES, account });
+        return tokenResp.accessToken;
+    } catch (err) {
+        const tokenResp = await client.acquireTokenPopup({ scopes: ONEDRIVE_SCOPES });
+        return tokenResp.accessToken;
+    }
+}
+
+async function getAccessToken() { return getMicrosoftAccessToken(); }
+
+async function fetchCloudImageObjectUrl(imgPath) {
+    if (!imgPath) return null;
+    if (cloudImageObjectUrls[imgPath]) return cloudImageObjectUrls[imgPath];
+    if (cloudImageFetchPromises[imgPath]) return cloudImageFetchPromises[imgPath];
+    cloudImageFetchPromises[imgPath] = (async () => {
+        const accessToken = await getAccessToken();
+        const res = await fetch(buildOneDriveImageContentUrl(imgPath), { headers: { Authorization: `Bearer ${accessToken}` } });
+        if (!res.ok) throw new Error(`图片下载失败: ${res.status}`);
+        const blob = await res.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        cloudImageObjectUrls[imgPath] = objectUrl;
+        return objectUrl;
+    })();
+    try {
+        return await cloudImageFetchPromises[imgPath];
+    } finally {
+        delete cloudImageFetchPromises[imgPath];
+    }
+}
+
+function setItemImageSource(imgEl, item, emptyText = '暂无配图') {
+    if (!imgEl) return;
+    if (item?.img && typeof item.img === 'string' && item.img.startsWith('data:')) {
+        imgEl.src = item.img;
+        return;
+    }
+    if (item?.imgPath) {
+        imgEl.alt = '正在加载云端图片...';
+        imgEl.dataset.imgPath = item.imgPath;
+        fetchCloudImageObjectUrl(item.imgPath).then(url => {
+            if (imgEl.dataset.imgPath === item.imgPath) imgEl.src = url;
+        }).catch(err => {
+            console.error(err);
+            imgEl.alt = emptyText;
+            imgEl.style.opacity = '0.45';
+            imgEl.title = '云端图片暂时无法加载';
+        });
+        return;
+    }
+    imgEl.alt = emptyText;
+    imgEl.style.opacity = '0.35';
+}
+
+async function uploadBlobToOneDrive(blob, fileName, contentType) {
+    const accessToken = await getAccessToken();
+    const targetPath = `${ONEDRIVE_IMAGE_FOLDER}/${fileName}`;
+    const res = await fetch(buildOneDriveImageContentUrl(targetPath), {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': contentType || blob.type || 'application/octet-stream' },
+        body: blob
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+    return targetPath;
+}
+
+async function uploadTempImageToOneDrive(tempImage, ownerType) {
+    if (!tempImage) return { img: null, imgPath: null, imgStorage: null };
+    let blob = null;
+    let mimeType = 'image/png';
+    let ext = 'png';
+    if (tempImage.file) {
+        blob = tempImage.file;
+        mimeType = tempImage.file.type || mimeType;
+        ext = (tempImage.file.name && tempImage.file.name.split('.').pop()) || getExtFromMime(mimeType);
+    } else if (tempImage.previewUrl && tempImage.previewUrl.startsWith('data:')) {
+        blob = dataUrlToBlob(tempImage.previewUrl);
+        mimeType = blob.type || mimeType;
+        ext = getExtFromMime(mimeType);
+    }
+    if (!blob) return { img: null, imgPath: null, imgStorage: null };
+    const safeName = sanitizeFileName(`${ownerType}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`);
+    try {
+        const imgPath = await uploadBlobToOneDrive(blob, safeName, mimeType);
+        return { img: null, imgPath, imgStorage: 'onedrive' };
+    } catch (err) {
+        console.error(err);
+        const fallback = tempImage.previewUrl || null;
+        if (fallback) {
+            const useInline = confirm(`图片上传 OneDrive 失败。
+
+点“确定”则先以内嵌方式本地保存，稍后你仍可点“保存到云端”自动迁移旧图片；点“取消”则本次不保存这张图片。`);
+            if (useInline) return { img: fallback, imgPath: null, imgStorage: 'inline' };
+        }
+        throw err;
+    }
+}
+
+async function migrateInlineImagesToOneDrive(showProgress = false) {
+    const jobs = [];
+    IMAGE_ENABLED_TYPES.forEach(type => {
+        (db[type] || []).forEach((item, index) => {
+            if (item && item.img && typeof item.img === 'string' && item.img.startsWith('data:') && !item.imgPath) {
+                jobs.push({ type, index, item });
+            }
+        });
+    });
+    if (jobs.length === 0) return 0;
+    for (let i = 0; i < jobs.length; i++) {
+        const job = jobs[i];
+        if (showProgress) updateCloudUI(`正在迁移历史图片 ${i + 1}/${jobs.length}`);
+        const blob = dataUrlToBlob(job.item.img);
+        const ext = getExtFromMime(blob.type || 'image/png');
+        const safeName = sanitizeFileName(`${job.type}_migrated_${Date.now()}_${i}.${ext}`);
+        const imgPath = await uploadBlobToOneDrive(blob, safeName, blob.type || 'image/png');
+        db[job.type][job.index].imgPath = imgPath;
+        db[job.type][job.index].imgStorage = 'onedrive';
+        db[job.type][job.index].img = null;
+    }
+    await persist({ markDirty: true, skipAutoSave: true });
+    return jobs.length;
+}
+
+function scheduleCloudAutoSave() {
+    clearTimeout(cloudAutoSaveTimer);
+    if (!isCloudLoggedIn()) {
+        updateCloudUI();
+        return;
+    }
+    cloudAutoSaveTimer = setTimeout(() => {
+        saveCloudData({ silent: true, auto: true });
+    }, 2000);
+    updateCloudUI('本地已保存，等待自动同步...');
+}
+
+async function loginMicrosoft() {
+    try {
+        updateCloudUI('正在打开微软登录窗口...');
+        await ensureMicrosoftAccount();
+        updateCloudUI('Microsoft 账户已连接');
+        const lastLocal = db.__meta?.lastLocalWriteAt;
+        const lastCloud = db.__meta?.lastCloudSyncAt;
+        if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) scheduleCloudAutoSave();
+        alert('Microsoft 登录成功。');
+    } catch (e) {
+        console.error(e);
+        const msg = (e && e.message) ? e.message : String(e);
+        if (msg && (msg.includes('popup') || msg.includes('Popup') || msg.includes('user_cancelled'))) {
+            alert(`登录窗口可能被浏览器拦截，或刚刚被关闭。\n\n请先允许 localhost:5500 的弹窗，然后再点一次“登录 Microsoft”。`);
+        } else {
+            alert('登录失败：' + msg);
+        }
+        updateCloudUI('登录失败');
+    }
+}
+
+async function loadCloudData() {
+    try {
+        ensureDbCompatibility();
+        const hasLocalData = [
+            ...(db.words || []), ...(db.cns || []), ...(db.reading || []), ...(db.movie || []), ...(db.blog || []), ...(db.learning || []),
+            ...(db.memorableQuotes || []), ...(db.todos || []), ...(db.focusRecords || []), ...(db.statusRecords || []), ...(db.literature || [])
+        ].length > 0;
+        if (hasLocalData) {
+            const ok = confirm('从云端读取会用云端数据覆盖当前本地数据。建议你先导出备份。是否继续？');
+            if (!ok) return;
+        }
+        updateCloudUI('正在读取云端...');
+        const accessToken = await getMicrosoftAccessToken();
+        const res = await fetch(ONEDRIVE_DB_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
+        if (res.status === 404) {
+            alert('云端还没有同步文件。你可以先在本地编辑，再点“保存到云端”。');
+            updateCloudUI('云端暂无数据');
+            return;
+        }
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        revokeCloudImageObjectUrls();
+        const remoteData = JSON.parse(await res.text());
+        db = { ...db, ...remoteData };
+        ensureDbCompatibility();
+        await persist({ markDirty: false, skipAutoSave: true });
+        document.getElementById('quote-text').innerText = db.quote;
+        document.getElementById('focus-target').value = db.focusTarget;
+        renderAll();
+        updateCloudUI('已从云端读取');
+        alert('已从 OneDrive 读取并覆盖本地数据。');
+    } catch (e) {
+        console.error(e);
+        alert('云端读取失败：' + e.message);
+        updateCloudUI('云端读取失败');
+    }
+}
+
+async function saveCloudData(options = {}) {
+    const { silent = false, auto = false } = options;
+    if (cloudSyncInProgress) return;
+    cloudSyncInProgress = true;
+    try {
+        ensureDbCompatibility();
+        updateCloudUI(auto ? '正在自动保存到云端...' : '正在保存到云端...');
+        const accessToken = await getMicrosoftAccessToken();
+        const migratedCount = await migrateInlineImagesToOneDrive(auto);
+        db.__meta.lastCloudSyncAt = new Date().toISOString();
+        const res = await fetch(ONEDRIVE_DB_URL, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify(db)
+        });
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        await persist({ markDirty: false, skipAutoSave: true });
+        updateCloudUI(auto ? '已自动保存到云端' : '云端保存成功');
+        if (!silent) {
+            alert(migratedCount > 0 ? `已保存到 OneDrive，并迁移 ${migratedCount} 张历史图片到 images 文件夹。` : '已保存到 OneDrive。');
+        }
+    } catch (e) {
+        console.error(e);
+        if (!silent) alert('云端保存失败：' + e.message);
+        updateCloudUI(auto ? '自动保存失败' : '云端保存失败');
+    } finally {
+        cloudSyncInProgress = false;
+    }
+}
+
+async function persist(options = {}) {
+    const { markDirty = true, skipAutoSave = false } = options;
+    try {
+        ensureDbCompatibility();
+        if (markDirty) db.__meta.lastLocalWriteAt = new Date().toISOString();
+        await localforage.setItem('yuedongData', db);
+        updateCloudUI();
+        if (markDirty && !skipAutoSave) scheduleCloudAutoSave();
+    } catch(e) {
+        console.error('IndexedDB 写入失败:', e);
+        alert('数据库写入失败，请检查浏览器存储权限！');
+    }
+}
+
+
+window.onload = async () => {
+    localforage.config({ name: 'YuedongApp', storeName: 'diary_data' });
+    try {
+        const saved = await localforage.getItem('yuedongData');
+        if (saved) db = { ...db, ...saved };
+    } catch(e) {}
+
+    ensureDbCompatibility();
+    updateCloudUI();
+
+    const d = new Date();
+    document.getElementById('current-date').textContent = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} 星期${'日一二三四五六'[d.getDay()]}`;
+
+    const todayKey = getDateKey();
+    if (!db.loginDays) db.loginDays = [];
+    if (!db.loginDays.includes(todayKey)) { db.loginDays.push(todayKey); persist(); }
+
+    document.getElementById('quote-text').innerText = db.quote;
+    document.getElementById('focus-target').value = db.focusTarget;
+
+    const hour = new Date().getHours();
+    activeStatusTab = hour < 12 ? 0 : (hour < 18 ? 1 : 2);
+    selectStatusTab(activeStatusTab);
+
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+    // 恢复计时器状态
+    if (db.activeTimer.running) {
+        document.getElementById('focus-topic').value = db.activeTimer.topic;
+        startTimerInterval();
+    } else if (db.activeTimer.accumulatedSeconds > 0) {
+        document.getElementById('focus-topic').value = db.activeTimer.topic;
+        updateTimerDisplay();
+    }
+
+    bindSidebarNav();
+    bindGlobalSearchEvents();
+    renderAll();
+    updateCloudUI();
+};
+
+function renderAll() {
+    renderWordsList(); renderIdeasList(); renderFocusShortcuts();
+    ['sport', 'food', 'drink'].forEach(t => renderLifeList(t));
+    renderQuotesList();
+    ['reading', 'movie', 'blog'].forEach(t => renderMediaCards(t));
+    renderLiterature(); renderLearning();
+    renderTodos(); renderFocusToday(); updateOverviewStats();
+    renderStatusRecords(); updateCheckinUI();
+    renderCalendar(); renderUnifiedLifeCalendar(); renderStats(); renderAnnualPlans();
+}
+
+function activateSection(id) {
+    document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-item[data-section]').forEach(el => el.classList.remove('active'));
+    const target = document.getElementById(`section-${id}`);
+    if (target) target.classList.add('active');
+    const nav = document.querySelector(`.nav-item[data-section="${id}"]`);
+    if (nav) nav.classList.add('active');
+    if (id === 'home' && typeof drawTrendChart === 'function') drawTrendChart();
+}
+function switchTab(e, id) {
+    activateSection(id);
+}
+function bindSidebarNav() {
+    document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+        el.addEventListener('click', () => activateSection(el.dataset.section));
+    });
+}
+
+// =============================================================================
+// Modal 弹窗
+// =============================================================================
+function openModal(title, fields, callback) {
+    document.getElementById('modal-title').innerText = title;
+    const body = document.getElementById('modal-body'); body.innerHTML = '';
+    fields.forEach((f, i) => {
+        const group = document.createElement('div'); group.className = 'modal-input-group';
+        const label = document.createElement('label'); label.textContent = f.label; group.appendChild(label);
+        let input;
+        if (f.type === 'textarea') {
+            input = document.createElement('textarea');
+            input.className = f.isCode ? 'custom-textarea code-textarea' : 'custom-textarea';
+            input.value = f.value || '';
+        } else if (f.type === 'select') {
+            input = document.createElement('select'); input.className = 'custom-input';
+            (f.options || []).forEach(o => {
+                const opt = document.createElement('option'); opt.value = o.value; opt.textContent = o.text;
+                if (String(o.value) === String(f.value)) opt.selected = true;
+                input.appendChild(opt);
+            });
+        } else {
+            input = document.createElement('input'); input.type = f.type || 'text';
+            input.className = 'custom-input'; input.value = f.value !== undefined ? f.value : '';
+        }
+        input.id = `modal-inp-${i}`; group.appendChild(input); body.appendChild(group);
+    });
+    modalSaveCallback = callback;
+    const modal = document.getElementById('custom-modal'); modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+function closeModal() { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
+function confirmModal() {
+    if (modalSaveCallback) {
+        const inputs = Array.from(document.getElementById('modal-body').querySelectorAll('input, textarea, select')).map(el => el.value);
+        modalSaveCallback(inputs);
+    }
+    closeModal();
+}
+
+// =============================================================================
+// 📚 文献指南 (Literature)
+// =============================================================================
+function saveLiterature() {
+    const id = document.getElementById('input-lit-id').value.trim();
+    if (!id) return alert("必须填写文献标识！");
+    const tags = document.getElementById('input-lit-tags').value.split(',').map(s=>s.trim()).filter(s=>s);
+    db.literature.push({
+        idKey: Date.now(), time: getFullTime(),
+        litId: id, journal: document.getElementById('input-lit-journal').value,
+        tags: tags, params: document.getElementById('input-lit-params').value,
+        desc: document.getElementById('input-lit-desc').value
+    });
+    ['id','journal','tags','params','desc'].forEach(k => document.getElementById(`input-lit-${k}`).value = '');
+    persist(); renderLiterature();
+}
+
+function toggleLitDesc(elId) { document.getElementById(elId).classList.toggle('open'); }
+function setLitFilter(tag) { currentFilterTag = currentFilterTag === tag ? null : tag; renderLiterature(); }
+
+function renderLiterature() {
+    const list = document.getElementById('list-literature'); list.innerHTML = '';
+    let allTags = new Set();
+    db.literature.forEach(item => (item.tags||[]).forEach(t => allTags.add(t)));
+    
+    document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${t}')">${t}</span>`).join('');
+    document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${t}">`).join('');
+
+    let items = [...db.literature].reverse();
+    if (currentFilterTag) items = items.filter(item => (item.tags||[]).includes(currentFilterTag));
+    if (!items.length) { list.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">暂无文献记录</div>'; return; }
+
+    items.forEach(item => {
+        const card = document.createElement('div'); card.className = 'lit-card';
+        const tagHtml = (item.tags||[]).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
+        const detailsId = `lit-det-${item.idKey}`;
+        card.innerHTML = `
+            <div class="lit-summary" onclick="toggleLitDesc('${detailsId}')">
+                <div>
+                    <div class="lit-id">${item.litId} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${item.journal}</span></div>
+                    <div style="margin-top:6px;">${tagHtml}</div>
+                </div>
+                <div class="action-group" style="opacity: 1;" onclick="event.stopPropagation()">
+                    <span class="text-btn edit" onclick="editLiterature(${item.idKey})">✎ 修改</span>
+                    <span class="text-btn delete" onclick="deleteRecord('literature', ${item.idKey})">🗑️ 删除</span>
+                </div>
+            </div>
+            <div class="lit-details" id="${detailsId}">
+                ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${item.params}</div>` : ''}
+                <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${item.desc}</div>
+                <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${item.time}</div>
+            </div>`;
+        list.appendChild(card);
+    });
+}
+
+function editLiterature(idKey) {
+    const item = db.literature.find(x => x.idKey === idKey);
+    openModal("修改文献", [
+        {label: "文献标识", value: item.litId}, {label: "期刊年份", value: item.journal},
+        {label: "标签(逗号分隔)", value: (item.tags||[]).join(', ')}, {label: "参数简记", value: item.params},
+        {label: "详细笔记", value: item.desc, type: "textarea"}
+    ], vals => {
+        if(vals[0]) item.litId = vals[0]; item.journal = vals[1]; item.tags = vals[2].split(',').map(s=>s.trim()).filter(s=>s);
+        item.params = vals[3]; item.desc = vals[4]; persist(); renderLiterature();
+    });
+}
+
+function exportCSV(type) {
+    if(type !== 'literature' || !db.literature.length) return;
+    let csv = "data:text/csv;charset=utf-8,\uFEFF文献标识,期刊,分类标签,核心参数,详细笔记,记录时间\n";
+    db.literature.forEach(item => {
+        const row = [item.litId, item.journal, (item.tags||[]).join(';'), item.params, item.desc, item.time]
+            .map(v => `"${(v||'').replace(/"/g, '""')}"`).join(",");
+        csv += row + "\n";
+    });
+    const link = document.createElement("a"); link.href = encodeURI(csv); link.download = "文献库_导出.csv";
+    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+// =============================================================================
+// 💡 学习笔记 (Learning)
+// =============================================================================
+async function saveLearning() {
+    const title = document.getElementById('input-learn-title').value.trim();
+    if (!title) return alert("必须填写标题！");
+    let imagePayload = { img: null, imgPath: null, imgStorage: null };
+    if (tempImages['learn']) {
+        if (isCloudLoggedIn()) imagePayload = await uploadTempImageToOneDrive(tempImages['learn'], 'learn');
+        else imagePayload = { img: tempImages['learn'].previewUrl || null, imgPath: null, imgStorage: 'inline' };
+    }
+    db.learning.push({
+        idKey: Date.now(), time: getFullTime(), title: title,
+        tags: document.getElementById('input-learn-tags').value,
+        desc: document.getElementById('input-learn-desc').value,
+        code: document.getElementById('input-learn-code').value,
+        ...imagePayload
+    });
+    ['title','tags','desc','code'].forEach(k => document.getElementById(`input-learn-${k}`).value = '');
+    document.getElementById('input-learn-img').value = '';
+    document.getElementById('preview-learn').style.display = 'none'; tempImages['learn'] = null;
+    await persist(); renderLearning();
+}
+
+function renderLearning() {
+    const list = document.getElementById('list-learning'); list.innerHTML = '';
+    [...db.learning].reverse().forEach(item => {
+        const card = document.createElement('div'); card.className = 'learn-card';
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                <div>
+                    <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${item.title}</div>
+                    ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${item.tags}</div>` : ''}
+                </div>
+                <div class="action-group" style="opacity: 1;">
+                    <span class="text-btn edit" onclick="editLearning(${item.idKey})">✎</span>
+                    <span class="text-btn delete" onclick="deleteRecord('learning', ${item.idKey})">🗑️</span>
+                </div>
+            </div>
+            ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${item.desc}</div>` : ''}
+            ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${item.code}</div>` : ''}
+            ${(item.img || item.imgPath) ? `<img id="learn-img-${item.idKey}" style="max-width:100%; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px; object-fit:contain;">` : ''}
+            <div style="font-size:11px; color:var(--text-muted); text-align:right;">${item.time}</div>`;
+        list.appendChild(card);
+        if (item.img || item.imgPath) {
+            const imgEl = document.getElementById(`learn-img-${item.idKey}`);
+            setItemImageSource(imgEl, item, '暂无配图');
+        }
+    });
+}
+
+function editLearning(idKey) {
+    const item = db.learning.find(x => x.idKey === idKey);
+    openModal("修改笔记", [
+        {label: "标题", value: item.title}, {label: "标签", value: item.tags},
+        {label: "梳理描述", value: item.desc, type: "textarea"}, {label: "代码区域", value: item.code, type: "textarea", isCode: true}
+    ], vals => {
+        if(vals[0]) item.title = vals[0]; item.tags = vals[1]; item.desc = vals[2]; item.code = vals[3]; persist(); renderLearning();
+    });
+}
+
+// =============================================================================
+// 图片预览上传与记录保存 (兼容新旧数据结构)
+// =============================================================================
+function previewImage(inp, type) {
+    if (!inp.files[0]) return;
+    const file = inp.files[0];
+    const rd = new FileReader();
+    rd.onload = e => {
+        tempImages[type] = { file, previewUrl: e.target.result };
+        document.getElementById(`preview-${type}`).src = e.target.result;
+        document.getElementById(`preview-${type}`).style.display = 'block';
+    };
+    rd.readAsDataURL(file);
+}
+
+async function saveRecord(type) {
+    const t = getFullTime();
+    if (type === 'memorableQuotes') {
+        const v = document.getElementById('input-memorable-quote').value; if (!v.trim()) return;
+        db.memorableQuotes.push({time: t, val: v, idKey: Date.now()});
+        document.getElementById('input-memorable-quote').value = ''; await persist(); renderQuotesList();
+    } else if (type === 'cns') {
+        const el = document.getElementById('input-cns-full'); const textVal = el ? el.value.trim() : '';
+        if (!textVal && !tempImages['cns']) return alert("请填写灵感内容或上传一张图片！");
+        let imagePayload = { img: null, imgPath: null, imgStorage: null };
+        if (tempImages['cns']) {
+            if (isCloudLoggedIn()) imagePayload = await uploadTempImageToOneDrive(tempImages['cns'], 'cns');
+            else imagePayload = { img: tempImages['cns'].previewUrl || null, imgPath: null, imgStorage: 'inline' };
+        }
+        db.cns.push({time: t, val: textVal, idKey: Date.now(), ...imagePayload});
+        if (el) el.value = ''; document.getElementById('preview-cns').style.display = 'none'; tempImages['cns'] = null;
+        await persist(); renderIdeasList();
+    } else if (['words','food','drink'].includes(type)) {
+        const v = document.getElementById(`input-${type}`).value; if (!v) return;
+        const d = {time: t, val: v, idKey: Date.now()};
+        db[type].push(d); document.getElementById(`input-${type}`).value = ''; await persist();
+        if (type === 'words') renderWordsList(); else { renderLifeList(type); renderUnifiedLifeCalendar(); }
+        updateOverviewStats();
+    } else if (type === 'sport') {
+        const n = document.getElementById('input-sport-name').value; const v = document.getElementById('input-sport-time').value;
+        if (!n) return;
+        db.sport.push({time: t, name: n, val: v || 0, idKey: Date.now()});
+        document.getElementById('input-sport-name').value = ''; document.getElementById('input-sport-time').value = '';
+        await persist(); renderLifeList('sport'); renderUnifiedLifeCalendar();
+    }
+}
+
+function deleteRecord(type, identifier) {
+    if (!confirm("确定删除吗？")) return;
+    // 兼容根据索引或 idKey 删除
+    if (typeof identifier === 'number' && db[type].some(x => x.idKey === identifier)) {
+        db[type] = db[type].filter(x => x.idKey !== identifier);
+    } else {
+        db[type].splice(identifier, 1);
+    }
+    persist();
+    if (['sport','food','drink'].includes(type)) { renderLifeList(type); renderUnifiedLifeCalendar(); }
+    else if (type === 'words') renderWordsList();
+    else if (type === 'cns') renderIdeasList();
+    else if (type === 'memorableQuotes') renderQuotesList();
+    else if (['reading','movie','blog'].includes(type)) { renderMediaCards(type); renderAnnualPlans(); }
+    else if (type === 'literature') renderLiterature();
+    else if (type === 'learning') renderLearning();
+}
+
+function editLifeRecord(type, index) {
+    const item = db[type][index];
+    if (type === 'sport') {
+        openModal("修改运动记录", [
+            {label: "运动项目", value: item.name}, {label: "时长 (分)", value: item.val, type: "number"}
+        ], (vals) => {
+            if (vals[0]) item.name = vals[0].trim(); if (vals[1]) item.val = vals[1];
+            persist(); renderLifeList(type);
+        });
+    } else {
+        openModal("修改生活碎片", [{label: "内容", value: item.val}], (vals) => {
+            if (vals[0]) item.val = vals[0].trim(); persist(); renderLifeList(type);
+        });
+    }
+}
+
+function renderLifeList(type) {
+    const ul = document.getElementById(`list-${type}`); if (!ul) return;
+    ul.innerHTML = '';
+    [...(db[type]||[])].reverse().forEach((item, i) => {
+        const realIndex = db[type].length - 1 - i;
+        const li = document.createElement('li'); li.className = 'life-item';
+        if (type === 'sport') {
+            li.innerHTML = `
+                <div class="life-title"><span class="life-time-badge">${item.time}</span> ${item.name}</div>
+                <div class="life-meta">时长: <strong>${item.val}</strong> 分</div>
+                <div class="action-group" style="position:absolute;right:15px;top:15px;">
+                    <span class="text-btn edit" onclick="editLifeRecord('${type}', ${realIndex})">${ICON_EDIT}</span>
+                    <span class="text-btn delete" onclick="deleteRecord('${type}', ${item.idKey ? item.idKey : realIndex})">${ICON_DELETE}</span>
+                </div>`;
+        } else {
+            li.innerHTML = `
+                <div class="life-title"><span class="life-time-badge">${item.time}</span> ${item.val}</div>
+                <div class="action-group" style="position:absolute;right:15px;top:15px;">
+                    <span class="text-btn edit" onclick="editLifeRecord('${type}', ${realIndex})">${ICON_EDIT}</span>
+                    <span class="text-btn delete" onclick="deleteRecord('${type}', ${item.idKey ? item.idKey : realIndex})">${ICON_DELETE}</span>
+                </div>`;
+        }
+        ul.appendChild(li);
+    });
+}
+
+async function saveMedia(type) {
+    const tEl = document.getElementById(`input-${type}-title`);
+    const dEl = document.getElementById(`input-${type}-desc`);
+    const r = document.getElementById(`input-${type}-rating`).value;
+    if (!tEl.value) return alert("请填写标题！");
+    let imagePayload = { img: null, imgPath: null, imgStorage: null };
+    if (tempImages[type]) {
+        if (isCloudLoggedIn()) imagePayload = await uploadTempImageToOneDrive(tempImages[type], type);
+        else imagePayload = { img: tempImages[type].previewUrl || null, imgPath: null, imgStorage: 'inline' };
+    }
+    db[type].push({time: getFullTime(), title: tEl.value, desc: dEl.value, rating: r, idKey: Date.now(), ...imagePayload});
+    tEl.value = ''; dEl.value = '';
+    document.getElementById(`input-${type}-rating`).value = 8;
+    document.getElementById(`${type}-rating-val`).innerText = '8 分';
+    document.getElementById(`preview-${type}`).style.display = 'none';
+    document.getElementById(`input-${type}-img`).value = '';
+    tempImages[type] = null;
+    await persist(); renderMediaCards(type); renderAnnualPlans();
+}
+
+function editMedia(t, i) {
+    const x = db[t][i];
+    openModal(`修改指南`, [
+        {label: "标题", value: x.title}, {label: "评分 (1-10)", value: x.rating || 8, type: "number"},
+        {label: "感悟 / 笔记", value: x.desc, type: "textarea"}
+    ], (vals) => {
+        if (vals[0]) x.title = vals[0].trim(); if (vals[1]) x.rating = parseInt(vals[1]); if (vals[2] !== undefined) x.desc = vals[2];
+        persist(); renderMediaCards(t);
+    });
+}
+
+function renderMediaCards(type) {
+    const ct = document.getElementById(`list-${type}`); ct.innerHTML = '';
+    [...(db[type]||[])].reverse().forEach((item, i) => {
+        const rIdx = db[type].length - 1 - i;
+        const card = document.createElement('div'); card.className = 'media-card';
+        const badge = document.createElement('div'); badge.className = 'media-rating-badge';
+        badge.textContent = `⭐ ${item.rating || '-'} / 10`; card.appendChild(badge);
+        if (item.img || item.imgPath) {
+            const img = document.createElement('img'); img.id = `${type}-img-${item.idKey}`; img.className = 'media-img';
+            card.appendChild(img);
+            setItemImageSource(img, item, '暂无配图');
+        } else {
+            const placeholder = document.createElement('div'); placeholder.className = 'media-img'; placeholder.textContent = '暂无配图'; card.appendChild(placeholder);
+        }
+        const content = document.createElement('div'); content.className = 'media-content';
+        const titleRow = document.createElement('div'); titleRow.className = 'media-title-row';
+        const titleEl = document.createElement('div'); titleEl.className = 'media-title'; titleEl.textContent = item.title;
+        const actions = document.createElement('div'); actions.className = 'action-group';
+        actions.innerHTML = `
+            <span class="text-btn edit" onclick="editMedia('${type}', ${rIdx})">${ICON_EDIT}</span>
+            <span class="text-btn delete" onclick="deleteRecord('${type}', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span>`;
+        titleRow.appendChild(titleEl); titleRow.appendChild(actions);
+        const desc = document.createElement('div'); desc.className = 'media-desc'; desc.textContent = item.desc;
+        const timeNote = document.createElement('div');
+        timeNote.style.cssText = 'font-size:12px;color:var(--text-muted);text-align:right;margin-top:15px;border-top:1px dashed var(--border-color);padding-top:10px;';
+        timeNote.textContent = '记录时间：' + item.time;
+        content.appendChild(titleRow); content.appendChild(desc); content.appendChild(timeNote);
+        card.appendChild(content); ct.appendChild(card);
+    });
+}
+
+
+function formatClock(value) {
+    const d = value ? new Date(value) : null;
+    if (!d || Number.isNaN(d.getTime())) return '--:--';
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+function parseClockOnBaseDate(baseIso, hhmm) {
+    if (!hhmm || !hhmm.includes(':')) return null;
+    const [h, m] = hhmm.split(':').map(v => parseInt(v, 10));
+    if (Number.isNaN(h) || Number.isNaN(m)) return null;
+    const base = baseIso ? new Date(baseIso) : new Date();
+    if (Number.isNaN(base.getTime())) return null;
+    base.setHours(h, m, 0, 0);
+    return base;
+}
+function getFocusRange(rec) {
+    const end = rec?.endAt ? new Date(rec.endAt) : (rec?.date ? new Date(rec.date) : null);
+    const validEnd = end && !Number.isNaN(end.getTime()) ? end : null;
+    let start = rec?.startAt ? new Date(rec.startAt) : null;
+    if (!start || Number.isNaN(start.getTime())) {
+        if (validEnd && rec?.seconds) start = new Date(validEnd.getTime() - rec.seconds * 1000);
+        else start = null;
+    }
+    return { start, end: validEnd };
+}
+function focusRangeText(rec) {
+    const { start, end } = getFocusRange(rec);
+    const range = `${formatClock(start)} - ${formatClock(end)}`;
+    return `${range} · ${Math.max(1, Math.round((rec?.seconds || 0) / 60))} 分钟`;
+}
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s] || s));
+}
+function makeSearchSnippet(text, query) {
+    const raw = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!raw) return '';
+    const q = String(query || '').trim();
+    if (!q) return raw.slice(0, 120);
+    const idx = raw.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return raw.slice(0, 120);
+    const start = Math.max(0, idx - 28);
+    const end = Math.min(raw.length, idx + q.length + 56);
+    return (start > 0 ? '…' : '') + raw.slice(start, end) + (end < raw.length ? '…' : '');
+}
+function buildGlobalSearchItems() {
+    const items = [];
+    (db.literature || []).forEach(item => items.push({ section: 'literature', badge: '文献', title: item.id || item.title || '未命名文献', text: [item.journal, item.tags, item.params, item.desc].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
+    (db.learning || []).forEach(item => items.push({ section: 'learning', badge: '笔记', title: item.title || '未命名笔记', text: [item.tags, item.desc, item.code].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
+    (db.reading || []).forEach(item => items.push({ section: 'reading', badge: '阅读', title: item.title || '未命名阅读', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.movie || []).forEach(item => items.push({ section: 'movie', badge: '观影', title: item.title || '未命名观影', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.blog || []).forEach(item => items.push({ section: 'blog', badge: '播客', title: item.title || '未命名播客', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.memorableQuotes || []).forEach(item => items.push({ section: 'quotes', badge: '好句', title: '抄点好句', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.cns || []).forEach(item => items.push({ section: 'ideas', badge: '闪念', title: '闪念归档', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.todos || []).forEach(item => items.push({ section: 'home', badge: item.type === 'today' ? '今日任务' : '近期任务', title: item.text || '任务', text: [item.ddl ? `DDL ${item.ddl}` : '', item.status || ''].join(' '), time: item.dateCreated || '', sortTime: item.dateCreated || '' }));
+    (db.focusRecords || []).forEach(item => items.push({ section: 'home', badge: '理政时间', title: item.topic || '未命名专注', text: focusRangeText(item), time: item.endAt || item.date || '', sortTime: item.endAt || item.date || '' }));
+    (db.statusRecords || []).forEach(item => items.push({ section: 'home', badge: '状态打卡', title: item.period || '状态记录', text: item.text || '', time: item.fullTime || item.time || '', sortTime: item.time || '' }));
+    return items;
+}
+function performGlobalSearch() {
+    const input = document.getElementById('global-search-input');
+    const resultBox = document.getElementById('global-search-results');
+    if (!input || !resultBox) return;
+    const query = input.value.trim();
+    if (!query) {
+        resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
+        return;
+    }
+    const q = query.toLowerCase();
+    const hits = buildGlobalSearchItems().filter(item => (`${item.title} ${item.text} ${item.badge}`.toLowerCase().includes(q)))
+        .sort((a, b) => String(b.sortTime || '').localeCompare(String(a.sortTime || ''))).slice(0, 60);
+    if (!hits.length) {
+        resultBox.innerHTML = `<div class="search-empty">没有找到与“${escapeHtml(query)}”相关的内容。</div>`;
+        return;
+    }
+    resultBox.innerHTML = hits.map(item => `
+        <div class="search-result-item" onclick="openSearchResult('${item.section}')">
+            <div class="search-result-top">
+                <div class="search-result-title">${escapeHtml(item.title)}</div>
+                <span class="search-result-badge">${escapeHtml(item.badge)}</span>
+            </div>
+            <div class="search-result-snippet">${escapeHtml(makeSearchSnippet(item.text, query))}</div>
+            <div class="search-result-meta">${escapeHtml(item.time || '')}</div>
+        </div>`).join('');
+}
+function clearGlobalSearch() {
+    const input = document.getElementById('global-search-input');
+    if (input) input.value = '';
+    performGlobalSearch();
+}
+function openSearchResult(section) {
+    activateSection(section);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+let globalSearchDebounce = null;
+function bindGlobalSearchEvents() {
+    const input = document.getElementById('global-search-input');
+    if (!input) return;
+    input.addEventListener('input', () => {
+        clearTimeout(globalSearchDebounce);
+        globalSearchDebounce = setTimeout(performGlobalSearch, 180);
+    });
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); performGlobalSearch(); } });
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            input.focus();
+            input.select();
+        }
+    });
+}
+
+// 恢复其余完整的原版代码功能 (专注、Todos、状态打卡、单词、年计划等)
+function formatTime(s) { return [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(v => String(v).padStart(2, '0')).join(':'); }
+function updateTimerDisplay() {
+    let total = db.activeTimer.accumulatedSeconds;
+    if (db.activeTimer.running && db.activeTimer.startTime > 0) total += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
+    document.getElementById('focus-stopwatch').textContent = formatTime(total);
+}
+function startTimerInterval() { clearInterval(timerInterval); timerInterval = setInterval(updateTimerDisplay, 1000); }
+function renderFocusShortcuts() {
+    document.getElementById('focus-shortcuts').innerHTML = db.focusShortcuts.map(s => `<span class="shortcut-tag" onclick="startFocusShortcut('${s.replace(/'/g,"&#39;")}')">${s}</span>`).join('') + `<span class="shortcut-tag add-btn" onclick="editFocusShortcuts()">+ 自定义</span>`;
+}
+function editFocusShortcuts() {
+    openModal("自定义快捷主题", [{label: "主题 (用逗号分隔)", value: db.focusShortcuts.join("，")}], (vals) => {
+        if (vals[0]) { db.focusShortcuts = vals[0].split(/[,，]/).map(s => s.trim()).filter(s => s); persist(); renderFocusShortcuts(); }
+    });
+}
+function startFocusShortcut(topic) {
+    if (db.activeTimer.running) { if (!confirm("当前有正在计时的任务，是否先停止？")) return; focusTimerCtrl('stop'); }
+    document.getElementById('focus-topic').value = topic;
+    const todayKey = getDateKey();
+    const existing = (db.focusRecords || []).find(r => r.date && getDateKey(r.date) === todayKey && r.topic === topic);
+    db.activeTimer.accumulatedSeconds = existing ? existing.seconds : 0;
+    db.activeTimer.sessionStartAt = existing?.startAt || (existing?.date ? new Date(new Date(existing.date).getTime() - (existing.seconds || 0) * 1000).toISOString() : null);
+    resumeFocusId = existing ? existing.id : null; updateTimerDisplay(); focusTimerCtrl('start');
+}
+function focusTimerCtrl(act) {
+    if (act === 'start' && !db.activeTimer.running) {
+        db.activeTimer.running = true;
+        db.activeTimer.startTime = Date.now();
+        if (!db.activeTimer.sessionStartAt) db.activeTimer.sessionStartAt = new Date(db.activeTimer.startTime - (db.activeTimer.accumulatedSeconds || 0) * 1000).toISOString();
+        db.activeTimer.topic = document.getElementById('focus-topic').value.trim() || "未命名";
+        startTimerInterval(); persist();
+    } else if (act === 'pause' && db.activeTimer.running) {
+        db.activeTimer.running = false; db.activeTimer.accumulatedSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
+        db.activeTimer.startTime = 0; clearInterval(timerInterval); updateTimerDisplay(); persist();
+    } else if (act === 'stop') {
+        let totalSeconds = db.activeTimer.accumulatedSeconds;
+        if (db.activeTimer.running && db.activeTimer.startTime > 0) totalSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
+        if (totalSeconds < 60) return alert("总记录不满1分钟，无法保存！");
+        clearInterval(timerInterval);
+        const topic = db.activeTimer.topic || document.getElementById('focus-topic').value.trim() || "未命名研究";
+        const endAt = new Date().toISOString();
+        const startAt = db.activeTimer.sessionStartAt || new Date(new Date(endAt).getTime() - totalSeconds * 1000).toISOString();
+        if (resumeFocusId !== null) {
+            const idx = db.focusRecords.findIndex(r => r.id === resumeFocusId);
+            if (idx !== -1 && db.focusRecords[idx].topic === topic) {
+                db.focusRecords[idx].seconds = totalSeconds;
+                db.focusRecords[idx].startAt = db.focusRecords[idx].startAt || startAt;
+                db.focusRecords[idx].endAt = endAt;
+                db.focusRecords[idx].date = endAt;
+                db.focusRecords[idx].time = getFullTime();
+            } else db.focusRecords.push({ id: Date.now(), date: endAt, time: getFullTime(), topic, seconds: totalSeconds, startAt, endAt });
+            resumeFocusId = null;
+        } else {
+            const todayKey = getDateKey();
+            const idx = db.focusRecords.findIndex(r => r.date && getDateKey(r.date) === todayKey && r.topic === topic);
+            if (idx !== -1) {
+                db.focusRecords[idx].seconds = totalSeconds;
+                db.focusRecords[idx].startAt = db.focusRecords[idx].startAt || startAt;
+                db.focusRecords[idx].endAt = endAt;
+                db.focusRecords[idx].date = endAt;
+                db.focusRecords[idx].time = getFullTime();
+            } else db.focusRecords.push({ id: Date.now(), date: endAt, time: getFullTime(), topic, seconds: totalSeconds, startAt, endAt });
+        }
+        db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
+        document.getElementById('focus-topic').value = ""; updateTimerDisplay(); persist(); renderFocusToday(); updateOverviewStats(); renderStats();
+    } else if (act === 'reset') {
+        clearInterval(timerInterval); db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
+        resumeFocusId = null; updateTimerDisplay(); persist();
+    }
+}
+function editFocusRecord(id) {
+    const rec = db.focusRecords.find(r => r.id === id); if (!rec) return;
+    const { start, end } = getFocusRange(rec);
+    openModal("修改专注纪要", [
+        {label: "主题名称", value: rec.topic},
+        {label: "开始时间 (HH:MM)", value: formatClock(start)},
+        {label: "结束时间 (HH:MM)", value: formatClock(end)},
+        {label: "总时长 (分钟)", value: Math.max(1, Math.round((rec.seconds || 0) / 60)), type: "number"}
+    ], (vals) => {
+        if (vals[0]) rec.topic = vals[0].trim();
+        const baseIso = rec.endAt || rec.date || new Date().toISOString();
+        const startObj = parseClockOnBaseDate(baseIso, vals[1]);
+        const endObj = parseClockOnBaseDate(baseIso, vals[2]);
+        let durationSeconds = rec.seconds || 0;
+        if (startObj && endObj) {
+            if (endObj.getTime() < startObj.getTime()) endObj.setDate(endObj.getDate() + 1);
+            durationSeconds = Math.round((endObj.getTime() - startObj.getTime()) / 1000);
+            if (durationSeconds < 60) return alert('结束时间需晚于开始时间，且总时长至少 1 分钟。');
+            rec.startAt = startObj.toISOString();
+            rec.endAt = endObj.toISOString();
+            rec.date = rec.endAt;
+        } else if (vals[3] && !isNaN(vals[3])) {
+            durationSeconds = parseInt(vals[3], 10) * 60;
+            const endBase = endObj || end || new Date(baseIso);
+            rec.endAt = endBase.toISOString();
+            rec.startAt = new Date(endBase.getTime() - durationSeconds * 1000).toISOString();
+            rec.date = rec.endAt;
+        }
+        if (vals[3] && !isNaN(vals[3]) && !(startObj && endObj)) durationSeconds = parseInt(vals[3], 10) * 60;
+        rec.seconds = durationSeconds;
+        persist(); renderFocusToday(); updateOverviewStats(); renderStats();
+    });
+}
+function deleteFocusRecord(id) { if (confirm("确定删除这条纪要吗？")) { db.focusRecords = db.focusRecords.filter(r => r.id !== id); persist(); renderFocusToday(); updateOverviewStats(); } }
+function renderFocusToday() {
+    const todayKey = getDateKey(); const ul = document.getElementById('list-focus-today'); ul.innerHTML = '';
+    const recs = (db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey);
+    if (!recs.length) { ul.innerHTML = '<li style="font-size:13px; color:var(--text-muted); text-align:center; padding: 18px 0;">暂无记录，快去开启专注吧</li>'; return; }
+    [...recs].reverse().forEach(r => {
+        ul.innerHTML += `<li class="focus-item">
+            <div style="flex-grow: 1; min-width: 0;">
+                <div style="font-size:15px;font-weight:bold;color:var(--title-color);">${r.topic}</div>
+                <div class="focus-time-meta">${focusRangeText(r)}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px; margin-left:12px;">
+                <div class="focus-duration">${Math.max(1, Math.round((r.seconds || 0)/60))} 分钟</div>
+                <div class="action-group">
+                    <span class="text-btn edit" onclick="editFocusRecord(${r.id})">${ICON_EDIT}</span>
+                    <span class="text-btn delete" onclick="deleteFocusRecord(${r.id})">${ICON_DELETE}</span>
+                </div>
+            </div></li>`;
+    });
+}
+function updateOverviewStats() {
+    const todayKey = getDateKey(); db.focusTarget = parseInt(document.getElementById('focus-target').value) || 240;
+    const mins = Math.floor((db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).reduce((s, r) => s + r.seconds, 0) / 60);
+    document.getElementById('progress-text').textContent = `${mins}/${db.focusTarget} 分钟`;
+    document.getElementById('progress-bar').style.width = `${db.focusTarget > 0 ? Math.min((mins / db.focusTarget) * 100, 100) : 0}%`;
+    let checkedCount = 0; (db.checkins[todayKey] || [0, 0, 0]).forEach(v => { if (v) checkedCount++; });
+    document.getElementById('stat-checkin-rate').textContent = `${Math.round((checkedCount / 3) * 100)}%`;
+    const tds = (db.todos || []).filter(t => t.type === 'today' && t.dateCreated && getDateKey(t.dateCreated) === todayKey);
+    document.getElementById('stat-todo-rate').textContent = `${tds.length ? Math.round((tds.filter(t => t.status === 'done').length / tds.length) * 100) : 0}%`;
+}
+function selectStatusTab(idx) { activeStatusTab = idx; document.querySelectorAll('#tab-0, #tab-1, #tab-2').forEach((el, i) => el.classList.toggle('active', i === idx)); }
+function updateCheckinUI() { const todayKey = getDateKey(); const checks = db.checkins[todayKey] || [0, 0, 0]; document.querySelectorAll('#tab-0, #tab-1, #tab-2').forEach((el, i) => el.classList.toggle('checked', !!checks[i])); }
+function saveDailyStatus() {
+    const txt = document.getElementById('input-daily-status').value.trim(); if (!txt) return alert("请先填写记录内容！");
+    db.statusRecords.push({ id: Date.now(), time: new Date().toISOString(), fullTime: getFullTime(), period: periodNames[activeStatusTab], text: txt });
+    const todayKey = getDateKey(); if (!db.checkins[todayKey]) db.checkins[todayKey] = [0, 0, 0]; db.checkins[todayKey][activeStatusTab] = 1;
+    document.getElementById('input-daily-status').value = ''; persist(); renderStatusRecords(); updateCheckinUI(); updateOverviewStats();
+}
+function deleteStatusRecord(id) { if (confirm("确定删除这条记录吗？")) { db.statusRecords = db.statusRecords.filter(r => r.id !== id); persist(); renderStatusRecords(); } }
+function editStatusRecord(id) {
+    const rec = db.statusRecords.find(r => r.id === id); if (!rec) return;
+    openModal("修改打卡状态", [{label: "记录内容", value: rec.text, type: "textarea"}], (vals) => { if (vals[0]) { rec.text = vals[0].trim(); persist(); renderStatusRecords(); } });
+}
+function renderStatusRecords() {
+    const grid = document.getElementById('status-records-grid'); if (!grid) return;
+    const todayKey = getDateKey(); const recs = (db.statusRecords || []).filter(r => r.time && getDateKey(r.time) === todayKey);
+    const cols = { '🌅 上午': [], '☀️ 下午': [], '🌙 晚上': [] };
+    recs.forEach(r => {
+        const timeOnly = new Date(r.time).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+        cols[r.period] = cols[r.period] || [];
+        cols[r.period].push(`<div class="status-card"><div class="status-card-time">${timeOnly}<div class="action-group" style="margin-left:auto;">
+            <span class="text-btn edit" onclick="editStatusRecord(${r.id})">${ICON_EDIT}</span>
+            <span class="text-btn delete" onclick="deleteStatusRecord(${r.id})">${ICON_DELETE}</span>
+        </div></div><div class="status-card-content">${r.text}</div></div>`);
+    });
+    grid.innerHTML = '';
+    ['🌅 上午', '☀️ 下午', '🌙 晚上'].forEach(period => {
+        let contentHtml = cols[period].length ? cols[period].join('') : '<div style="text-align:center;color:#ccc;font-size:12px;margin-top:10px;">暂无</div>';
+        grid.innerHTML += `<div class="status-col"><div class="status-col-title">${period}</div>${contentHtml}</div>`;
+    });
+}
+function setPrio(type, val) {
+    currentInputPrio[type] = val; document.querySelectorAll(`#prio-group-${type} .prio-opt`).forEach(el => el.classList.remove('active'));
+    document.querySelector(`#prio-group-${type} .prio-${val}`).classList.add('active');
+}
+function addTodo(type) {
+    const input = document.getElementById(`input-todo-${type}`); const ddl = type === 'long' ? document.getElementById('input-todo-ddl').value : "";
+    if (!input.value.trim() || (type === 'long' && !ddl)) return alert("请完善任务信息！");
+    db.todos.push({ id: Date.now(), text: input.value.trim(), type, ddl, priority: currentInputPrio[type] || 3, status: 'pending', dateCreated: new Date().toISOString() });
+    input.value = ''; setPrio(type, 3); if (type === 'long') document.getElementById('input-todo-ddl').value = '';
+    persist(); renderTodos(); updateOverviewStats();
+}
+function toggleTodo(id) {
+    const t = db.todos.find(x => x.id === id);
+    if (t) { t.status = t.status === 'pending' ? 'done' : 'pending'; t.dateCompleted = t.status === 'done' ? new Date().toISOString() : null; persist(); renderTodos(); updateOverviewStats(); renderStats(); }
+}
+function deleteTodo(id) { db.todos = db.todos.filter(t => t.id !== id); persist(); renderTodos(); updateOverviewStats(); }
+function editTodo(id) {
+    const t = db.todos.find(x => x.id === id); if (!t) return;
+    let fields = [ {label: "任务名称", value: t.text}, {label: "重要程度", value: t.priority || 3, type: "select", options: [ {value: 1, text: "🔴 紧急"}, {value: 2, text: "🟡 重要"}, {value: 3, text: "🟢 普通"} ]} ];
+    if (t.type === 'long') fields.push({label: "截止日期 (DDL)", value: t.ddl, type: "date"});
+    openModal("修改研究任务", fields, (vals) => {
+        if (vals[0]) t.text = vals[0].trim(); if (vals[1]) t.priority = parseInt(vals[1]); if (t.type === 'long' && vals[2]) t.ddl = vals[2];
+        persist(); renderTodos();
+    });
+}
+function renderTodos() {
+    const lLong = document.getElementById('list-todo-long'); const lToday = document.getElementById('list-todo-today');
+    const todayKey = getDateKey(); lLong.innerHTML = ''; lToday.innerHTML = ''; let pCount = 0;
+    const prioMap = { 1: {text: '紧急', class: 'prio-tag-1'}, 2: {text: '重要', class: 'prio-tag-2'}, 3: {text: '普通', class: 'prio-tag-3'} };
+    const makeTodoItem = (t) => {
+        const isD = t.status === 'done'; const prioInfo = prioMap[t.priority || 3];
+        return `<li class="todo-item">
+            <input type="checkbox" class="todo-checkbox" ${isD ? 'checked' : ''} onchange="toggleTodo(${t.id})">
+            <div class="todo-content"><span class="todo-text ${isD ? 'done' : ''}" title="${escapeHtml(t.text)}"><span class="prio-tag ${prioInfo.class}">${prioInfo.text}</span> ${escapeHtml(t.text)}</span>
+            ${t.type === 'long' ? `<span class="todo-meta" style="color:${!isD && Math.ceil((new Date(t.ddl) - new Date()) / 86400000) <= 3 ? 'var(--danger-color)' : 'var(--text-muted)'}">DDL: ${t.ddl}</span>` : ''}</div>
+            <div class="action-group"><span class="text-btn edit" onclick="editTodo(${t.id})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteTodo(${t.id})">${ICON_DELETE}</span></div>
+        </li>`;
+    };
+    (db.todos || []).filter(t => t.type === 'long').sort((a, b) => { if (a.status !== b.status) return a.status === 'pending' ? -1 : 1; if ((a.priority||3) !== (b.priority||3)) return (a.priority||3) - (b.priority||3); return new Date(a.ddl) - new Date(b.ddl); }).forEach(t => { if (t.status === 'pending') pCount++; lLong.innerHTML += makeTodoItem(t); });
+    (db.todos || []).filter(t => t.type === 'today' && (t.status === 'pending' || (t.dateCompleted && getDateKey(t.dateCompleted) === todayKey))).sort((a, b) => { if (a.status !== b.status) return a.status === 'pending' ? -1 : 1; if ((a.priority||3) !== (b.priority||3)) return (a.priority||3) - (b.priority||3); return b.id - a.id; }).forEach(t => { if (t.status === 'pending') pCount++; lToday.innerHTML += makeTodoItem(t); });
+    document.getElementById('sidebar-todos').textContent = `${pCount} 份`;
+}
+function renderWordsList() {
+    const ul = document.getElementById('list-words'); if (!ul) return; ul.innerHTML = '';
+    let weekTotal = 0, monthTotal = 0, todayTotal = 0; const now = new Date(); const y = now.getFullYear(), m = now.getMonth();
+    const weekStart = getMondayWeekStart(now);
+    const todayKey = getDateKey();
+    (db.words || []).forEach(item => {
+        const d = new Date(String(item.time).replace(/-/g, '/')); const val = parseInt(item.val || 0);
+        if (d.getFullYear() === y && d.getMonth() === m) monthTotal += val;
+        if (d >= weekStart) weekTotal += val;
+        if (getDateKey(d) === todayKey) todayTotal += val;
+    });
+    document.getElementById('word-stats').innerHTML = `<span style="flex:1">今日: <strong>${todayTotal}</strong></span><span style="flex:1">本周: <strong>${weekTotal}</strong></span><span style="flex:1">本月: <strong>${monthTotal}</strong></span>`;
+    [...(db.words || [])].reverse().forEach((item, i) => {
+        const realIdx = db.words.length - 1 - i;
+        ul.innerHTML += `<li class="record-item compact-record"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editWordRecord(${realIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('words', ${item.idKey ? item.idKey : realIdx})">${ICON_DELETE}</span></div></div><div class="record-content">新增打卡: <strong>${item.val}</strong> 字</div></li>`;
+    });
+    document.getElementById('sidebar-words').textContent = `${weekTotal} 字`;
+}
+function editWordRecord(i) { openModal("修改字数", [{label: "字数", value: db.words[i].val, type: "number"}], (vals) => { if (vals[0] && !isNaN(vals[0])) { db.words[i].val = vals[0]; persist(); renderWordsList(); } }); }
+
+function renderIdeasList() {
+    const l1 = document.getElementById('list-cns'); const l2 = document.getElementById('list-cns-full');
+    const renderTo = (ul, prefix) => {
+        if (!ul) return; ul.innerHTML = '';
+        [...(db.cns || [])].reverse().forEach((item, i) => {
+            const rIdx = db.cns.length - 1 - i;
+            const imgHtml = (item.img || item.imgPath) ? `<img id="${prefix}-cns-img-${item.idKey}" style="max-width:100%;max-height:300px;border-radius:8px;margin-top:12px;border:1px solid var(--border-color);object-fit:contain;">` : '';
+            ul.innerHTML += `<li class="record-item" style="padding:15px;"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editCNSRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('cns', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content" style="${item.val ? 'margin-bottom: 5px;' : ''}">${item.val||''}</div>${imgHtml}</li>`;
+        });
+        [...(db.cns || [])].reverse().forEach(item => {
+            if (item.img || item.imgPath) {
+                const imgEl = document.getElementById(`${prefix}-cns-img-${item.idKey}`);
+                setItemImageSource(imgEl, item, '暂无配图');
+            }
+        });
+    };
+    renderTo(l1, 'list1'); renderTo(l2, 'list2');
+}
+function editCNSRecord(i) { openModal("修改闪念", [{label: "内容", value: db.cns[i].val, type: "textarea"}], (vals) => { if (vals[0] !== undefined) { db.cns[i].val = vals[0].trim(); persist(); renderIdeasList(); } }); }
+function renderQuotesList() {
+    const ul = document.getElementById('list-memorableQuotes'); ul.innerHTML = '';
+    [...(db.memorableQuotes||[])].reverse().forEach((item, i) => {
+        const rIdx = db.memorableQuotes.length - 1 - i;
+        ul.innerHTML += `<li class="record-item"><div class="record-header"><span class="record-time">摘录于 ${item.time.split(' ')[0]}</span><div class="action-group"><span class="text-btn edit" onclick="editQuoteRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('memorableQuotes', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content">${item.val}</div></li>`;
+    });
+}
+function editQuoteRecord(i) { openModal("修改金句", [{label: "摘录内容", value: db.memorableQuotes[i].val, type: "textarea"}], (vals) => { if (vals[0] && vals[0].trim()) { db.memorableQuotes[i].val = vals[0].trim(); persist(); renderQuotesList(); } }); }
+
+// 年计划、日历、统计
+function toggleAnnualCustom(sel) { document.getElementById('annual-custom-title').style.display = sel.value === 'other' ? 'block' : 'none'; }
+function addAnnualPlan() {
+    const type = document.getElementById('annual-type').value; const target = parseInt(document.getElementById('annual-target').value); const cTitle = document.getElementById('annual-custom-title').value;
+    if (!target) return alert("输入目标数量！"); if (type === 'other' && !cTitle.trim()) return alert("输入自定义名称！");
+    db.annualPlans.push({ id: Date.now(), year: new Date().getFullYear(), type, title: cTitle, target, current: 0 });
+    document.getElementById('annual-target').value = ''; document.getElementById('annual-custom-title').value = ''; persist(); renderAnnualPlans();
+}
+function deleteAnnual(idx) { if (confirm("确定删除该计划？")) { db.annualPlans.splice(idx, 1); persist(); renderAnnualPlans(); } }
+function updateAnnualManual(idx, change) { db.annualPlans[idx].current = Math.max(0, (db.annualPlans[idx].current || 0) + change); persist(); renderAnnualPlans(); }
+function editAnnualPlan(idx) {
+    const p = db.annualPlans[idx];
+    openModal("修改年计划", [{label: "目标数量", value: p.target, type: "number"}, ...(p.type === 'other' ? [{label: "自定义目标名称", value: p.title}] : [])], (vals) => {
+        if (vals[0] && !isNaN(vals[0])) p.target = parseInt(vals[0]); if (p.type === 'other' && vals[1]) p.title = vals[1].trim(); persist(); renderAnnualPlans();
+    });
+}
+function renderAnnualPlans() {
+    const container = document.getElementById('list-annual'); if (!container) return; container.innerHTML = '';
+    if (!db.annualPlans.length) { container.innerHTML = '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:30px;">暂无计划，请在上方添加！</div>'; return; }
+    db.annualPlans.forEach((p, idx) => {
+        let cur = 0, unit = '项', title = '其他目标', manualHtml = '';
+        if (p.type === 'reading') { cur = (db.reading||[]).filter(r => r.time.includes(p.year)).length; unit = '本'; title = '阅读指南'; }
+        else if (p.type === 'movie') { cur = (db.movie||[]).filter(r => r.time.includes(p.year)).length; unit = '部'; title = '观影指南'; }
+        else if (p.type === 'blog') { cur = (db.blog||[]).filter(r => r.time.includes(p.year)).length; unit = 'EP'; title = '播客指南'; }
+        else { cur = p.current || 0; unit = '次'; title = p.title || '自定义目标'; manualHtml = `<button class="annual-manual-btn" onclick="updateAnnualManual(${idx}, -1)">-1</button><button class="annual-manual-btn" onclick="updateAnnualManual(${idx}, 1)">+1</button>`; }
+        const pct = p.target > 0 ? Math.min((cur / p.target) * 100, 100).toFixed(1) : 0;
+        container.innerHTML += `<div class="annual-item"><div class="annual-bg" style="width:${pct}%;"></div><div class="annual-content"><div class="annual-header"><span class="annual-badge">${p.year} | ${title}</span><div class="action-group"><span class="text-btn edit" onclick="editAnnualPlan(${idx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteAnnual(${idx})">${ICON_DELETE}</span></div></div><div style="font-size:14px; font-weight:bold; color:var(--title-color); display:flex; align-items:center;">${pct}% &nbsp;|&nbsp; ${cur} / ${p.target} ${unit} &nbsp;${manualHtml}</div></div></div>`;
+    });
+}
+function changeMonth(o) { currentCalMonth.setMonth(currentCalMonth.getMonth() + o); renderCalendar(); renderUnifiedLifeCalendar(); }
+function renderCalendar() {
+    const y = currentCalMonth.getFullYear(), m = currentCalMonth.getMonth(); const todayKey = getDateKey();
+    document.getElementById('calendar-title').textContent = `${y}年${m+1}月`;
+    const grid = document.getElementById('calendar-grid'); grid.innerHTML = '日一二三四五六'.split('').map(d => `<div class="calendar-day-name">${d}</div>`).join('');
+    const firstDay = new Date(y, m, 1).getDay(); for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div></div>';
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+        const ds = getDateKey(new Date(y, m, d));
+        let cellHtml = `<div class="calendar-cell${ds === todayKey ? ' today' : ''}"><div class="calendar-date">${d}</div>`;
+        (db.todos || []).filter(t => t.status === 'done' && t.dateCompleted && getDateKey(t.dateCompleted) === ds).forEach(t => { cellHtml += `<div class="calendar-task">${t.text}</div>`; });
+        cellHtml += `</div>`; grid.innerHTML += cellHtml;
+    }
+}
+function renderUnifiedLifeCalendar() {
+    const y = currentCalMonth.getFullYear(), m = currentCalMonth.getMonth();
+    document.getElementById('unified-cal-title').textContent = `📅 ${y}年${m+1}月 综合追踪`;
+    const grid = document.getElementById('unified-cal-grid'); grid.innerHTML = '日一二三四五六'.split('').map(d => `<div style="font-size:13px;color:var(--text-muted);margin-bottom:6px;">${d}</div>`).join('');
+    const firstDay = new Date(y, m, 1).getDay(); for (let i = 0; i < firstDay; i++) grid.innerHTML += '<div></div>';
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    for (let d = 1; d <= daysInMonth; d++) {
+        const ds = getDateKey(new Date(y, m, d));
+        const hasSport = (db.sport||[]).some(x => getDateKey(x.time.replace(/-/g, '/')) === ds || x.time.includes(ds));
+        const hasFood  = (db.food||[]).some(x => getDateKey(x.time.replace(/-/g, '/')) === ds || x.time.includes(ds));
+        const hasDrink = (db.drink||[]).some(x => getDateKey(x.time.replace(/-/g, '/')) === ds || x.time.includes(ds));
+        let icons = ''; if (hasSport) icons += '🏅'; if (hasFood) icons += '🍱'; if (hasDrink) icons += '🍵';
+        grid.innerHTML += `<div class="unified-cal-cell${(hasSport||hasFood||hasDrink) ? ' has-record' : ''}">${d}<div style="display:flex;justify-content:center;gap:2px;height:15px;margin-top:4px;font-size:11px;">${icons}</div></div>`;
+    }
+}
+function renderStats() {
+    const st = { w: {t:0,m:0}, m: {t:0,m:0}, y: {t:0,m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
+    const weekStart = getMondayWeekStart(now);
+    const check = (ds, p) => { const d = new Date(ds); if (p === 'y') return d.getFullYear() === y; if (p === 'm') return d.getFullYear() === y && d.getMonth() === mo; return d >= weekStart; };
+    (db.todos||[]).filter(t => t.status==='done' && t.dateCompleted).forEach(t => ['w','m','y'].forEach(p => { if (check(t.dateCompleted, p)) st[p].t++; }));
+    (db.focusRecords||[]).forEach(r => ['w','m','y'].forEach(p => { if (r.date && check(r.date, p)) st[p].m += Math.floor(r.seconds/60); }));
+    ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = st[p].m + ' min'; });
+    drawTrendChart();
+}
+function drawTrendChart() {
+    const cvs = document.getElementById('trendChart'); if (!cvs) return;
+    const ctx = cvs.getContext('2d'), rect = cvs.parentNode.getBoundingClientRect();
+    cvs.width = rect.width * 2; cvs.height = 440; cvs.style.width = rect.width + 'px'; cvs.style.height = '220px'; ctx.scale(2, 2);
+    const w = rect.width, h = 220, pad = 30; ctx.clearRect(0, 0, w, h);
+    const dts = [], cts = [];
+    for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dts.push(`${d.getMonth()+1}/${d.getDate()}`); cts.push((db.todos||[]).filter(t => t.status==='done' && t.dateCompleted && getDateKey(t.dateCompleted) === getDateKey(d)).length); }
+    const max = Math.max(...cts, 5); ctx.fillStyle = '#999'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) { const yPos = h - pad - (i/5)*(h-pad*2); ctx.fillText(Math.round((i/5)*max), pad-5, yPos+3); ctx.beginPath(); ctx.moveTo(pad, yPos); ctx.lineTo(w-pad, yPos); ctx.strokeStyle = '#E2EAE8'; ctx.stroke(); }
+    ctx.beginPath(); cts.forEach((v, i) => { const x = pad + (i/6)*(w-pad*2), y2 = h - pad - (v/max)*(h-pad*2); if (i === 0) ctx.moveTo(x, y2); else ctx.lineTo(x, y2); ctx.fillStyle = '#999'; ctx.textAlign = 'center'; ctx.fillText(dts[i], x, h-5); });
+    ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 3; ctx.stroke();
+    cts.forEach((v, i) => { const x = pad + (i/6)*(w-pad*2), y2 = h - pad - (v/max)*(h-pad*2); ctx.beginPath(); ctx.arc(x, y2, 5, 0, Math.PI*2); ctx.fillStyle = 'white'; ctx.fill(); ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 2; ctx.stroke(); });
+}
+
+function editQuote() { openModal("修改顶部格言", [{label: "格言内容", value: db.quote}], (vals) => { if (vals[0] && vals[0].trim()) { db.quote = vals[0].trim(); persist(); document.getElementById('quote-text').innerText = db.quote; } }); }
+function exportData() {
+    const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(db)], {type: "application/json"}));
+    a.download = `进步日记_${getDateKey()}.json`; a.click(); alert("数据已成功打包备份！\n如果图片已拆分到 OneDrive images 文件夹，备份文件中保存的是图片路径而不是图片二进制本体。");
+}
+function importData(e) {
+    const f = e.target.files[0]; if (!f) return; const rd = new FileReader();
+    rd.onload = async ev => { try { if (confirm("确定要覆盖当前所有数据吗？此操作不可逆。")) { revokeCloudImageObjectUrls(); db = { ...db, ...JSON.parse(ev.target.result) }; ensureDbCompatibility(); await persist(); renderAll(); updateCloudUI(); alert("恢复成功！"); } } catch(err) { alert("格式错误，请检查文件是否为有效的 JSON 备份"); } };
+    rd.readAsText(f); e.target.value = '';
+}
+</script>
+
+</body>
+</html>
