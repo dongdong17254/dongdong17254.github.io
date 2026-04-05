@@ -670,6 +670,48 @@ html, body { overflow-x: hidden; }
 }
 </style>
 
+
+<style id="emperor-mobile-cloud-ui-fix">
+/* 手机端显示云同步与今日概况卡片 */
+@media (max-width: 780px) {
+    .sidebar > .status-widget{
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        margin-top: 8px !important;
+    }
+    .sidebar > div[style*="border-top"]{
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+    .sidebar .cloud-actions{
+        grid-template-columns: 1fr !important;
+    }
+    .sidebar .cloud-btn{
+        min-height: 42px;
+        font-size: 14px;
+    }
+    .sidebar .cloud-note{
+        font-size: 12px;
+        line-height: 1.55;
+    }
+}
+@media (max-width: 520px) {
+    .sidebar > .status-widget{
+        padding: 12px !important;
+        border-radius: 14px !important;
+    }
+    .sidebar .status-row{
+        font-size: 12px !important;
+        gap: 8px;
+    }
+    .sidebar .cloud-pill{
+        max-width: 132px !important;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -2828,6 +2870,212 @@ function importData(e) {
     window.addEventListener('load', boot);
     window.addEventListener('resize', markResponsiveRows);
     setInterval(syncTimerPulse, 800);
+})();
+</script>
+
+
+<script id="emperor-stable-mobile-auth-patch">
+(function(){
+    const CLOUD_PENDING_ACTION_KEY = 'emperor_cloud_pending_action_v1';
+    const CLOUD_LAST_MESSAGE_KEY = 'emperor_cloud_last_message_v1';
+
+    function isMobileLike(){
+        const ua = navigator.userAgent || '';
+        const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        const narrow = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+        return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || coarse || narrow;
+    }
+
+    function setPendingCloudAction(action){
+        try{
+            if(action) sessionStorage.setItem(CLOUD_PENDING_ACTION_KEY, action);
+            else sessionStorage.removeItem(CLOUD_PENDING_ACTION_KEY);
+        }catch(e){}
+    }
+
+    function getPendingCloudAction(){
+        try{
+            return sessionStorage.getItem(CLOUD_PENDING_ACTION_KEY) || '';
+        }catch(e){
+            return '';
+        }
+    }
+
+    function setCloudFlashMessage(msg){
+        try{
+            if(msg) sessionStorage.setItem(CLOUD_LAST_MESSAGE_KEY, msg);
+            else sessionStorage.removeItem(CLOUD_LAST_MESSAGE_KEY);
+        }catch(e){}
+    }
+
+    function consumeCloudFlashMessage(){
+        try{
+            const msg = sessionStorage.getItem(CLOUD_LAST_MESSAGE_KEY) || '';
+            sessionStorage.removeItem(CLOUD_LAST_MESSAGE_KEY);
+            return msg;
+        }catch(e){
+            return '';
+        }
+    }
+
+    async function processRedirectResultAndReplay(){
+        try{
+            const client = initMsal();
+            const resp = await client.handleRedirectPromise();
+            if (resp && resp.account) {
+                client.setActiveAccount(resp.account);
+                updateCloudUI('Microsoft 账户已连接');
+                setCloudFlashMessage('Microsoft 账户已连接');
+            } else {
+                updateCloudUI();
+            }
+
+            const flash = consumeCloudFlashMessage();
+            if (flash) {
+                setTimeout(() => {
+                    try { updateCloudUI(flash); } catch(e){}
+                }, 120);
+            }
+
+            const pending = getPendingCloudAction();
+            if (!pending) return;
+
+            if (isCloudLoggedIn()) {
+                setPendingCloudAction('');
+                setTimeout(async () => {
+                    try{
+                        if (pending === 'loadCloudData' && typeof window.loadCloudData === 'function') {
+                            await window.loadCloudData();
+                        } else if (pending === 'saveCloudData' && typeof window.saveCloudData === 'function') {
+                            await window.saveCloudData();
+                        } else if (pending === 'loginOnly') {
+                            try { alert('Microsoft 登录成功。'); } catch(e){}
+                        }
+                    }catch(err){
+                        console.error(err);
+                    }
+                }, 250);
+            }
+        }catch(err){
+            console.error(err);
+            try { updateCloudUI('登录回调失败'); } catch(e){}
+        }
+    }
+
+    async function ensureMicrosoftAccountStable(){
+        const client = initMsal();
+        const accounts = client.getAllAccounts();
+        let account = client.getActiveAccount() || accounts[0];
+        if (account) {
+            client.setActiveAccount(account);
+            return account;
+        }
+
+        if (isMobileLike()) {
+            setPendingCloudAction(getPendingCloudAction() || 'loginOnly');
+            setCloudFlashMessage('请完成 Microsoft 登录后返回当前页面');
+            await client.loginRedirect({ scopes: ONEDRIVE_SCOPES });
+            throw new Error('REDIRECTING_FOR_LOGIN');
+        }
+
+        try{
+            const loginResp = await client.loginPopup({ scopes: ONEDRIVE_SCOPES });
+            account = loginResp.account;
+            client.setActiveAccount(account);
+            return account;
+        }catch(err){
+            console.warn('Popup 登录失败，回退到 redirect：', err);
+            setPendingCloudAction(getPendingCloudAction() || 'loginOnly');
+            setCloudFlashMessage('正在切换到更稳定的登录方式');
+            await client.loginRedirect({ scopes: ONEDRIVE_SCOPES });
+            throw new Error('REDIRECTING_FOR_LOGIN');
+        }
+    }
+
+    async function getMicrosoftAccessTokenStable(){
+        const client = initMsal();
+        const account = await ensureMicrosoftAccountStable();
+        try{
+            const tokenResp = await client.acquireTokenSilent({ scopes: ONEDRIVE_SCOPES, account });
+            return tokenResp.accessToken;
+        }catch(err){
+            if (isMobileLike()) {
+                setCloudFlashMessage('请完成授权后返回当前页面');
+                await client.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
+                throw new Error('REDIRECTING_FOR_TOKEN');
+            }
+            try{
+                const tokenResp = await client.acquireTokenPopup({ scopes: ONEDRIVE_SCOPES, account });
+                return tokenResp.accessToken;
+            }catch(err2){
+                console.warn('Popup 授权失败，回退到 redirect：', err2);
+                setCloudFlashMessage('正在切换到更稳定的授权方式');
+                await client.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
+                throw new Error('REDIRECTING_FOR_TOKEN');
+            }
+        }
+    }
+
+    const __origLoadCloudData = window.loadCloudData;
+    if (typeof __origLoadCloudData === 'function') {
+        window.loadCloudData = async function(...args){
+            setPendingCloudAction('loadCloudData');
+            try{
+                const result = await __origLoadCloudData.apply(this, args);
+                setPendingCloudAction('');
+                return result;
+            }catch(err){
+                if (!String(err && err.message || err).includes('REDIRECTING_FOR_')) {
+                    setPendingCloudAction('');
+                }
+                throw err;
+            }
+        };
+    }
+
+    const __origSaveCloudData = window.saveCloudData;
+    if (typeof __origSaveCloudData === 'function') {
+        window.saveCloudData = async function(...args){
+            setPendingCloudAction('saveCloudData');
+            try{
+                const result = await __origSaveCloudData.apply(this, args);
+                setPendingCloudAction('');
+                return result;
+            }catch(err){
+                if (!String(err && err.message || err).includes('REDIRECTING_FOR_')) {
+                    setPendingCloudAction('');
+                }
+                throw err;
+            }
+        };
+    }
+
+    window.ensureMicrosoftAccount = ensureMicrosoftAccountStable;
+    window.getMicrosoftAccessToken = getMicrosoftAccessTokenStable;
+    window.getAccessToken = getMicrosoftAccessTokenStable;
+
+    window.loginMicrosoft = async function(){
+        try{
+            updateCloudUI(isMobileLike() ? '正在跳转 Microsoft 登录...' : '正在打开 Microsoft 登录...');
+            setPendingCloudAction('loginOnly');
+            await ensureMicrosoftAccountStable();
+            updateCloudUI('Microsoft 账户已连接');
+            setPendingCloudAction('');
+            const lastLocal = db.__meta?.lastLocalWriteAt;
+            const lastCloud = db.__meta?.lastCloudSyncAt;
+            if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) scheduleCloudAutoSave();
+            alert('Microsoft 登录成功。');
+        }catch(e){
+            const msg = String((e && e.message) || e || '');
+            if (msg.includes('REDIRECTING_FOR_')) return;
+            console.error(e);
+            alert('登录失败：' + msg);
+            updateCloudUI('登录失败');
+            setPendingCloudAction('');
+        }
+    };
+
+    processRedirectResultAndReplay();
 })();
 </script>
 
