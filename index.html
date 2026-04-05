@@ -394,7 +394,11 @@
         }
     </style>
 
-<style id="emperor-layout-fix-style">
+<style id="emperor-responsive-unified-style">
+/* ===== 统一修复与美化 ===== */
+html, body { overflow-x: hidden; }
+* { min-width: 0; }
+.card, .sub-box, .status-widget, .status-col, .media-card, .annual-item { max-width: 100%; }
 .card{
     transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
     border-color:#EEF4F3;
@@ -431,6 +435,239 @@
     0%,100%{ transform:scale(1); opacity:1; }
     50%{ transform:scale(1.015); opacity:.92; }
 }
+.todo-text, .record-content, .media-desc, .search-result-snippet {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.main-content { min-width: 0; }
+.layout { align-items: flex-start; }
+.sidebar > .status-widget, .sidebar > div[style*="border-top"] { width: 100%; }
+
+/* ===== 大平板 / 竖屏电脑 ===== */
+@media (max-width: 1180px), (orientation: portrait) {
+    body { padding: 14px; }
+    .header { flex-direction: column; align-items: stretch; }
+    .header-tools { width: 100%; justify-content: center; }
+    .header-search { max-width: none; }
+    .layout { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        position: static;
+        top: auto;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding: 14px;
+    }
+    .sidebar > .nav-item {
+        margin-bottom: 0;
+        justify-content: center;
+        text-align: center;
+        min-height: 44px;
+    }
+    .sidebar > .status-widget,
+    .sidebar > div[style*="border-top"] {
+        grid-column: 1 / -1;
+    }
+
+    .grid-split,
+    .grid-split-half,
+    .grid-3,
+    .pie-grid,
+    .distribution-grid,
+    .stats-time-summary,
+    .status-records-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .resp-home-hero-row,
+    .resp-overview-stats-row,
+    .resp-todo-row,
+    .resp-word-row,
+    .resp-status-input-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .resp-home-hero-row > .timer-box,
+    .resp-home-hero-row > .focus-side-panel {
+        flex: 1 1 320px !important;
+        width: 100% !important;
+    }
+
+    .resp-overview-stats-row > .sub-box {
+        flex: 1 1 220px !important;
+    }
+
+    .resp-todo-row > * {
+        flex: 1 1 160px !important;
+        min-width: 0 !important;
+    }
+    .resp-todo-row > .btn {
+        flex: 0 0 auto !important;
+    }
+    .prio-select-group { flex-wrap: wrap; }
+
+    .resp-word-row > * {
+        flex: 1 1 220px !important;
+        min-width: 0 !important;
+    }
+
+    .resp-status-input-row > * {
+        min-width: 0 !important;
+    }
+
+    .todo-content {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .todo-text {
+        white-space: normal;
+    }
+}
+
+/* ===== 手机 / 窄屏 ===== */
+@media (max-width: 780px) {
+    body { padding: 10px; }
+    .header h1 { font-size: 24px; }
+    .quote-container { font-size: 13px; flex-wrap: wrap; }
+    .header-search-bar {
+        padding: 6px;
+        gap: 6px;
+    }
+    .header-search-input {
+        font-size: 12px;
+    }
+    .header-search-btn {
+        min-width: auto;
+        padding: 8px 10px;
+    }
+    .search-hint-line { display: none; }
+
+    .sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-radius: 16px;
+        padding: 10px;
+    }
+    .nav-item {
+        font-size: 13px;
+        padding: 10px 8px;
+    }
+
+    .card {
+        padding: 16px 14px;
+        border-radius: 16px;
+    }
+    .sub-box {
+        padding: 14px;
+        border-radius: 14px;
+    }
+    .section-title {
+        font-size: 17px;
+        margin-bottom: 16px;
+    }
+
+    .grid-split,
+    .grid-split-half,
+    .grid-3,
+    .pie-grid,
+    .distribution-grid,
+    .stats-time-summary,
+    .status-records-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .resp-home-hero-row,
+    .resp-overview-stats-row,
+    .resp-status-input-row {
+        flex-direction: column !important;
+    }
+
+    .resp-todo-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .resp-todo-row > * {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+    .resp-todo-row > .btn {
+        width: 100% !important;
+    }
+
+    .resp-word-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .resp-word-row > * {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    .resp-status-input-row .btn {
+        width: 100%;
+        align-self: auto !important;
+    }
+
+    .timer-box {
+        padding: 18px 14px !important;
+    }
+    .time-display {
+        font-size: 38px !important;
+    }
+    .timer-btn-grid,
+    .timer-btn-full {
+        max-width: none;
+        width: 100%;
+    }
+
+    .status-tabs {
+        flex-direction: column;
+    }
+
+    .word-stats-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .media-gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .focus-category-chips,
+    .shortcut-tags {
+        gap: 6px;
+    }
+
+    .focus-category-chip,
+    .shortcut-tag,
+    .shortcut-item {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .focus-donut {
+        width: 180px;
+        height: 180px;
+    }
+    .focus-donut::after {
+        inset: 22px;
+    }
+}
+
+/* ===== 超小手机 ===== */
+@media (max-width: 520px) {
+    .sidebar {
+        grid-template-columns: 1fr;
+    }
+    .header h1 { font-size: 22px; }
+    .time-display { font-size: 34px !important; }
+    .focus-duration { min-width: 0; text-align: left; }
+    .calendar-grid { gap: 6px; }
+    .calendar-cell { min-height: 88px; padding: 6px; }
+    .search-results-popover { width: min(96vw, 420px); right: 50%; transform: translateX(50%); }
+}
 </style>
 
 </head>
@@ -463,16 +700,16 @@
 
 <div class="layout">
     <aside class="sidebar">
-        <div class="nav-item active" data-section="home" onclick="switchTab(event, \'home\')"><span class="nav-icon">👑</span> 帝王总览</div>
-        <div class="nav-item" data-section="literature" onclick="switchTab(event, \'literature\')"><span class="nav-icon">📖</span> 文献指南</div>
-        <div class="nav-item" data-section="learning" onclick="switchTab(event, \'learning\')"><span class="nav-icon">💡</span> 学习笔记</div>
-        <div class="nav-item" data-section="annual" onclick="switchTab(event, \'annual\')"><span class="nav-icon">🎯</span> 年计划</div>
-        <div class="nav-item" data-section="life" onclick="switchTab(event, \'life\')"><span class="nav-icon">🍱</span> 生活碎片</div>
-        <div class="nav-item" data-section="reading" onclick="switchTab(event, \'reading\')"><span class="nav-icon">📚</span> 阅读指南</div>
-        <div class="nav-item" data-section="movie" onclick="switchTab(event, \'movie\')"><span class="nav-icon">🎬</span> 观影指南</div>
-        <div class="nav-item" data-section="blog" onclick="switchTab(event, \'blog\')"><span class="nav-icon">🎧</span> 播客指南</div>
-        <div class="nav-item" data-section="quotes" onclick="switchTab(event, \'quotes\')"><span class="nav-icon">✒️</span> 抄点好句</div>
-        <div class="nav-item" data-section="ideas" onclick="switchTab(event, \'ideas\')"><span class="nav-icon">⚡</span> 闪念归档</div>
+        <div class="nav-item active" data-section="home" onclick="switchTab(event, 'home')"><span class="nav-icon">👑</span> 帝王总览</div>
+        <div class="nav-item" data-section="literature" onclick="switchTab(event, 'literature')"><span class="nav-icon">📖</span> 文献指南</div>
+        <div class="nav-item" data-section="learning" onclick="switchTab(event, 'learning')"><span class="nav-icon">💡</span> 学习笔记</div>
+        <div class="nav-item" data-section="annual" onclick="switchTab(event, 'annual')"><span class="nav-icon">🎯</span> 年计划</div>
+        <div class="nav-item" data-section="life" onclick="switchTab(event, 'life')"><span class="nav-icon">🍱</span> 生活碎片</div>
+        <div class="nav-item" data-section="reading" onclick="switchTab(event, 'reading')"><span class="nav-icon">📚</span> 阅读指南</div>
+        <div class="nav-item" data-section="movie" onclick="switchTab(event, 'movie')"><span class="nav-icon">🎬</span> 观影指南</div>
+        <div class="nav-item" data-section="blog" onclick="switchTab(event, 'blog')"><span class="nav-icon">🎧</span> 播客指南</div>
+        <div class="nav-item" data-section="quotes" onclick="switchTab(event, 'quotes')"><span class="nav-icon">✒️</span> 抄点好句</div>
+        <div class="nav-item" data-section="ideas" onclick="switchTab(event, 'ideas')"><span class="nav-icon">⚡</span> 闪念归档</div>
 
         <div style="border-top: 1px dashed var(--border-color); margin: 20px 0 10px 0; padding-top: 15px;">
             <div class="nav-item" onclick="exportData()" style="color: var(--primary-color); font-size: 13px;"><span class="nav-icon">💾</span> 导出备份</div>
@@ -2494,14 +2731,43 @@ function importData(e) {
 </script>
 
 
-<script id="emperor-layout-fix-script">
+<script id="emperor-responsive-unified-script">
 (function(){
     function normalizeSectionLayout(){
         const main = document.querySelector('main.main-content');
         if(!main) return;
-        const misplaced = Array.from(document.querySelectorAll('body > section.content-section'));
-        if(!misplaced.length) return;
-        misplaced.forEach(sec => main.appendChild(sec));
+        const sections = Array.from(document.querySelectorAll('.content-section'));
+        sections.forEach(sec => {
+            if (sec.parentElement !== main) main.appendChild(sec);
+        });
+    }
+
+    function markResponsiveRows(){
+        const timerBox = document.getElementById('focus-stopwatch')?.closest('.timer-box');
+        const homeHeroRow = timerBox?.parentElement;
+        if(homeHeroRow) homeHeroRow.classList.add('resp-home-hero-row');
+        const sidePanel = timerBox?.nextElementSibling;
+        if(sidePanel) sidePanel.classList.add('focus-side-panel');
+
+        const checkinRate = document.getElementById('stat-checkin-rate');
+        const overviewStatsRow = checkinRate?.closest('.sub-box')?.parentElement;
+        if(overviewStatsRow) overviewStatsRow.classList.add('resp-overview-stats-row');
+
+        const statusInput = document.getElementById('input-daily-status');
+        const statusInputRow = statusInput?.parentElement;
+        if(statusInputRow) statusInputRow.classList.add('resp-status-input-row');
+
+        const todoLong = document.getElementById('input-todo-long');
+        const todoLongRow = todoLong?.parentElement;
+        if(todoLongRow) todoLongRow.classList.add('resp-todo-row');
+
+        const todoToday = document.getElementById('input-todo-today');
+        const todoTodayRow = todoToday?.parentElement;
+        if(todoTodayRow) todoTodayRow.classList.add('resp-todo-row');
+
+        const wordInput = document.getElementById('input-words');
+        const wordRow = wordInput?.parentElement;
+        if(wordRow) wordRow.classList.add('resp-word-row');
     }
 
     function syncTimerPulse(){
@@ -2534,10 +2800,10 @@ function importData(e) {
         return false;
     };
 
-    function rebindSidebarNav(){
+    function bindSidebarNav(){
         document.querySelectorAll('.nav-item[data-section]').forEach(el => {
-            if(el.dataset.layoutFixedBound === '1') return;
-            el.dataset.layoutFixedBound = '1';
+            if(el.dataset.responsiveBound === '1') return;
+            el.dataset.responsiveBound = '1';
             el.addEventListener('click', function(ev){
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -2548,17 +2814,19 @@ function importData(e) {
 
     function boot(){
         normalizeSectionLayout();
-        rebindSidebarNav();
+        markResponsiveRows();
+        bindSidebarNav();
         const activeId = document.querySelector('.nav-item.active[data-section]')?.dataset.section || 'home';
         activateSectionFixed(activeId);
     }
 
     if(document.readyState === 'loading'){
         document.addEventListener('DOMContentLoaded', boot);
-    }else{
+    } else {
         boot();
     }
     window.addEventListener('load', boot);
+    window.addEventListener('resize', markResponsiveRows);
     setInterval(syncTimerPulse, 800);
 })();
 </script>
