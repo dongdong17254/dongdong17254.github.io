@@ -393,6 +393,46 @@
             .focus-field-row { flex-direction: column; align-items: stretch; }
         }
     </style>
+
+<style id="emperor-final-polish">
+.card{
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    border-color: #EEF4F3;
+}
+.card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.05);
+    border-color: rgba(108,141,135,0.26);
+}
+.card{ margin-bottom: 24px; }
+.card .sub-box{ margin-bottom: 14px; }
+.section-title{ font-size: 19px; margin-bottom: 20px; }
+.sub-box h4{ font-size: 15px !important; }
+.header-main::after{
+    content:"";
+    display:block;
+    width:220px;
+    max-width:42%;
+    height:1px;
+    margin:14px auto 0;
+    background: linear-gradient(90deg, transparent, rgba(108,141,135,0.38), transparent);
+}
+.progress-bar-bg, .dist-bar{
+    height: 10px !important;
+    border-radius: 999px !important;
+}
+.progress-bar-fill, .dist-bar-fill{
+    background: linear-gradient(90deg, #A8C2BB, #6C8D87) !important;
+}
+.time-display.running-pulse{
+    animation: emperorPulse 1.8s ease-in-out infinite;
+}
+@keyframes emperorPulse{
+    0%,100%{ transform: scale(1); opacity: 1; }
+    50%{ transform: scale(1.015); opacity: .92; }
+}
+</style>
+
 </head>
 <body>
 
@@ -419,21 +459,19 @@
             <div id="global-search-results" class="search-results search-results-popover"></div>
         </div>
         </div>
-    </div>
 </div>
-
 <div class="layout">
     <aside class="sidebar">
-        <div class="nav-item active" data-section="home" onclick="switchTab(event, \'home\')"><span class="nav-icon">👑</span> 帝王总览</div>
-        <div class="nav-item" data-section="literature" onclick="switchTab(event, \'literature\')"><span class="nav-icon">📖</span> 文献指南</div>
-        <div class="nav-item" data-section="learning" onclick="switchTab(event, \'learning\')"><span class="nav-icon">💡</span> 学习笔记</div>
-        <div class="nav-item" data-section="annual" onclick="switchTab(event, \'annual\')"><span class="nav-icon">🎯</span> 年计划</div>
-        <div class="nav-item" data-section="life" onclick="switchTab(event, \'life\')"><span class="nav-icon">🍱</span> 生活碎片</div>
-        <div class="nav-item" data-section="reading" onclick="switchTab(event, \'reading\')"><span class="nav-icon">📚</span> 阅读指南</div>
-        <div class="nav-item" data-section="movie" onclick="switchTab(event, \'movie\')"><span class="nav-icon">🎬</span> 观影指南</div>
-        <div class="nav-item" data-section="blog" onclick="switchTab(event, \'blog\')"><span class="nav-icon">🎧</span> 播客指南</div>
-        <div class="nav-item" data-section="quotes" onclick="switchTab(event, \'quotes\')"><span class="nav-icon">✒️</span> 抄点好句</div>
-        <div class="nav-item" data-section="ideas" onclick="switchTab(event, \'ideas\')"><span class="nav-icon">⚡</span> 闪念归档</div>
+        <div class="nav-item active" data-section="home" onclick="switchTab(event, 'home')"><span class="nav-icon">👑</span> 帝王总览</div>
+        <div class="nav-item" data-section="literature" onclick="switchTab(event, 'literature')"><span class="nav-icon">📖</span> 文献指南</div>
+        <div class="nav-item" data-section="learning" onclick="switchTab(event, 'learning')"><span class="nav-icon">💡</span> 学习笔记</div>
+        <div class="nav-item" data-section="annual" onclick="switchTab(event, 'annual')"><span class="nav-icon">🎯</span> 年计划</div>
+        <div class="nav-item" data-section="life" onclick="switchTab(event, 'life')"><span class="nav-icon">🍱</span> 生活碎片</div>
+        <div class="nav-item" data-section="reading" onclick="switchTab(event, 'reading')"><span class="nav-icon">📚</span> 阅读指南</div>
+        <div class="nav-item" data-section="movie" onclick="switchTab(event, 'movie')"><span class="nav-icon">🎬</span> 观影指南</div>
+        <div class="nav-item" data-section="blog" onclick="switchTab(event, 'blog')"><span class="nav-icon">🎧</span> 播客指南</div>
+        <div class="nav-item" data-section="quotes" onclick="switchTab(event, 'quotes')"><span class="nav-icon">✒️</span> 抄点好句</div>
+        <div class="nav-item" data-section="ideas" onclick="switchTab(event, 'ideas')"><span class="nav-icon">⚡</span> 闪念归档</div>
 
         <div style="border-top: 1px dashed var(--border-color); margin: 20px 0 10px 0; padding-top: 15px;">
             <div class="nav-item" onclick="exportData()" style="color: var(--primary-color); font-size: 13px;"><span class="nav-icon">💾</span> 导出备份</div>
@@ -2452,6 +2490,54 @@ function importData(e) {
     rd.onload = async ev => { try { if (confirm("确定要覆盖当前所有数据吗？此操作不可逆。")) { revokeCloudImageObjectUrls(); db = { ...db, ...JSON.parse(ev.target.result) }; ensureDbCompatibility(); await persist(); renderAll(); updateCloudUI(); alert("恢复成功！"); } } catch(err) { alert("格式错误，请检查文件是否为有效的 JSON 备份"); } };
     rd.readAsText(f); e.target.value = '';
 }
+</script>
+
+
+<script id="emperor-final-fix-script">
+(function(){
+    function safeActivate(id){
+        try{
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item[data-section]').forEach(el => el.classList.remove('active'));
+            const target = document.getElementById('section-' + id);
+            if (target) target.classList.add('active');
+            const nav = document.querySelector('.nav-item[data-section="' + id + '"]');
+            if (nav) nav.classList.add('active');
+            if (id === 'home') {
+                if (typeof window.drawTrendChart === 'function') try{ window.drawTrendChart(); } catch(e){}
+                if (typeof window.renderFocusPieCharts === 'function') try{ window.renderFocusPieCharts(); } catch(e){}
+            }
+        }catch(e){}
+    }
+
+    function rebindSidebarNav(){
+        document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+            if (el.dataset.repairBound === '1') return;
+            el.dataset.repairBound = '1';
+            el.addEventListener('click', function(ev){
+                ev.preventDefault();
+                ev.stopPropagation();
+                safeActivate(el.dataset.section);
+            }, true);
+        });
+    }
+
+    function syncTimerPulse(){
+        const timer = document.getElementById('focus-stopwatch');
+        if (!timer) return;
+        const running = !!(window.db && window.db.activeTimer && window.db.activeTimer.running);
+        timer.classList.toggle('running-pulse', running);
+    }
+
+    function boot(){
+        rebindSidebarNav();
+        syncTimerPulse();
+    }
+
+    window.addEventListener('load', boot);
+    document.addEventListener('click', function(){ setTimeout(boot, 0); }, true);
+    setInterval(syncTimerPulse, 800);
+})();
 </script>
 
 </body>
