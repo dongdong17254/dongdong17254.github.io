@@ -25,11 +25,22 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-main); padding: 20px; display: flex; flex-direction: column; align-items: center; line-height: 1.6;}
 
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { width: 100%; max-width: 1320px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+        .header-main { flex: 1; text-align: center; min-width: 0; }
         .header h1 { font-size: 28px; font-weight: bold; color: var(--title-color); margin-bottom: 6px; letter-spacing: 1px; }
         .quote-container { color: var(--text-muted); font-size: 14px; margin-bottom: 6px; display: flex; justify-content: center; align-items: center; gap: 8px; font-style: italic; }
         .edit-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 14px; transition: 0.3s; }
         .edit-btn:hover { color: var(--primary-color); }
+        .header-tools { width: 360px; flex-shrink: 0; display: flex; justify-content: flex-end; }
+        .header-search { position: relative; width: 100%; max-width: 360px; }
+        .header-search-bar { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.9); border: 1px solid var(--border-color); border-radius: 14px; padding: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .header-search-input-wrap { position: relative; flex: 1; }
+        .header-search-input-wrap .search-input-icon { left: 12px; font-size: 13px; }
+        .header-search-input { min-height: 38px; padding: 8px 12px 8px 34px; font-size: 13px; margin-bottom: 0; background: #fff; }
+        .header-search-btn { min-width: 54px; padding: 9px 12px; border-radius: 10px; font-size: 12px; }
+        .search-results-popover { position: absolute; top: calc(100% + 8px); right: 0; width: min(560px, 92vw); max-height: 62vh; overflow: auto; z-index: 30; background: rgba(255,255,255,0.98); border: 1px solid var(--border-color); border-radius: 16px; padding: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.12); display: none; }
+        .search-results-popover.active { display: grid; }
+        .search-hint-line { font-size: 11px; color: var(--text-muted); margin-top: 6px; text-align: right; }
 
         .layout { display: flex; width: 100%; max-width: 1320px; gap: 18px; align-items: flex-start; position: relative; }
 
@@ -47,27 +58,41 @@
         .cloud-btn.primary { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
         .cloud-btn.primary:hover { opacity: 0.95; color: #fff; }
         .cloud-note { font-size: 11px; color: var(--text-muted); line-height: 1.5; margin-top: 10px; }
-        .cloud-pill { display: inline-block; max-width: 136px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 8px; border-radius: 999px; background: rgba(108,141,135,0.08); color: #667f7a; font-size: 11.5px; text-align: right; }
+        .cloud-pill { display: inline-block; max-width: 112px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 2px 7px; border-radius: 999px; background: rgba(108,141,135,0.08); color: #667f7a; font-size: 11px; text-align: right; }
         .autosave-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #cfd8d6; margin-right: 6px; vertical-align: middle; }
         .autosave-dot.on { background: var(--primary-color); box-shadow: 0 0 0 3px rgba(108,141,135,0.12); }
-        .search-card { padding: 18px 22px; }
-        .search-toolbar { display: flex; gap: 10px; align-items: center; }
+        .search-toolbar { display: flex; gap: 8px; align-items: center; }
         .search-input-wrap { position: relative; flex: 1; }
         .search-input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 14px; pointer-events: none; }
         .search-input { padding-left: 42px; margin-bottom: 0; background: #fff; }
-        .search-results { margin-top: 14px; display: grid; gap: 10px; }
-        .search-result-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 12px 14px; background: #fff; cursor: pointer; transition: 0.2s; }
-        .search-result-item:hover { border-color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03); transform: translateY(-1px); }
-        .search-result-top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; align-items: center; }
-        .search-result-title { font-size: 14px; font-weight: bold; color: var(--title-color); }
-        .search-result-badge { font-size: 11px; color: var(--primary-color); background: var(--sidebar-active); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
-        .search-result-snippet { font-size: 13px; color: #566; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
-        .search-result-meta { margin-top: 8px; font-size: 11px; color: var(--text-muted); }
-        .search-empty { font-size: 13px; color: var(--text-muted); padding: 4px 2px; }
-        .search-kbd { font-size: 11px; color: var(--text-muted); padding: 2px 7px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; }
+        .search-results { margin-top: 0; display: grid; gap: 8px; }
+        .search-result-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 11px 12px; background: #fff; cursor: pointer; transition: 0.2s; }
+        .search-result-item:hover { border-color: var(--accent-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); transform: translateY(-1px); }
+        .search-result-top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 5px; align-items: center; }
+        .search-result-title { font-size: 13px; font-weight: bold; color: var(--title-color); }
+        .search-result-badge { font-size: 10px; color: var(--primary-color); background: var(--sidebar-active); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+        .search-result-snippet { font-size: 12px; color: #566; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+        .search-result-meta { margin-top: 6px; font-size: 10.5px; color: var(--text-muted); }
+        .search-empty { font-size: 12px; color: var(--text-muted); padding: 4px 2px; }
+        .search-kbd { font-size: 10px; color: var(--text-muted); padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; }
+        .search-highlight { outline: 2px solid rgba(108,141,135,0.45); box-shadow: 0 0 0 4px rgba(108,141,135,0.12); transition: outline-color 0.2s ease; }
         .focus-time-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
         .focus-duration { font-weight: bold; font-size: 15px; color: var(--title-color); min-width: 74px; text-align: right; }
 
+        .compact-section-title { margin-bottom: 12px; }
+        .compact-stack { display: grid; gap: 12px; }
+        .stats-subtitle { font-size: 14px; font-weight: bold; color: var(--title-color); margin: 18px 0 12px; }
+        .pie-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 14px; }
+        .pie-card { background: #FAFCFC; border: 1px solid var(--border-color); border-radius: 16px; padding: 14px; }
+        .pie-title { font-size: 13px; font-weight: bold; color: var(--title-color); margin-bottom: 10px; }
+        .pie-canvas-wrap { display: flex; justify-content: center; align-items: center; min-height: 170px; }
+        .pie-legend { margin-top: 10px; display: grid; gap: 7px; }
+        .pie-legend-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-main); }
+        .pie-legend-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+        .pie-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .pie-topic { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pie-minutes { color: var(--text-muted); flex-shrink: 0; }
+        .pie-empty { text-align: center; color: var(--text-muted); font-size: 12px; padding: 20px 8px; }
 
         .main-content { flex-grow: 1; min-width: 0; position: relative; z-index: 1; }
         .content-section { display: none; animation: fadeIn 0.3s ease; }
@@ -181,7 +206,8 @@
         .calendar-date { font-size: 14px; color: var(--text-muted); margin-bottom: 8px; text-align: left; padding-left: 4px; }
         .calendar-task { font-size: 11px; background: #FFF4E5; color: #D37A20; padding: 4px 6px; margin-bottom: 4px; border-radius: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .record-item { background: #fff; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; position: relative; transition: 0.2s;}
+        .record-item { background: #fff; border: 1px solid var(--border-color); border-left: 4px solid var(--accent-color); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; position: relative; transition: 0.2s;}
+        .compact-record { padding: 11px 14px; }
         .record-item:hover { border-color: var(--primary-color); box-shadow: 0 4px 12px rgba(0,0,0,0.03);}
         .record-item:hover .action-group { opacity: 1; }
         .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
@@ -255,7 +281,9 @@
         #section-reading #input-reading-title, #section-reading #input-reading-desc,
         #section-movie #input-movie-title, #section-movie #input-movie-desc,
         #section-blog #input-blog-title, #section-blog #input-blog-desc,
-        #input-cns-full, #list-cns-full .record-content, #list-cns .record-content {
+        #section-quotes #input-memorable-quote, #list-memorableQuotes .record-content,
+        #input-cns-full, #list-cns-full .record-content, #list-cns .record-content,
+        .modal-input-group .quote-font {
             font-family: "STZhongsong", "华文中宋", "Songti SC", "SimSun", serif;
         }
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
@@ -271,26 +299,47 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #D0DCDA; border-radius: 6px; }
 
-        @media (max-width: 1024px) { .grid-split { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 1024px) { .grid-split { grid-template-columns: 1fr; } .grid-3, .pie-grid { grid-template-columns: 1fr 1fr; } .header { flex-direction: column; align-items: stretch; } .header-tools { width: 100%; justify-content: center; } .header-search { max-width: none; } }
         @media (max-width: 768px) {
             body { padding: 10px; } .layout { flex-direction: column; }
             .sidebar { width: 100%; position: static; display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; }
             .nav-item { flex: 1; min-width: 70px; text-align: center; font-size: 12px; padding: 8px 4px; }
             .nav-icon { margin-right: 4px; }
-            .grid-split, .grid-split-half, .grid-3 { grid-template-columns: 1fr; }
+            .grid-split, .grid-split-half, .grid-3, .pie-grid { grid-template-columns: 1fr; }
             .time-display { font-size: 38px; } .status-widget { display: none; }
+            .header-search-bar { flex-wrap: wrap; }
+            .header-search-btn { flex: 1; }
+            .search-results-popover { width: 100%; }
         }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1>越冬皇帝的进步日记</h1>
-    <div class="quote-container">
-        <span id="quote-text">光荣在于平淡，艰巨在于漫长</span>
-        <button class="edit-btn" onclick="editQuote()">✎</button>
+    <div class="header-main">
+        <h1>越冬皇帝的进步日记</h1>
+        <div class="quote-container">
+            <span id="quote-text">光荣在于平淡，艰巨在于漫长</span>
+            <button class="edit-btn" onclick="editQuote()">✎</button>
+        </div>
+        <p id="current-date" style="font-size: 13px; color: var(--text-muted);"></p>
     </div>
-    <p id="current-date" style="font-size: 13px; color: var(--text-muted);"></p>
+    <div class="header-tools">
+        <div class="header-search">
+            <div class="header-search-bar">
+                <div class="header-search-input-wrap">
+                    <span class="search-input-icon">🔍</span>
+                    <input id="global-search-input" class="custom-input header-search-input" type="text" placeholder="搜索文献、笔记、任务、阅读/观影/播客、闪念…">
+                </div>
+                <button class="btn header-search-btn" type="button" onclick="performGlobalSearch()">搜索</button>
+                <button class="btn btn-outline header-search-btn" type="button" onclick="clearGlobalSearch()">清空</button>
+            </div>
+            <div class="search-hint-line">Ctrl / ⌘ + K</div>
+            <div id="global-search-results" class="search-results search-results-popover">
+                <div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="layout">
@@ -336,20 +385,6 @@
 
 
     <main class="main-content">
-        <div class="card search-card">
-            <div class="section-title"><span>🔎 全站搜索</span><span class="search-kbd">Ctrl / ⌘ + K</span></div>
-            <div class="search-toolbar">
-                <div class="search-input-wrap">
-                    <span class="search-input-icon">🔍</span>
-                    <input id="global-search-input" class="custom-input search-input" type="text" placeholder="搜索文献、学习笔记、任务、专注记录、阅读/观影/播客、闪念等...">
-                </div>
-                <button class="btn" type="button" onclick="performGlobalSearch()">搜索</button>
-                <button class="btn btn-outline" type="button" onclick="clearGlobalSearch()">清空</button>
-            </div>
-            <div id="global-search-results" class="search-results">
-                <div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>
-            </div>
-        </div>
 
         <!-- 首页总览 -->
         <section id="section-home" class="content-section active">
@@ -478,8 +513,26 @@
                         <div class="stat-box-title">📈 本年</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-y-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-y-time">0 min</span></div>
                     </div>
                 </div>
-                <div style="font-size: 14px; font-weight: bold; color: var(--title-color); margin-top: 20px; margin-bottom: 15px;">📉 近7天批阅趋势</div>
+                <div class="stats-subtitle">📉 近7天批阅趋势</div>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
+                <div class="stats-subtitle">🧭 理政时间分布</div>
+                <div class="pie-grid">
+                    <div class="pie-card">
+                        <div class="pie-title">今日时间分布</div>
+                        <div class="pie-canvas-wrap"><canvas id="focusPieDay" width="220" height="220"></canvas></div>
+                        <div id="focusPieDayLegend" class="pie-legend"></div>
+                    </div>
+                    <div class="pie-card">
+                        <div class="pie-title">本月时间分布</div>
+                        <div class="pie-canvas-wrap"><canvas id="focusPieMonth" width="220" height="220"></canvas></div>
+                        <div id="focusPieMonthLegend" class="pie-legend"></div>
+                    </div>
+                    <div class="pie-card">
+                        <div class="pie-title">本年时间分布</div>
+                        <div class="pie-canvas-wrap"><canvas id="focusPieYear" width="220" height="220"></canvas></div>
+                        <div id="focusPieYearLegend" class="pie-legend"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="card">
@@ -1195,7 +1248,7 @@ function activateSection(id) {
     if (target) target.classList.add('active');
     const nav = document.querySelector(`.nav-item[data-section="${id}"]`);
     if (nav) nav.classList.add('active');
-    if (id === 'home' && typeof drawTrendChart === 'function') drawTrendChart();
+    if (id === 'home') { if (typeof drawTrendChart === 'function') drawTrendChart(); if (typeof renderFocusPieCharts === 'function') renderFocusPieCharts(); }
 }
 function switchTab(e, id) {
     activateSection(id);
@@ -1219,9 +1272,11 @@ function openModal(title, fields, callback) {
         if (f.type === 'textarea') {
             input = document.createElement('textarea');
             input.className = f.isCode ? 'custom-textarea code-textarea' : 'custom-textarea';
+            if (f.className) input.classList.add(...String(f.className).split(/\s+/).filter(Boolean));
             input.value = f.value || '';
         } else if (f.type === 'select') {
             input = document.createElement('select'); input.className = 'custom-input';
+            if (f.className) input.classList.add(...String(f.className).split(/\s+/).filter(Boolean));
             (f.options || []).forEach(o => {
                 const opt = document.createElement('option'); opt.value = o.value; opt.textContent = o.text;
                 if (String(o.value) === String(f.value)) opt.selected = true;
@@ -1229,7 +1284,7 @@ function openModal(title, fields, callback) {
             });
         } else {
             input = document.createElement('input'); input.type = f.type || 'text';
-            input.className = 'custom-input'; input.value = f.value !== undefined ? f.value : '';
+            input.className = 'custom-input'; if (f.className) input.classList.add(...String(f.className).split(/\s+/).filter(Boolean)); input.value = f.value !== undefined ? f.value : '';
         }
         input.id = `modal-inp-${i}`; group.appendChild(input); body.appendChild(group);
     });
@@ -1279,7 +1334,7 @@ function renderLiterature() {
     if (!items.length) { list.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">暂无文献记录</div>'; return; }
 
     items.forEach(item => {
-        const card = document.createElement('div'); card.className = 'lit-card';
+        const card = document.createElement('div'); card.className = 'lit-card'; card.dataset.searchKey = `literature-${item.idKey}`;
         const tagHtml = (item.tags||[]).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
         const detailsId = `lit-det-${item.idKey}`;
         card.innerHTML = `
@@ -1353,7 +1408,7 @@ async function saveLearning() {
 function renderLearning() {
     const list = document.getElementById('list-learning'); list.innerHTML = '';
     [...db.learning].reverse().forEach(item => {
-        const card = document.createElement('div'); card.className = 'learn-card';
+        const card = document.createElement('div'); card.className = 'learn-card'; card.dataset.searchKey = `learning-${item.idKey}`;
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                 <div>
@@ -1529,7 +1584,7 @@ function renderMediaCards(type) {
     const ct = document.getElementById(`list-${type}`); ct.innerHTML = '';
     [...(db[type]||[])].reverse().forEach((item, i) => {
         const rIdx = db[type].length - 1 - i;
-        const card = document.createElement('div'); card.className = 'media-card';
+        const card = document.createElement('div'); card.className = 'media-card'; card.dataset.searchKey = `${type}-${item.idKey}`;
         const badge = document.createElement('div'); badge.className = 'media-rating-badge';
         badge.textContent = `⭐ ${item.rating || '-'} / 10`; card.appendChild(badge);
         if (item.img || item.imgPath) {
@@ -1602,36 +1657,45 @@ function makeSearchSnippet(text, query) {
 }
 function buildGlobalSearchItems() {
     const items = [];
-    (db.literature || []).forEach(item => items.push({ section: 'literature', badge: '文献', title: item.id || item.title || '未命名文献', text: [item.journal, item.tags, item.params, item.desc].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
-    (db.learning || []).forEach(item => items.push({ section: 'learning', badge: '笔记', title: item.title || '未命名笔记', text: [item.tags, item.desc, item.code].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
-    (db.reading || []).forEach(item => items.push({ section: 'reading', badge: '阅读', title: item.title || '未命名阅读', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
-    (db.movie || []).forEach(item => items.push({ section: 'movie', badge: '观影', title: item.title || '未命名观影', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
-    (db.blog || []).forEach(item => items.push({ section: 'blog', badge: '播客', title: item.title || '未命名播客', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
-    (db.memorableQuotes || []).forEach(item => items.push({ section: 'quotes', badge: '好句', title: '抄点好句', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
-    (db.cns || []).forEach(item => items.push({ section: 'ideas', badge: '闪念', title: '闪念归档', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
-    (db.todos || []).forEach(item => items.push({ section: 'home', badge: item.type === 'today' ? '今日任务' : '近期任务', title: item.text || '任务', text: [item.ddl ? `DDL ${item.ddl}` : '', item.status || ''].join(' '), time: item.dateCreated || '', sortTime: item.dateCreated || '' }));
-    (db.focusRecords || []).forEach(item => items.push({ section: 'home', badge: '理政时间', title: item.topic || '未命名专注', text: focusRangeText(item), time: item.endAt || item.date || '', sortTime: item.endAt || item.date || '' }));
-    (db.statusRecords || []).forEach(item => items.push({ section: 'home', badge: '状态打卡', title: item.period || '状态记录', text: item.text || '', time: item.fullTime || item.time || '', sortTime: item.time || '' }));
+    (db.literature || []).forEach(item => items.push({ key: `literature-${item.idKey}`, section: 'literature', badge: '文献', title: item.litId || item.id || item.title || '未命名文献', text: [item.journal, Array.isArray(item.tags) ? item.tags.join(' ') : item.tags, item.params, item.desc].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
+    (db.learning || []).forEach(item => items.push({ key: `learning-${item.idKey}`, section: 'learning', badge: '笔记', title: item.title || '未命名笔记', text: [item.tags, item.desc, item.code].filter(Boolean).join(' '), time: item.time || '', sortTime: item.time || '' }));
+    (db.reading || []).forEach(item => items.push({ key: `reading-${item.idKey}`, section: 'reading', badge: '阅读', title: item.title || '未命名阅读', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.movie || []).forEach(item => items.push({ key: `movie-${item.idKey}`, section: 'movie', badge: '观影', title: item.title || '未命名观影', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.blog || []).forEach(item => items.push({ key: `blog-${item.idKey}`, section: 'blog', badge: '播客', title: item.title || '未命名播客', text: item.desc || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.memorableQuotes || []).forEach(item => items.push({ key: `quotes-${item.idKey || item.time}`, section: 'quotes', badge: '好句', title: '抄点好句', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.cns || []).forEach(item => items.push({ key: `ideas-${item.idKey || item.time}`, section: 'ideas', badge: '闪念', title: '闪念归档', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
+    (db.todos || []).forEach(item => items.push({ key: `todo-${item.id}`, section: 'home', badge: item.type === 'today' ? '今日任务' : '近期任务', title: item.text || '任务', text: [item.ddl ? `DDL ${item.ddl}` : '', item.status || ''].join(' '), time: item.dateCreated || '', sortTime: item.dateCreated || '' }));
+    (db.focusRecords || []).forEach(item => items.push({ key: `focus-${item.id}`, section: 'home', badge: '理政时间', title: item.topic || '未命名专注', text: focusRangeText(item), time: item.endAt || item.date || '', sortTime: item.endAt || item.date || '' }));
+    (db.statusRecords || []).forEach(item => items.push({ key: `status-${item.id}`, section: 'home', badge: '状态打卡', title: item.period || '状态记录', text: item.text || '', time: item.fullTime || item.time || '', sortTime: item.time || '' }));
     return items;
+}
+function showSearchResultsBox() {
+    const box = document.getElementById('global-search-results');
+    if (box) box.classList.add('active');
+}
+function hideSearchResultsBox() {
+    const box = document.getElementById('global-search-results');
+    if (box) box.classList.remove('active');
 }
 function performGlobalSearch() {
     const input = document.getElementById('global-search-input');
     const resultBox = document.getElementById('global-search-results');
     if (!input || !resultBox) return;
     const query = input.value.trim();
+    showSearchResultsBox();
     if (!query) {
         resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
         return;
     }
     const q = query.toLowerCase();
     const hits = buildGlobalSearchItems().filter(item => (`${item.title} ${item.text} ${item.badge}`.toLowerCase().includes(q)))
-        .sort((a, b) => String(b.sortTime || '').localeCompare(String(a.sortTime || ''))).slice(0, 60);
+        .sort((a, b) => String(b.sortTime || '').localeCompare(String(a.sortTime || ''))).slice(0, 40);
     if (!hits.length) {
         resultBox.innerHTML = `<div class="search-empty">没有找到与“${escapeHtml(query)}”相关的内容。</div>`;
         return;
     }
     resultBox.innerHTML = hits.map(item => `
-        <div class="search-result-item" onclick="openSearchResult('${item.section}')">
+        <div class="search-result-item" onclick="openSearchResult('${item.section}', '${item.key}')">
             <div class="search-result-top">
                 <div class="search-result-title">${escapeHtml(item.title)}</div>
                 <span class="search-result-badge">${escapeHtml(item.badge)}</span>
@@ -1642,20 +1706,37 @@ function performGlobalSearch() {
 }
 function clearGlobalSearch() {
     const input = document.getElementById('global-search-input');
+    const resultBox = document.getElementById('global-search-results');
     if (input) input.value = '';
-    performGlobalSearch();
+    if (resultBox) resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
+    hideSearchResultsBox();
 }
-function openSearchResult(section) {
+function highlightSearchTarget(key) {
+    if (!key) return;
+    const target = document.querySelector(`[data-search-key="${CSS.escape(key)}"]`);
+    if (!target) return;
+    target.classList.add('search-highlight');
+    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => target.classList.remove('search-highlight'), 2200);
+}
+function openSearchResult(section, key) {
     activateSection(section);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    hideSearchResultsBox();
+    setTimeout(() => highlightSearchTarget(key), 140);
 }
 let globalSearchDebounce = null;
 function bindGlobalSearchEvents() {
     const input = document.getElementById('global-search-input');
-    if (!input) return;
+    const resultBox = document.getElementById('global-search-results');
+    const searchWrap = document.querySelector('.header-search');
+    if (!input || !resultBox || !searchWrap) return;
+    input.addEventListener('focus', () => {
+        showSearchResultsBox();
+        if (!input.value.trim()) resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
+    });
     input.addEventListener('input', () => {
         clearTimeout(globalSearchDebounce);
-        globalSearchDebounce = setTimeout(performGlobalSearch, 180);
+        globalSearchDebounce = setTimeout(performGlobalSearch, 160);
     });
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); performGlobalSearch(); } });
     document.addEventListener('keydown', (e) => {
@@ -1663,7 +1744,12 @@ function bindGlobalSearchEvents() {
             e.preventDefault();
             input.focus();
             input.select();
+            showSearchResultsBox();
         }
+        if (e.key === 'Escape') hideSearchResultsBox();
+    });
+    document.addEventListener('click', (e) => {
+        if (!searchWrap.contains(e.target)) hideSearchResultsBox();
     });
 }
 
@@ -1777,7 +1863,7 @@ function renderFocusToday() {
     const recs = (db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey);
     if (!recs.length) { ul.innerHTML = '<li style="font-size:13px; color:var(--text-muted); text-align:center; padding: 18px 0;">暂无记录，快去开启专注吧</li>'; return; }
     [...recs].reverse().forEach(r => {
-        ul.innerHTML += `<li class="focus-item">
+        ul.innerHTML += `<li class="focus-item" data-search-key="focus-${r.id}">
             <div style="flex-grow: 1; min-width: 0;">
                 <div style="font-size:15px;font-weight:bold;color:var(--title-color);">${r.topic}</div>
                 <div class="focus-time-meta">${focusRangeText(r)}</div>
@@ -1863,7 +1949,7 @@ function renderTodos() {
     const prioMap = { 1: {text: '紧急', class: 'prio-tag-1'}, 2: {text: '重要', class: 'prio-tag-2'}, 3: {text: '普通', class: 'prio-tag-3'} };
     const makeTodoItem = (t) => {
         const isD = t.status === 'done'; const prioInfo = prioMap[t.priority || 3];
-        return `<li class="todo-item">
+        return `<li class="todo-item" data-search-key="todo-${t.id}">
             <input type="checkbox" class="todo-checkbox" ${isD ? 'checked' : ''} onchange="toggleTodo(${t.id})">
             <div class="todo-content"><span class="todo-text ${isD ? 'done' : ''}" title="${escapeHtml(t.text)}"><span class="prio-tag ${prioInfo.class}">${prioInfo.text}</span> ${escapeHtml(t.text)}</span>
             ${t.type === 'long' ? `<span class="todo-meta" style="color:${!isD && Math.ceil((new Date(t.ddl) - new Date()) / 86400000) <= 3 ? 'var(--danger-color)' : 'var(--text-muted)'}">DDL: ${t.ddl}</span>` : ''}</div>
@@ -1901,7 +1987,7 @@ function renderIdeasList() {
         [...(db.cns || [])].reverse().forEach((item, i) => {
             const rIdx = db.cns.length - 1 - i;
             const imgHtml = (item.img || item.imgPath) ? `<img id="${prefix}-cns-img-${item.idKey}" style="max-width:100%;max-height:300px;border-radius:8px;margin-top:12px;border:1px solid var(--border-color);object-fit:contain;">` : '';
-            ul.innerHTML += `<li class="record-item" style="padding:15px;"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editCNSRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('cns', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content" style="${item.val ? 'margin-bottom: 5px;' : ''}">${item.val||''}</div>${imgHtml}</li>`;
+            ul.innerHTML += `<li class="record-item" data-search-key="ideas-${item.idKey || item.time}" style="padding:15px;"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editCNSRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('cns', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content" style="${item.val ? 'margin-bottom: 5px;' : ''}">${item.val||''}</div>${imgHtml}</li>`;
         });
         [...(db.cns || [])].reverse().forEach(item => {
             if (item.img || item.imgPath) {
@@ -1917,10 +2003,10 @@ function renderQuotesList() {
     const ul = document.getElementById('list-memorableQuotes'); ul.innerHTML = '';
     [...(db.memorableQuotes||[])].reverse().forEach((item, i) => {
         const rIdx = db.memorableQuotes.length - 1 - i;
-        ul.innerHTML += `<li class="record-item"><div class="record-header"><span class="record-time">摘录于 ${item.time.split(' ')[0]}</span><div class="action-group"><span class="text-btn edit" onclick="editQuoteRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('memorableQuotes', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content">${item.val}</div></li>`;
+        ul.innerHTML += `<li class="record-item" data-search-key="quotes-${item.idKey || item.time}"><div class="record-header"><span class="record-time">摘录于 ${item.time.split(' ')[0]}</span><div class="action-group"><span class="text-btn edit" onclick="editQuoteRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('memorableQuotes', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content">${item.val}</div></li>`;
     });
 }
-function editQuoteRecord(i) { openModal("修改金句", [{label: "摘录内容", value: db.memorableQuotes[i].val, type: "textarea"}], (vals) => { if (vals[0] && vals[0].trim()) { db.memorableQuotes[i].val = vals[0].trim(); persist(); renderQuotesList(); } }); }
+function editQuoteRecord(i) { openModal("修改金句", [{label: "摘录内容", value: db.memorableQuotes[i].val, type: "textarea", className: "quote-font"}], (vals) => { if (vals[0] && vals[0].trim()) { db.memorableQuotes[i].val = vals[0].trim(); persist(); renderQuotesList(); } }); }
 
 // 年计划、日历、统计
 function toggleAnnualCustom(sel) { document.getElementById('annual-custom-title').style.display = sel.value === 'other' ? 'block' : 'none'; }
@@ -1980,6 +2066,80 @@ function renderUnifiedLifeCalendar() {
         grid.innerHTML += `<div class="unified-cal-cell${(hasSport||hasFood||hasDrink) ? ' has-record' : ''}">${d}<div style="display:flex;justify-content:center;gap:2px;height:15px;margin-top:4px;font-size:11px;">${icons}</div></div>`;
     }
 }
+function collectFocusMinutesBy(period) {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const todayKey = getDateKey(now);
+    const bucket = {};
+    (db.focusRecords || []).forEach(r => {
+        if (!r.date) return;
+        const d = new Date(r.date);
+        if (Number.isNaN(d.getTime())) return;
+        const topic = (r.topic || '未命名事项').trim() || '未命名事项';
+        let include = false;
+        if (period === 'day') include = getDateKey(d) === todayKey;
+        else if (period === 'month') include = d.getFullYear() === year && d.getMonth() === month;
+        else if (period === 'year') include = d.getFullYear() === year;
+        if (!include) return;
+        bucket[topic] = (bucket[topic] || 0) + Math.max(1, Math.round((r.seconds || 0) / 60));
+    });
+    return bucket;
+}
+function drawPieCanvas(canvasId, legendId, minutesMap) {
+    const canvas = document.getElementById(canvasId);
+    const legend = document.getElementById(legendId);
+    if (!canvas || !legend) return;
+    const ctx = canvas.getContext('2d');
+    const data = Object.entries(minutesMap).sort((a, b) => b[1] - a[1]);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!data.length) {
+        legend.innerHTML = '<div class="pie-empty">暂无理政时间数据</div>';
+        ctx.fillStyle = '#dfe7e5';
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 68, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath();
+        ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
+        ctx.fill();
+        return;
+    }
+    const palette = ['#6C8D87','#83A09A','#D1B48C','#D48A88','#7FA3B8','#9B8BC1','#C5A66B','#86B6A6'];
+    const top = data.slice(0, 6);
+    const rest = data.slice(6);
+    if (rest.length) top.push(['其他', rest.reduce((s, x) => s + x[1], 0)]);
+    const total = top.reduce((s, x) => s + x[1], 0) || 1;
+    const cx = canvas.width / 2, cy = canvas.height / 2, radius = 70, inner = 40;
+    let start = -Math.PI / 2;
+    top.forEach(([label, minutes], idx) => {
+        const slice = (minutes / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, start, start + slice);
+        ctx.closePath();
+        ctx.fillStyle = palette[idx % palette.length];
+        ctx.fill();
+        start += slice;
+    });
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(cx, cy, inner, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#576';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(total + ' 分', cx, cy + 5);
+    legend.innerHTML = top.map(([label, minutes], idx) => {
+        const pct = Math.round((minutes / total) * 100);
+        return `<div class="pie-legend-item"><div class="pie-legend-left"><span class="pie-dot" style="background:${palette[idx % palette.length]}"></span><span class="pie-topic">${escapeHtml(label)}</span></div><span class="pie-minutes">${minutes} 分 · ${pct}%</span></div>`;
+    }).join('');
+}
+function renderFocusPieCharts() {
+    drawPieCanvas('focusPieDay', 'focusPieDayLegend', collectFocusMinutesBy('day'));
+    drawPieCanvas('focusPieMonth', 'focusPieMonthLegend', collectFocusMinutesBy('month'));
+    drawPieCanvas('focusPieYear', 'focusPieYearLegend', collectFocusMinutesBy('year'));
+}
 function renderStats() {
     const st = { w: {t:0,m:0}, m: {t:0,m:0}, y: {t:0,m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
     const weekStart = getMondayWeekStart(now);
@@ -1988,6 +2148,7 @@ function renderStats() {
     (db.focusRecords||[]).forEach(r => ['w','m','y'].forEach(p => { if (r.date && check(r.date, p)) st[p].m += Math.floor(r.seconds/60); }));
     ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = st[p].m + ' min'; });
     drawTrendChart();
+    renderFocusPieCharts();
 }
 function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
