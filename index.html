@@ -299,7 +299,85 @@
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #D0DCDA; border-radius: 6px; }
 
-        @media (max-width: 1024px) { .grid-split { grid-template-columns: 1fr; } .grid-3, .pie-grid { grid-template-columns: 1fr 1fr; } .header { flex-direction: column; align-items: stretch; } .header-tools { width: 100%; justify-content: center; } .header-search { max-width: none; } }
+
+        .header-search { position: relative; width: 100%; max-width: 300px; }
+        .header-search-bar { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.82); border: 1px solid var(--border-color); border-radius: 14px; padding: 6px; box-shadow: 0 3px 16px rgba(0,0,0,0.025); }
+        .header-search-input-wrap { position: relative; flex: 1; }
+        .header-search-input-wrap .search-input-icon { left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; }
+        .header-search-input { min-height: 34px; padding: 6px 10px 6px 32px; font-size: 12.5px; margin-bottom: 0; border-radius: 10px; }
+        .header-search-btn { min-width: 46px; padding: 8px 10px; border-radius: 10px; font-size: 11.5px; }
+        .search-results-popover { position: absolute; top: calc(100% + 8px); right: 0; width: min(440px, 92vw); max-height: 62vh; overflow: auto; z-index: 40; background: rgba(255,255,255,0.98); border: 1px solid var(--border-color); border-radius: 16px; padding: 10px; box-shadow: 0 16px 36px rgba(0,0,0,0.12); display: none; }
+        .search-results-popover.active { display: block; }
+        .search-results { margin-top: 0; display: grid; gap: 8px; }
+        .search-result-item { border: 1px solid var(--border-color); border-radius: 12px; padding: 10px 12px; background: #fff; cursor: pointer; transition: 0.18s; }
+        .search-result-item:hover { border-color: var(--accent-color); box-shadow: 0 6px 14px rgba(0,0,0,0.05); transform: translateY(-1px); }
+        .search-result-top { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 4px; align-items: center; }
+        .search-result-title { font-size: 12.5px; font-weight: 700; color: var(--title-color); }
+        .search-result-badge { font-size: 10px; color: var(--primary-color); background: var(--sidebar-active); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+        .search-result-snippet { font-size: 11.5px; color: #566; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+        .search-result-meta { margin-top: 6px; font-size: 10.5px; color: var(--text-muted); }
+        .search-empty { font-size: 12px; color: var(--text-muted); padding: 4px 2px; }
+        .search-kbd { font-size: 10px; color: var(--text-muted); padding: 2px 6px; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; }
+        .search-highlight { outline: 2px solid rgba(108,141,135,0.45); box-shadow: 0 0 0 4px rgba(108,141,135,0.12); transition: outline-color 0.2s ease; }
+        .focus-time-meta { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; line-height: 1.35; }
+        .focus-duration { font-weight: 700; font-size: 14px; color: var(--title-color); min-width: 92px; text-align: right; }
+        .focus-control-panel { display: flex; flex-direction: column; gap: 10px; }
+        .focus-field-label { font-size: 12px; font-weight: 700; color: var(--title-color); margin-bottom: 2px; }
+        .focus-category-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .focus-category-chip { border: 1px solid var(--border-color); border-radius: 999px; padding: 6px 12px; font-size: 12px; background: #fff; color: var(--title-color); cursor: pointer; transition: 0.2s; }
+        .focus-category-chip.active { color: #fff; box-shadow: 0 6px 14px rgba(0,0,0,0.08); }
+        .focus-inline-actions, .focus-side-btns { display: flex; gap: 8px; justify-content: flex-end; }
+        .focus-field-row { display: flex; gap: 10px; align-items: flex-end; }
+        .mini-chip-btn { border: 1px solid var(--border-color); background: #fff; color: var(--title-color); border-radius: 10px; padding: 7px 10px; font-size: 11.5px; cursor: pointer; transition: 0.2s; }
+        .mini-chip-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
+        .mini-chip-btn.danger:hover { border-color: var(--danger-color); color: var(--danger-color); }
+        .shortcut-tags-compact { margin-top: 2px; }
+        .shortcut-item { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.04); background: #fff; color: var(--title-color); cursor: pointer; transition: 0.2s; font-size: 11.5px; }
+        .shortcut-item:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(0,0,0,0.06); }
+        .shortcut-item .shortcut-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .focus-title-line { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .focus-cat-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; color: #fff; }
+        .focus-subtitle { font-size: 14px; font-weight: 700; color: var(--title-color); }
+        .editor-row-list { display: flex; flex-direction: column; gap: 10px; }
+        .editor-row { display: grid; grid-template-columns: 1.2fr 120px 120px 72px; gap: 10px; align-items: center; }
+        .editor-row.shortcut { grid-template-columns: 1fr 1.2fr 100px 72px; }
+        .editor-row .custom-input { margin-bottom: 0; }
+        .editor-row .inline-select { margin-bottom: 0; width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 13px; background: #fff; }
+        .editor-row .color-input { width: 100%; height: 40px; border: 1px solid var(--border-color); border-radius: 10px; background: #fff; padding: 4px; }
+        .editor-note { font-size: 11.5px; color: var(--text-muted); line-height: 1.55; }
+        .stats-time-summary { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 22px; }
+        .time-summary-card { background: #f8fbfa; border: 1px solid var(--border-color); border-radius: 14px; padding: 16px 18px; }
+        .time-summary-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+        .time-summary-value { font-size: 24px; font-weight: 800; color: var(--title-color); }
+        .distribution-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+        .distribution-card { background: #fbfcfc; border: 1px solid var(--border-color); border-radius: 18px; padding: 18px; }
+        .distribution-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; color: var(--title-color); font-weight: 700; }
+        .distribution-head small { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        .focus-donut-wrap { display: flex; justify-content: center; padding: 8px 0 16px; }
+        .focus-donut { width: 220px; height: 220px; border-radius: 50%; position: relative; background: #e7eded; }
+        .focus-donut::after { content: ''; position: absolute; inset: 28px; background: #fbfcfc; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.03); }
+        .focus-donut-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 0 36px; }
+        .focus-donut-total { font-size: 22px; font-weight: 800; color: var(--title-color); line-height: 1.15; }
+        .focus-donut-total span { font-size: 12px; font-weight: 500; color: var(--text-muted); }
+        .focus-breakdown { display: grid; gap: 12px; }
+        .dist-group { display: grid; gap: 8px; }
+        .dist-group-head { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; font-size: 12.5px; color: var(--title-color); }
+        .dist-group-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 700; }
+        .dist-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+        .dist-percent { color: var(--text-muted); font-size: 11px; }
+        .dist-duration { font-weight: 700; }
+        .dist-bar { width: 100%; height: 7px; border-radius: 999px; background: #edf1f0; overflow: hidden; }
+        .dist-bar-fill { height: 100%; border-radius: 999px; }
+        .dist-sub-list { display: grid; gap: 5px; padding-left: 18px; }
+        .dist-sub-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 11.5px; color: #566; }
+        .dist-sub-item span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dist-sub-item span:last-child { color: var(--text-main); font-weight: 600; flex-shrink: 0; }
+        .pie-empty { font-size: 12px; color: var(--text-muted); text-align: center; padding: 18px 0; }
+        #section-quotes #input-memorable-quote, #list-memorableQuotes .record-content, .quote-font {
+            font-family: "STZhongsong", "华文中宋", "Songti SC", "SimSun", serif;
+        }
+
+        @media (max-width: 1024px) { .grid-split { grid-template-columns: 1fr; } .grid-3, .distribution-grid { grid-template-columns: 1fr 1fr; } .header { flex-direction: column; align-items: stretch; } .header-tools { width: 100%; justify-content: center; } .header-search { max-width: none; } .stats-time-summary { grid-template-columns: 1fr; } }
         @media (max-width: 768px) {
             body { padding: 10px; } .layout { flex-direction: column; }
             .sidebar { width: 100%; position: static; display: flex; flex-wrap: wrap; gap: 4px; padding: 10px; }
@@ -307,9 +385,12 @@
             .nav-icon { margin-right: 4px; }
             .grid-split, .grid-split-half, .grid-3, .pie-grid { grid-template-columns: 1fr; }
             .time-display { font-size: 38px; } .status-widget { display: none; }
-            .header-search-bar { flex-wrap: wrap; }
-            .header-search-btn { flex: 1; }
-            .search-results-popover { width: 100%; }
+            .header-search-bar { flex-wrap: nowrap; }
+            .header-search-btn { flex: 0 0 auto; }
+            .search-results-popover { width: min(94vw, 420px); }
+            .editor-row, .editor-row.shortcut { grid-template-columns: 1fr; }
+            .distribution-grid { grid-template-columns: 1fr; }
+            .focus-field-row { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
@@ -329,15 +410,14 @@
             <div class="header-search-bar">
                 <div class="header-search-input-wrap">
                     <span class="search-input-icon">🔍</span>
-                    <input id="global-search-input" class="custom-input header-search-input" type="text" placeholder="搜索文献、笔记、任务、阅读/观影/播客、闪念…">
+                    <input id="global-search-input" class="custom-input header-search-input" type="text" placeholder="搜索">
                 </div>
                 <button class="btn header-search-btn" type="button" onclick="performGlobalSearch()">搜索</button>
                 <button class="btn btn-outline header-search-btn" type="button" onclick="clearGlobalSearch()">清空</button>
             </div>
             <div class="search-hint-line">Ctrl / ⌘ + K</div>
-            <div id="global-search-results" class="search-results search-results-popover">
-                <div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>
-            </div>
+            <div id="global-search-results" class="search-results search-results-popover"></div>
+        </div>
         </div>
     </div>
 </div>
@@ -404,11 +484,30 @@
                         </div>
                         <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
                             <div>
-                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: var(--title-color);">快捷主题 (点击即续接)</div>
-                                <div id="focus-shortcuts" class="shortcut-tags"></div>
-                                <div style="font-size: 13px; font-weight: bold; margin-bottom: 6px; margin-top:15px; color: var(--title-color);">当前目标(分)</div>
-                                <input type="number" id="focus-target" class="custom-input" placeholder="240" onchange="updateOverviewStats()">
+                                <div class="focus-control-panel">
+                                <div>
+                                    <div class="focus-field-label">一级分类</div>
+                                    <div id="focus-category-chips" class="focus-category-chips"></div>
+                                    <div class="focus-inline-actions"><button class="mini-chip-btn" type="button" onclick="manageFocusCategories()">分类管理</button></div>
+                                </div>
+                                <div>
+                                    <div class="focus-field-label">二级细分类</div>
+                                    <input type="text" id="focus-subcategory" class="custom-input" placeholder="#写论文 / #强化学习" list="focus-subcategory-list">
+                                    <datalist id="focus-subcategory-list"></datalist>
+                                </div>
+                                <div class="focus-field-row">
+                                    <div style="flex:1; min-width:0;">
+                                        <div class="focus-field-label">当前目标(min)</div>
+                                        <input type="number" id="focus-target" class="custom-input" placeholder="240" onchange="updateOverviewStats()">
+                                    </div>
+                                    <div class="focus-side-btns"><button class="mini-chip-btn" type="button" onclick="manageFocusShortcuts()">快捷管理</button></div>
+                                </div>
+                                <div>
+                                    <div class="focus-field-label">快捷开始（点击自动计时）</div>
+                                    <div id="focus-shortcuts" class="shortcut-tags shortcut-tags-compact"></div>
+                                </div>
                                 <input type="hidden" id="focus-topic" value="未命名">
+                            </div>
                             </div>
                         </div>
                     </div>
@@ -516,23 +615,24 @@
                 <div class="stats-subtitle">📉 近7天批阅趋势</div>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
                 <div class="stats-subtitle">🧭 理政时间分布</div>
-                <div class="pie-grid">
-                    <div class="pie-card">
-                        <div class="pie-title">今日时间分布</div>
-                        <div class="pie-canvas-wrap"><canvas id="focusPieDay" width="220" height="220"></canvas></div>
-                        <div id="focusPieDayLegend" class="pie-legend"></div>
+                <div class="distribution-grid">
+                    <div class="distribution-card">
+                        <div class="distribution-head"><span>今日</span><small id="focusDayTotalLabel">0min</small></div>
+                        <div class="focus-donut-wrap"><div id="focusDonutDay" class="focus-donut"><div class="focus-donut-center"><div class="focus-donut-total" id="focusDonutDayTotal">0min</div></div></div></div>
+                        <div id="focusBreakdownDay" class="focus-breakdown"></div>
                     </div>
-                    <div class="pie-card">
-                        <div class="pie-title">本月时间分布</div>
-                        <div class="pie-canvas-wrap"><canvas id="focusPieMonth" width="220" height="220"></canvas></div>
-                        <div id="focusPieMonthLegend" class="pie-legend"></div>
+                    <div class="distribution-card">
+                        <div class="distribution-head"><span>本月</span><small id="focusMonthTotalLabel">0min</small></div>
+                        <div class="focus-donut-wrap"><div id="focusDonutMonth" class="focus-donut"><div class="focus-donut-center"><div class="focus-donut-total" id="focusDonutMonthTotal">0min</div></div></div></div>
+                        <div id="focusBreakdownMonth" class="focus-breakdown"></div>
                     </div>
-                    <div class="pie-card">
-                        <div class="pie-title">本年时间分布</div>
-                        <div class="pie-canvas-wrap"><canvas id="focusPieYear" width="220" height="220"></canvas></div>
-                        <div id="focusPieYearLegend" class="pie-legend"></div>
+                    <div class="distribution-card">
+                        <div class="distribution-head"><span>本年</span><small id="focusYearTotalLabel">0min</small></div>
+                        <div class="focus-donut-wrap"><div id="focusDonutYear" class="focus-donut"><div class="focus-donut-center"><div class="focus-donut-total" id="focusDonutYearTotal">0min</div></div></div></div>
+                        <div id="focusBreakdownYear" class="focus-breakdown"></div>
                     </div>
                 </div>
+            </div>
             </div>
 
             <div class="card">
@@ -817,14 +917,82 @@ function formatSyncTime(value) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+function makeDefaultFocusCategories() {
+    return [
+        { id: 'focus_work', name: '工作', color: '#AEBACC', order: 0 },
+        { id: 'focus_study', name: '学习', color: '#72B6C9', order: 1 },
+        { id: 'focus_life', name: '生活', color: '#98AA8B', order: 2 },
+        { id: 'focus_fun', name: '摸鱼', color: '#E2C172', order: 3 }
+    ];
+}
+function makeUid(prefix = 'id') { return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`; }
+function formatMinutesHuman(minutes) {
+    const safe = Math.max(0, Math.round(minutes || 0));
+    const h = Math.floor(safe / 60), m = safe % 60;
+    if (h && m) return `${h}h ${m}min`;
+    if (h) return `${h}h`;
+    return `${m}min`;
+}
+function formatSecondsHuman(seconds) { return formatMinutesHuman(Math.max(1, Math.round((seconds || 0) / 60))); }
+function getFocusCategories() { return Array.isArray(db.focusCategories) ? db.focusCategories : []; }
+function getFocusCategoryById(id) { return getFocusCategories().find(c => c.id === id) || getFocusCategories()[0] || null; }
+function getFocusCategoryName(id) { return getFocusCategoryById(id)?.name || '工作'; }
+function getFocusCategoryColor(id) { return getFocusCategoryById(id)?.color || '#AEBACC'; }
+function getActiveFocusCategoryId() { return db.focusSelectedCategoryId || getFocusCategories()[0]?.id || 'focus_work'; }
+function getFocusDisplayTitle(rec) {
+    const cat = getFocusCategoryName(rec?.categoryId);
+    const sub = (rec?.subCategory || rec?.topic || '未命名事项').trim() || '未命名事项';
+    return `${cat} / ${sub}`;
+}
+function normalizeFocusShortcut(item) {
+    if (!item) return null;
+    if (typeof item === 'string') {
+        return { id: makeUid('shortcut'), categoryId: 'focus_work', subCategory: item, label: '', targetMinutes: '' };
+    }
+    return {
+        id: item.id || makeUid('shortcut'),
+        categoryId: item.categoryId || 'focus_work',
+        subCategory: item.subCategory || item.topic || item.label || '未命名事项',
+        label: item.label || '',
+        targetMinutes: item.targetMinutes || ''
+    };
+}
 function ensureDbCompatibility() {
     if (!db.statusRecords) db.statusRecords = [];
-    if (!db.focusShortcuts) db.focusShortcuts = ["📖 看文献", "✍️ 写论文", "💻 数据分析"];
     if (!db.checkins) db.checkins = {};
-    if (!db.activeTimer) db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
-    if (db.activeTimer && db.activeTimer.sessionStartAt === undefined) db.activeTimer.sessionStartAt = null;
+    if (!Array.isArray(db.focusCategories) || !db.focusCategories.length) db.focusCategories = makeDefaultFocusCategories();
+    db.focusCategories = db.focusCategories.map((cat, idx) => ({
+        id: cat.id || makeUid('cat'),
+        name: (cat.name || `分类${idx + 1}`).trim(),
+        color: cat.color || makeDefaultFocusCategories()[idx % 4]?.color || '#8FA6C1',
+        order: cat.order ?? idx
+    }));
+    db.focusCategories.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    if (!db.focusSelectedCategoryId || !db.focusCategories.some(c => c.id === db.focusSelectedCategoryId)) {
+        db.focusSelectedCategoryId = db.focusCategories[0].id;
+    }
+    if (!Array.isArray(db.focusShortcuts)) db.focusShortcuts = [];
+    db.focusShortcuts = db.focusShortcuts.map(normalizeFocusShortcut).filter(Boolean);
+    if (!db.focusShortcuts.length) {
+        db.focusShortcuts = [
+            { id: makeUid('shortcut'), categoryId: db.focusCategories[0].id, subCategory: '写论文', label: '', targetMinutes: 120 },
+            { id: makeUid('shortcut'), categoryId: db.focusCategories[0].id, subCategory: '开会', label: '', targetMinutes: 60 },
+            { id: makeUid('shortcut'), categoryId: db.focusCategories[1]?.id || db.focusCategories[0].id, subCategory: '强化学习', label: '', targetMinutes: 90 },
+            { id: makeUid('shortcut'), categoryId: db.focusCategories[1]?.id || db.focusCategories[0].id, subCategory: '看文献', label: '', targetMinutes: 60 }
+        ];
+    }
+    if (!db.activeTimer) db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: '', sessionStartAt: null, categoryId: db.focusSelectedCategoryId, subCategory: '' };
+    db.activeTimer = {
+        running: !!db.activeTimer.running,
+        startTime: db.activeTimer.startTime || 0,
+        accumulatedSeconds: db.activeTimer.accumulatedSeconds || 0,
+        topic: db.activeTimer.topic || '',
+        sessionStartAt: db.activeTimer.sessionStartAt || null,
+        categoryId: db.activeTimer.categoryId || db.focusSelectedCategoryId,
+        subCategory: db.activeTimer.subCategory || db.activeTimer.topic || ''
+    };
     if (!Array.isArray(db.focusRecords)) db.focusRecords = [];
-    db.focusRecords = db.focusRecords.map(rec => {
+    db.focusRecords = db.focusRecords.map((rec, idx) => {
         if (!rec || typeof rec !== 'object') return rec;
         if (!rec.endAt && rec.date) rec.endAt = rec.date;
         if (!rec.startAt && (rec.endAt || rec.date) && rec.seconds) {
@@ -832,13 +1000,17 @@ function ensureDbCompatibility() {
             if (!Number.isNaN(end.getTime())) rec.startAt = new Date(end.getTime() - (rec.seconds || 0) * 1000).toISOString();
         }
         if (!rec.date && rec.endAt) rec.date = rec.endAt;
+        if (!rec.categoryId || !db.focusCategories.some(c => c.id === rec.categoryId)) rec.categoryId = db.focusCategories[0].id;
+        if (!rec.subCategory) rec.subCategory = rec.topic || '未命名事项';
+        rec.topic = rec.subCategory;
+        rec.id = rec.id || Date.now() + idx;
         return rec;
     });
     if (!db.loginDays) db.loginDays = [];
     if (!db.literature) db.literature = [];
     if (!db.learning) db.learning = [];
     if (!db.__meta) db.__meta = {};
-    if (!db.__meta.schemaVersion || db.__meta.schemaVersion < 3) db.__meta.schemaVersion = 3;
+    if (!db.__meta.schemaVersion || db.__meta.schemaVersion < 4) db.__meta.schemaVersion = 4;
     if (!db.__meta.lastLocalWriteAt) db.__meta.lastLocalWriteAt = null;
     if (!db.__meta.lastCloudSyncAt) db.__meta.lastCloudSyncAt = null;
     IMAGE_ENABLED_TYPES.forEach(type => {
@@ -1231,7 +1403,8 @@ window.onload = async () => {
 };
 
 function renderAll() {
-    renderWordsList(); renderIdeasList(); renderFocusShortcuts();
+    fillFocusTimerFromState();
+    renderWordsList(); renderIdeasList();
     ['sport', 'food', 'drink'].forEach(t => renderLifeList(t));
     renderQuotesList();
     ['reading', 'movie', 'blog'].forEach(t => renderMediaCards(t));
@@ -1639,7 +1812,7 @@ function getFocusRange(rec) {
 function focusRangeText(rec) {
     const { start, end } = getFocusRange(rec);
     const range = `${formatClock(start)} - ${formatClock(end)}`;
-    return `${range} · ${Math.max(1, Math.round((rec?.seconds || 0) / 60))} 分钟`;
+    return `${range} · ${formatSecondsHuman(rec?.seconds || 0)}`;
 }
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s] || s));
@@ -1665,13 +1838,13 @@ function buildGlobalSearchItems() {
     (db.memorableQuotes || []).forEach(item => items.push({ key: `quotes-${item.idKey || item.time}`, section: 'quotes', badge: '好句', title: '抄点好句', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
     (db.cns || []).forEach(item => items.push({ key: `ideas-${item.idKey || item.time}`, section: 'ideas', badge: '闪念', title: '闪念归档', text: item.val || '', time: item.time || '', sortTime: item.time || '' }));
     (db.todos || []).forEach(item => items.push({ key: `todo-${item.id}`, section: 'home', badge: item.type === 'today' ? '今日任务' : '近期任务', title: item.text || '任务', text: [item.ddl ? `DDL ${item.ddl}` : '', item.status || ''].join(' '), time: item.dateCreated || '', sortTime: item.dateCreated || '' }));
-    (db.focusRecords || []).forEach(item => items.push({ key: `focus-${item.id}`, section: 'home', badge: '理政时间', title: item.topic || '未命名专注', text: focusRangeText(item), time: item.endAt || item.date || '', sortTime: item.endAt || item.date || '' }));
+    (db.focusRecords || []).forEach(item => items.push({ key: `focus-${item.id}`, section: 'home', badge: '理政时间', title: getFocusDisplayTitle(item), text: `${getFocusCategoryName(item.categoryId)} ${item.subCategory || ''} ${focusRangeText(item)}`, time: item.endAt || item.date || '', sortTime: item.endAt || item.date || '' }));
     (db.statusRecords || []).forEach(item => items.push({ key: `status-${item.id}`, section: 'home', badge: '状态打卡', title: item.period || '状态记录', text: item.text || '', time: item.fullTime || item.time || '', sortTime: item.time || '' }));
     return items;
 }
 function showSearchResultsBox() {
     const box = document.getElementById('global-search-results');
-    if (box) box.classList.add('active');
+    if (box && box.innerHTML.trim()) box.classList.add('active');
 }
 function hideSearchResultsBox() {
     const box = document.getElementById('global-search-results');
@@ -1682,16 +1855,13 @@ function performGlobalSearch() {
     const resultBox = document.getElementById('global-search-results');
     if (!input || !resultBox) return;
     const query = input.value.trim();
-    showSearchResultsBox();
-    if (!query) {
-        resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
-        return;
-    }
+    if (!query) { resultBox.innerHTML = ''; hideSearchResultsBox(); return; }
     const q = query.toLowerCase();
     const hits = buildGlobalSearchItems().filter(item => (`${item.title} ${item.text} ${item.badge}`.toLowerCase().includes(q)))
-        .sort((a, b) => String(b.sortTime || '').localeCompare(String(a.sortTime || ''))).slice(0, 40);
+        .sort((a, b) => String(b.sortTime || '').localeCompare(String(a.sortTime || ''))).slice(0, 24);
     if (!hits.length) {
         resultBox.innerHTML = `<div class="search-empty">没有找到与“${escapeHtml(query)}”相关的内容。</div>`;
+        showSearchResultsBox();
         return;
     }
     resultBox.innerHTML = hits.map(item => `
@@ -1703,12 +1873,13 @@ function performGlobalSearch() {
             <div class="search-result-snippet">${escapeHtml(makeSearchSnippet(item.text, query))}</div>
             <div class="search-result-meta">${escapeHtml(item.time || '')}</div>
         </div>`).join('');
+    showSearchResultsBox();
 }
 function clearGlobalSearch() {
     const input = document.getElementById('global-search-input');
     const resultBox = document.getElementById('global-search-results');
     if (input) input.value = '';
-    if (resultBox) resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
+    if (resultBox) resultBox.innerHTML = '';
     hideSearchResultsBox();
 }
 function highlightSearchTarget(key) {
@@ -1730,10 +1901,6 @@ function bindGlobalSearchEvents() {
     const resultBox = document.getElementById('global-search-results');
     const searchWrap = document.querySelector('.header-search');
     if (!input || !resultBox || !searchWrap) return;
-    input.addEventListener('focus', () => {
-        showSearchResultsBox();
-        if (!input.value.trim()) resultBox.innerHTML = '<div class="search-empty">可搜索：文献指南、学习笔记、任务、专注纪要、阅读指南、观影指南、播客指南、抄点好句、闪念归档。</div>';
-    });
     input.addEventListener('input', () => {
         clearTimeout(globalSearchDebounce);
         globalSearchDebounce = setTimeout(performGlobalSearch, 160);
@@ -1744,7 +1911,6 @@ function bindGlobalSearchEvents() {
             e.preventDefault();
             input.focus();
             input.select();
-            showSearchResultsBox();
         }
         if (e.key === 'Escape') hideSearchResultsBox();
     });
@@ -1753,90 +1919,199 @@ function bindGlobalSearchEvents() {
     });
 }
 
+
+function openRichModal(title, html, saveCallback) {
+    document.getElementById('modal-title').innerText = title;
+    const body = document.getElementById('modal-body');
+    body.innerHTML = html;
+    modalSaveCallback = saveCallback;
+    const modal = document.getElementById('custom-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+}
+function renderFocusCategoryChips() {
+    const box = document.getElementById('focus-category-chips');
+    if (!box) return;
+    const activeId = getActiveFocusCategoryId();
+    box.innerHTML = getFocusCategories().map(cat => {
+        const active = cat.id === activeId;
+        const style = active ? `background:${cat.color}; border-color:${cat.color};` : `border-color:${cat.color}33; color:${cat.color}; background:${cat.color}11;`;
+        return `<button type="button" class="focus-category-chip${active ? ' active' : ''}" style="${style}" onclick="setActiveFocusCategory('${cat.id}')">${escapeHtml(cat.name)}</button>`;
+    }).join('');
+}
+function setActiveFocusCategory(categoryId) {
+    db.focusSelectedCategoryId = categoryId;
+    if (document.getElementById('focus-topic')) document.getElementById('focus-topic').value = document.getElementById('focus-subcategory')?.value || '';
+    persist();
+    renderFocusCategoryChips();
+}
+function renderFocusSubcategorySuggestions() {
+    const list = document.getElementById('focus-subcategory-list');
+    if (!list) return;
+    const set = new Set();
+    (db.focusShortcuts || []).forEach(item => item?.subCategory && set.add(item.subCategory));
+    (db.focusRecords || []).forEach(item => item?.subCategory && set.add(item.subCategory));
+    list.innerHTML = Array.from(set).sort((a,b) => a.localeCompare(b,'zh-CN')).map(item => `<option value="${escapeHtml(item)}"></option>`).join('');
+}
+function getShortcutLabel(item) {
+    return item.label || `${getFocusCategoryName(item.categoryId)} / ${item.subCategory}`;
+}
+function renderFocusShortcuts() {
+    const box = document.getElementById('focus-shortcuts');
+    if (!box) return;
+    box.innerHTML = (db.focusShortcuts || []).map(item => `<button type="button" class="shortcut-item" onclick="startFocusShortcut('${item.id}')"><span class="shortcut-dot" style="background:${getFocusCategoryColor(item.categoryId)}"></span>${escapeHtml(getShortcutLabel(item))}</button>`).join('') || '<span class="editor-note">暂无快捷组合，点“快捷管理”添加。</span>';
+}
+function focusCategoryOptions(selectedId) {
+    return getFocusCategories().map(cat => `<option value="${cat.id}" ${cat.id === selectedId ? 'selected' : ''}>${escapeHtml(cat.name)}</option>`).join('');
+}
+function focusCategoryRowHtml(cat = {}) {
+    return `<div class="editor-row focus-category-editor-row"><input type="hidden" class="fc-id" value="${cat.id || makeUid('cat')}"><input class="custom-input fc-name" value="${escapeHtml(cat.name || '')}" placeholder="分类名称"><input type="color" class="color-input fc-color" value="${cat.color || '#8FA6C1'}"><button type="button" class="mini-chip-btn danger" onclick="this.closest('.editor-row').remove()">删除</button></div>`;
+}
+function shortcutRowHtml(item = {}) {
+    return `<div class="editor-row shortcut focus-shortcut-editor-row"><select class="inline-select fs-cat">${focusCategoryOptions(item.categoryId || getActiveFocusCategoryId())}</select><input class="custom-input fs-sub" value="${escapeHtml(item.subCategory || '')}" placeholder="二级细分类"><input type="number" class="custom-input fs-target" value="${item.targetMinutes || ''}" placeholder="目标min"><button type="button" class="mini-chip-btn danger" onclick="this.closest('.editor-row').remove()">删除</button></div>`;
+}
+function appendFocusCategoryEditorRow() {
+    const list = document.getElementById('focus-category-editor-list');
+    if (list) list.insertAdjacentHTML('beforeend', focusCategoryRowHtml({}));
+}
+function appendFocusShortcutEditorRow() {
+    const list = document.getElementById('focus-shortcut-editor-list');
+    if (list) list.insertAdjacentHTML('beforeend', shortcutRowHtml({}));
+}
+function manageFocusCategories() {
+    openRichModal('管理一级分类', `<div class="editor-row-list" id="focus-category-editor-list">${getFocusCategories().map(cat => focusCategoryRowHtml(cat)).join('')}</div><div class="focus-inline-actions" style="justify-content:flex-start; margin-top: 10px;"><button type="button" class="mini-chip-btn" onclick="appendFocusCategoryEditorRow()">+ 新增分类</button></div><div class="editor-note">一级分类会用于理政计时、快捷组合和统计图。可以改名、改颜色，也可以新增自定义分类。</div>`, () => {
+        const rows = Array.from(document.querySelectorAll('.focus-category-editor-row'));
+        const cats = rows.map((row, idx) => ({
+            id: row.querySelector('.fc-id').value || makeUid('cat'),
+            name: row.querySelector('.fc-name').value.trim(),
+            color: row.querySelector('.fc-color').value || '#8FA6C1',
+            order: idx
+        })).filter(item => item.name);
+        if (!cats.length) { alert('至少保留一个一级分类。'); return; }
+        db.focusCategories = cats;
+        if (!db.focusCategories.some(cat => cat.id === db.focusSelectedCategoryId)) db.focusSelectedCategoryId = db.focusCategories[0].id;
+        (db.focusShortcuts || []).forEach(sc => { if (!db.focusCategories.some(cat => cat.id === sc.categoryId)) sc.categoryId = db.focusCategories[0].id; });
+        (db.focusRecords || []).forEach(rec => { if (!db.focusCategories.some(cat => cat.id === rec.categoryId)) rec.categoryId = db.focusCategories[0].id; });
+        persist();
+        renderFocusCategoryChips(); renderFocusShortcuts(); renderFocusSubcategorySuggestions(); renderFocusToday(); renderStats();
+    });
+}
+function manageFocusShortcuts() {
+    openRichModal('管理快捷组合', `<div class="editor-row-list" id="focus-shortcut-editor-list">${(db.focusShortcuts || []).map(item => shortcutRowHtml(item)).join('')}</div><div class="focus-inline-actions" style="justify-content:flex-start; margin-top: 10px;"><button type="button" class="mini-chip-btn" onclick="appendFocusShortcutEditorRow()">+ 新增快捷</button></div><div class="editor-note">点击快捷组合会自动填入分类和细分，并立即开始计时。</div>`, () => {
+        const rows = Array.from(document.querySelectorAll('.focus-shortcut-editor-row'));
+        db.focusShortcuts = rows.map(row => ({
+            id: makeUid('shortcut'),
+            categoryId: row.querySelector('.fs-cat').value,
+            subCategory: row.querySelector('.fs-sub').value.trim(),
+            label: '',
+            targetMinutes: parseInt(row.querySelector('.fs-target').value, 10) || ''
+        })).filter(item => item.subCategory);
+        persist();
+        renderFocusShortcuts(); renderFocusSubcategorySuggestions();
+    });
+}
+
 // 恢复其余完整的原版代码功能 (专注、Todos、状态打卡、单词、年计划等)
 function formatTime(s) { return [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(v => String(v).padStart(2, '0')).join(':'); }
 function updateTimerDisplay() {
-    let total = db.activeTimer.accumulatedSeconds;
+    let total = db.activeTimer.accumulatedSeconds || 0;
     if (db.activeTimer.running && db.activeTimer.startTime > 0) total += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
-    document.getElementById('focus-stopwatch').textContent = formatTime(total);
+    const clock = document.getElementById('focus-stopwatch');
+    if (clock) clock.textContent = formatTime(total);
 }
 function startTimerInterval() { clearInterval(timerInterval); timerInterval = setInterval(updateTimerDisplay, 1000); }
-function renderFocusShortcuts() {
-    document.getElementById('focus-shortcuts').innerHTML = db.focusShortcuts.map(s => `<span class="shortcut-tag" onclick="startFocusShortcut('${s.replace(/'/g,"&#39;")}')">${s}</span>`).join('') + `<span class="shortcut-tag add-btn" onclick="editFocusShortcuts()">+ 自定义</span>`;
+function fillFocusTimerFromState() {
+    const input = document.getElementById('focus-subcategory');
+    if (input) input.value = db.activeTimer.subCategory || '';
+    renderFocusCategoryChips();
+    renderFocusSubcategorySuggestions();
+    renderFocusShortcuts();
 }
-function editFocusShortcuts() {
-    openModal("自定义快捷主题", [{label: "主题 (用逗号分隔)", value: db.focusShortcuts.join("，")}], (vals) => {
-        if (vals[0]) { db.focusShortcuts = vals[0].split(/[,，]/).map(s => s.trim()).filter(s => s); persist(); renderFocusShortcuts(); }
-    });
-}
-function startFocusShortcut(topic) {
-    if (db.activeTimer.running) { if (!confirm("当前有正在计时的任务，是否先停止？")) return; focusTimerCtrl('stop'); }
-    document.getElementById('focus-topic').value = topic;
-    const todayKey = getDateKey();
-    const existing = (db.focusRecords || []).find(r => r.date && getDateKey(r.date) === todayKey && r.topic === topic);
-    db.activeTimer.accumulatedSeconds = existing ? existing.seconds : 0;
-    db.activeTimer.sessionStartAt = existing?.startAt || (existing?.date ? new Date(new Date(existing.date).getTime() - (existing.seconds || 0) * 1000).toISOString() : null);
-    resumeFocusId = existing ? existing.id : null; updateTimerDisplay(); focusTimerCtrl('start');
+function startFocusShortcut(shortcutId) {
+    const item = (db.focusShortcuts || []).find(sc => sc.id === shortcutId);
+    if (!item) return;
+    if (db.activeTimer.running) {
+        if (!confirm('当前有正在计时的事项，是否先结束并切换到新的快捷计时？')) return;
+        focusTimerCtrl('stop');
+    } else if ((db.activeTimer.accumulatedSeconds || 0) > 0) {
+        if (!confirm('当前有尚未保存的计时，是否清零并切换到快捷计时？')) return;
+        focusTimerCtrl('reset');
+    }
+    db.focusSelectedCategoryId = item.categoryId || getActiveFocusCategoryId();
+    const subInput = document.getElementById('focus-subcategory');
+    if (subInput) subInput.value = item.subCategory || '';
+    if (item.targetMinutes) document.getElementById('focus-target').value = item.targetMinutes;
+    db.activeTimer.categoryId = db.focusSelectedCategoryId;
+    db.activeTimer.subCategory = item.subCategory || '';
+    db.activeTimer.topic = item.subCategory || '';
+    renderFocusCategoryChips();
+    focusTimerCtrl('start');
 }
 function focusTimerCtrl(act) {
+    const subInput = document.getElementById('focus-subcategory');
+    const categoryId = getActiveFocusCategoryId();
+    const subCategory = (subInput?.value || db.activeTimer.subCategory || '').trim() || '未命名事项';
+    if (subInput) subInput.value = subCategory;
     if (act === 'start' && !db.activeTimer.running) {
+        if ((db.activeTimer.accumulatedSeconds || 0) === 0) db.activeTimer.sessionStartAt = new Date().toISOString();
+        else if (!db.activeTimer.sessionStartAt) db.activeTimer.sessionStartAt = new Date(Date.now() - (db.activeTimer.accumulatedSeconds || 0) * 1000).toISOString();
         db.activeTimer.running = true;
         db.activeTimer.startTime = Date.now();
-        if (!db.activeTimer.sessionStartAt) db.activeTimer.sessionStartAt = new Date(db.activeTimer.startTime - (db.activeTimer.accumulatedSeconds || 0) * 1000).toISOString();
-        db.activeTimer.topic = document.getElementById('focus-topic').value.trim() || "未命名";
-        startTimerInterval(); persist();
+        db.activeTimer.categoryId = categoryId;
+        db.activeTimer.subCategory = subCategory;
+        db.activeTimer.topic = subCategory;
+        startTimerInterval();
+        persist();
     } else if (act === 'pause' && db.activeTimer.running) {
-        db.activeTimer.running = false; db.activeTimer.accumulatedSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
-        db.activeTimer.startTime = 0; clearInterval(timerInterval); updateTimerDisplay(); persist();
+        db.activeTimer.running = false;
+        db.activeTimer.accumulatedSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
+        db.activeTimer.startTime = 0;
+        clearInterval(timerInterval); updateTimerDisplay(); persist();
     } else if (act === 'stop') {
-        let totalSeconds = db.activeTimer.accumulatedSeconds;
+        let totalSeconds = db.activeTimer.accumulatedSeconds || 0;
         if (db.activeTimer.running && db.activeTimer.startTime > 0) totalSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
-        if (totalSeconds < 60) return alert("总记录不满1分钟，无法保存！");
+        if (totalSeconds < 60) return alert('总记录不满 1 分钟，无法保存。');
         clearInterval(timerInterval);
-        const topic = db.activeTimer.topic || document.getElementById('focus-topic').value.trim() || "未命名研究";
         const endAt = new Date().toISOString();
         const startAt = db.activeTimer.sessionStartAt || new Date(new Date(endAt).getTime() - totalSeconds * 1000).toISOString();
-        if (resumeFocusId !== null) {
-            const idx = db.focusRecords.findIndex(r => r.id === resumeFocusId);
-            if (idx !== -1 && db.focusRecords[idx].topic === topic) {
-                db.focusRecords[idx].seconds = totalSeconds;
-                db.focusRecords[idx].startAt = db.focusRecords[idx].startAt || startAt;
-                db.focusRecords[idx].endAt = endAt;
-                db.focusRecords[idx].date = endAt;
-                db.focusRecords[idx].time = getFullTime();
-            } else db.focusRecords.push({ id: Date.now(), date: endAt, time: getFullTime(), topic, seconds: totalSeconds, startAt, endAt });
-            resumeFocusId = null;
-        } else {
-            const todayKey = getDateKey();
-            const idx = db.focusRecords.findIndex(r => r.date && getDateKey(r.date) === todayKey && r.topic === topic);
-            if (idx !== -1) {
-                db.focusRecords[idx].seconds = totalSeconds;
-                db.focusRecords[idx].startAt = db.focusRecords[idx].startAt || startAt;
-                db.focusRecords[idx].endAt = endAt;
-                db.focusRecords[idx].date = endAt;
-                db.focusRecords[idx].time = getFullTime();
-            } else db.focusRecords.push({ id: Date.now(), date: endAt, time: getFullTime(), topic, seconds: totalSeconds, startAt, endAt });
-        }
-        db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
-        document.getElementById('focus-topic').value = ""; updateTimerDisplay(); persist(); renderFocusToday(); updateOverviewStats(); renderStats();
+        db.focusRecords.push({
+            id: Date.now(),
+            date: endAt,
+            time: getFullTime(),
+            categoryId,
+            subCategory,
+            topic: subCategory,
+            seconds: totalSeconds,
+            startAt,
+            endAt
+        });
+        db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: '', sessionStartAt: null, categoryId, subCategory: '' };
+        if (subInput) subInput.value = '';
+        updateTimerDisplay(); persist(); renderFocusToday(); updateOverviewStats(); renderStats();
     } else if (act === 'reset') {
-        clearInterval(timerInterval); db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: "", sessionStartAt: null };
-        resumeFocusId = null; updateTimerDisplay(); persist();
+        clearInterval(timerInterval);
+        const keepCategory = getActiveFocusCategoryId();
+        db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: '', sessionStartAt: null, categoryId: keepCategory, subCategory: '' };
+        if (subInput) subInput.value = '';
+        updateTimerDisplay(); persist();
     }
 }
 function editFocusRecord(id) {
     const rec = db.focusRecords.find(r => r.id === id); if (!rec) return;
     const { start, end } = getFocusRange(rec);
-    openModal("修改专注纪要", [
-        {label: "主题名称", value: rec.topic},
-        {label: "开始时间 (HH:MM)", value: formatClock(start)},
-        {label: "结束时间 (HH:MM)", value: formatClock(end)},
-        {label: "总时长 (分钟)", value: Math.max(1, Math.round((rec.seconds || 0) / 60)), type: "number"}
+    openModal('修改理政纪要', [
+        {label: '一级分类', type: 'select', value: rec.categoryId, options: getFocusCategories().map(cat => ({ value: cat.id, text: cat.name }))},
+        {label: '二级细分类', value: rec.subCategory || rec.topic || ''},
+        {label: '开始时间 (HH:MM)', value: formatClock(start)},
+        {label: '结束时间 (HH:MM)', value: formatClock(end)},
+        {label: '总时长 (分钟)', value: Math.max(1, Math.round((rec.seconds || 0) / 60)), type: 'number'}
     ], (vals) => {
-        if (vals[0]) rec.topic = vals[0].trim();
+        rec.categoryId = vals[0] || rec.categoryId;
+        rec.subCategory = (vals[1] || rec.subCategory || '未命名事项').trim();
+        rec.topic = rec.subCategory;
         const baseIso = rec.endAt || rec.date || new Date().toISOString();
-        const startObj = parseClockOnBaseDate(baseIso, vals[1]);
-        const endObj = parseClockOnBaseDate(baseIso, vals[2]);
+        const startObj = parseClockOnBaseDate(baseIso, vals[2]);
+        const endObj = parseClockOnBaseDate(baseIso, vals[3]);
         let durationSeconds = rec.seconds || 0;
         if (startObj && endObj) {
             if (endObj.getTime() < startObj.getTime()) endObj.setDate(endObj.getDate() + 1);
@@ -1845,31 +2120,31 @@ function editFocusRecord(id) {
             rec.startAt = startObj.toISOString();
             rec.endAt = endObj.toISOString();
             rec.date = rec.endAt;
-        } else if (vals[3] && !isNaN(vals[3])) {
-            durationSeconds = parseInt(vals[3], 10) * 60;
+        }
+        if (vals[4] && !isNaN(vals[4]) && !(startObj && endObj)) {
+            durationSeconds = parseInt(vals[4], 10) * 60;
             const endBase = endObj || end || new Date(baseIso);
             rec.endAt = endBase.toISOString();
             rec.startAt = new Date(endBase.getTime() - durationSeconds * 1000).toISOString();
             rec.date = rec.endAt;
         }
-        if (vals[3] && !isNaN(vals[3]) && !(startObj && endObj)) durationSeconds = parseInt(vals[3], 10) * 60;
         rec.seconds = durationSeconds;
         persist(); renderFocusToday(); updateOverviewStats(); renderStats();
     });
 }
-function deleteFocusRecord(id) { if (confirm("确定删除这条纪要吗？")) { db.focusRecords = db.focusRecords.filter(r => r.id !== id); persist(); renderFocusToday(); updateOverviewStats(); } }
+function deleteFocusRecord(id) { if (confirm('确定删除这条纪要吗？')) { db.focusRecords = db.focusRecords.filter(r => r.id !== id); persist(); renderFocusToday(); updateOverviewStats(); renderStats(); } }
 function renderFocusToday() {
     const todayKey = getDateKey(); const ul = document.getElementById('list-focus-today'); ul.innerHTML = '';
-    const recs = (db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey);
-    if (!recs.length) { ul.innerHTML = '<li style="font-size:13px; color:var(--text-muted); text-align:center; padding: 18px 0;">暂无记录，快去开启专注吧</li>'; return; }
-    [...recs].reverse().forEach(r => {
+    const recs = (db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).sort((a,b) => String(b.endAt || b.date).localeCompare(String(a.endAt || a.date)));
+    if (!recs.length) { ul.innerHTML = '<li style="font-size:13px; color:var(--text-muted); text-align:center; padding: 18px 0;">暂无记录，快去开启理政吧</li>'; return; }
+    recs.forEach(r => {
         ul.innerHTML += `<li class="focus-item" data-search-key="focus-${r.id}">
             <div style="flex-grow: 1; min-width: 0;">
-                <div style="font-size:15px;font-weight:bold;color:var(--title-color);">${r.topic}</div>
+                <div class="focus-title-line"><span class="focus-cat-badge" style="background:${getFocusCategoryColor(r.categoryId)}">${escapeHtml(getFocusCategoryName(r.categoryId))}</span><span class="focus-subtitle">${escapeHtml(r.subCategory || r.topic || '未命名事项')}</span></div>
                 <div class="focus-time-meta">${focusRangeText(r)}</div>
             </div>
             <div style="display:flex; align-items:center; gap:12px; margin-left:12px;">
-                <div class="focus-duration">${Math.max(1, Math.round((r.seconds || 0)/60))} 分钟</div>
+                <div class="focus-duration">${formatSecondsHuman(r.seconds || 0)}</div>
                 <div class="action-group">
                     <span class="text-btn edit" onclick="editFocusRecord(${r.id})">${ICON_EDIT}</span>
                     <span class="text-btn delete" onclick="deleteFocusRecord(${r.id})">${ICON_DELETE}</span>
@@ -1879,7 +2154,7 @@ function renderFocusToday() {
 }
 function updateOverviewStats() {
     const todayKey = getDateKey(); db.focusTarget = parseInt(document.getElementById('focus-target').value) || 240;
-    const mins = Math.floor((db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).reduce((s, r) => s + r.seconds, 0) / 60);
+    const mins = Math.floor((db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).reduce((s, r) => s + (r.seconds || 0), 0) / 60);
     document.getElementById('progress-text').textContent = `${mins}/${db.focusTarget} 分钟`;
     document.getElementById('progress-bar').style.width = `${db.focusTarget > 0 ? Math.min((mins / db.focusTarget) * 100, 100) : 0}%`;
     let checkedCount = 0; (db.checkins[todayKey] || [0, 0, 0]).forEach(v => { if (v) checkedCount++; });
@@ -2066,89 +2341,92 @@ function renderUnifiedLifeCalendar() {
         grid.innerHTML += `<div class="unified-cal-cell${(hasSport||hasFood||hasDrink) ? ' has-record' : ''}">${d}<div style="display:flex;justify-content:center;gap:2px;height:15px;margin-top:4px;font-size:11px;">${icons}</div></div>`;
     }
 }
-function collectFocusMinutesBy(period) {
+function collectFocusCategoryTree(period) {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth();
     const todayKey = getDateKey(now);
     const bucket = {};
     (db.focusRecords || []).forEach(r => {
-        if (!r.date) return;
+        if (!r?.date) return;
         const d = new Date(r.date);
         if (Number.isNaN(d.getTime())) return;
-        const topic = (r.topic || '未命名事项').trim() || '未命名事项';
         let include = false;
         if (period === 'day') include = getDateKey(d) === todayKey;
         else if (period === 'month') include = d.getFullYear() === year && d.getMonth() === month;
         else if (period === 'year') include = d.getFullYear() === year;
         if (!include) return;
-        bucket[topic] = (bucket[topic] || 0) + Math.max(1, Math.round((r.seconds || 0) / 60));
+        const categoryId = r.categoryId || getFocusCategories()[0]?.id;
+        const sub = (r.subCategory || r.topic || '未命名事项').trim() || '未命名事项';
+        const minutes = Math.max(1, Math.round((r.seconds || 0) / 60));
+        if (!bucket[categoryId]) bucket[categoryId] = { categoryId, name: getFocusCategoryName(categoryId), color: getFocusCategoryColor(categoryId), totalMinutes: 0, subs: {} };
+        bucket[categoryId].totalMinutes += minutes;
+        bucket[categoryId].subs[sub] = (bucket[categoryId].subs[sub] || 0) + minutes;
     });
-    return bucket;
+    const groups = Object.values(bucket).map(item => ({
+        ...item,
+        subItems: Object.entries(item.subs).map(([name, minutes]) => ({ name, minutes })).sort((a, b) => b.minutes - a.minutes)
+    })).sort((a, b) => b.totalMinutes - a.totalMinutes);
+    const totalMinutes = groups.reduce((s, g) => s + g.totalMinutes, 0);
+    groups.forEach(group => group.percent = totalMinutes ? (group.totalMinutes / totalMinutes) * 100 : 0);
+    return { groups, totalMinutes };
 }
-function drawPieCanvas(canvasId, legendId, minutesMap) {
-    const canvas = document.getElementById(canvasId);
-    const legend = document.getElementById(legendId);
-    if (!canvas || !legend) return;
-    const ctx = canvas.getContext('2d');
-    const data = Object.entries(minutesMap).sort((a, b) => b[1] - a[1]);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (!data.length) {
-        legend.innerHTML = '<div class="pie-empty">暂无理政时间数据</div>';
-        ctx.fillStyle = '#dfe7e5';
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 68, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
-        ctx.fill();
+function buildFocusDonutGradient(groups) {
+    if (!groups.length) return '#e7eded';
+    const total = groups.reduce((s, g) => s + g.totalMinutes, 0) || 1;
+    let cursor = 0;
+    const parts = [];
+    const gap = groups.length > 1 ? 1.2 : 0;
+    groups.forEach(group => {
+        const span = (group.totalMinutes / total) * 360;
+        const end = cursor + span;
+        const solidEnd = Math.max(cursor, end - gap);
+        parts.push(`${group.color} ${cursor}deg ${solidEnd}deg`);
+        if (gap > 0) parts.push(`rgba(251,252,252,0.98) ${solidEnd}deg ${end}deg`);
+        cursor = end;
+    });
+    return `conic-gradient(${parts.join(',')})`;
+}
+function renderFocusDistributionCard(period, donutId, totalId, labelId, breakdownId) {
+    const donut = document.getElementById(donutId);
+    const totalEl = document.getElementById(totalId);
+    const labelEl = document.getElementById(labelId);
+    const breakdown = document.getElementById(breakdownId);
+    if (!donut || !totalEl || !labelEl || !breakdown) return;
+    const { groups, totalMinutes } = collectFocusCategoryTree(period);
+    donut.style.background = groups.length ? buildFocusDonutGradient(groups) : '#e7eded';
+    totalEl.innerHTML = `${formatMinutesHuman(totalMinutes)}<span>总时长</span>`;
+    labelEl.textContent = formatMinutesHuman(totalMinutes);
+    if (!groups.length) {
+        breakdown.innerHTML = '<div class="pie-empty">暂无理政时间数据</div>';
         return;
     }
-    const palette = ['#6C8D87','#83A09A','#D1B48C','#D48A88','#7FA3B8','#9B8BC1','#C5A66B','#86B6A6'];
-    const top = data.slice(0, 6);
-    const rest = data.slice(6);
-    if (rest.length) top.push(['其他', rest.reduce((s, x) => s + x[1], 0)]);
-    const total = top.reduce((s, x) => s + x[1], 0) || 1;
-    const cx = canvas.width / 2, cy = canvas.height / 2, radius = 70, inner = 40;
-    let start = -Math.PI / 2;
-    top.forEach(([label, minutes], idx) => {
-        const slice = (minutes / total) * Math.PI * 2;
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, radius, start, start + slice);
-        ctx.closePath();
-        ctx.fillStyle = palette[idx % palette.length];
-        ctx.fill();
-        start += slice;
-    });
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(cx, cy, inner, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#576';
-    ctx.font = 'bold 14px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(total + ' 分', cx, cy + 5);
-    legend.innerHTML = top.map(([label, minutes], idx) => {
-        const pct = Math.round((minutes / total) * 100);
-        return `<div class="pie-legend-item"><div class="pie-legend-left"><span class="pie-dot" style="background:${palette[idx % palette.length]}"></span><span class="pie-topic">${escapeHtml(label)}</span></div><span class="pie-minutes">${minutes} 分 · ${pct}%</span></div>`;
-    }).join('');
+    breakdown.innerHTML = groups.map(group => `
+        <div class="dist-group">
+            <div class="dist-group-head">
+                <div class="dist-group-name"><span class="dist-dot" style="background:${group.color}"></span>${escapeHtml(group.name)}</div>
+                <span class="dist-duration">${formatMinutesHuman(group.totalMinutes)}</span>
+                <span class="dist-percent">${group.percent.toFixed(1)}%</span>
+            </div>
+            <div class="dist-bar"><div class="dist-bar-fill" style="width:${group.percent}%; background:${group.color}"></div></div>
+            <div class="dist-sub-list">${group.subItems.map(sub => `<div class="dist-sub-item"><span>#${escapeHtml(sub.name)}</span><span>${formatMinutesHuman(sub.minutes)}</span></div>`).join('')}</div>
+        </div>
+    `).join('');
 }
-function renderFocusPieCharts() {
-    drawPieCanvas('focusPieDay', 'focusPieDayLegend', collectFocusMinutesBy('day'));
-    drawPieCanvas('focusPieMonth', 'focusPieMonthLegend', collectFocusMinutesBy('month'));
-    drawPieCanvas('focusPieYear', 'focusPieYearLegend', collectFocusMinutesBy('year'));
+function renderFocusDistributionCharts() {
+    renderFocusDistributionCard('day', 'focusDonutDay', 'focusDonutDayTotal', 'focusDayTotalLabel', 'focusBreakdownDay');
+    renderFocusDistributionCard('month', 'focusDonutMonth', 'focusDonutMonthTotal', 'focusMonthTotalLabel', 'focusBreakdownMonth');
+    renderFocusDistributionCard('year', 'focusDonutYear', 'focusDonutYearTotal', 'focusYearTotalLabel', 'focusBreakdownYear');
 }
 function renderStats() {
     const st = { w: {t:0,m:0}, m: {t:0,m:0}, y: {t:0,m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
     const weekStart = getMondayWeekStart(now);
     const check = (ds, p) => { const d = new Date(ds); if (p === 'y') return d.getFullYear() === y; if (p === 'm') return d.getFullYear() === y && d.getMonth() === mo; return d >= weekStart; };
     (db.todos||[]).filter(t => t.status==='done' && t.dateCompleted).forEach(t => ['w','m','y'].forEach(p => { if (check(t.dateCompleted, p)) st[p].t++; }));
-    (db.focusRecords||[]).forEach(r => ['w','m','y'].forEach(p => { if (r.date && check(r.date, p)) st[p].m += Math.floor(r.seconds/60); }));
-    ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = st[p].m + ' min'; });
+    (db.focusRecords||[]).forEach(r => ['w','m','y'].forEach(p => { if (r.date && check(r.date, p)) st[p].m += Math.floor((r.seconds || 0)/60); }));
+    ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = formatMinutesHuman(st[p].m); });
     drawTrendChart();
-    renderFocusPieCharts();
+    renderFocusDistributionCharts();
 }
 function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
