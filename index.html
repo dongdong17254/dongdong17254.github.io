@@ -1117,6 +1117,121 @@ body {
     .tl2-cat-row, .tl2-sub-row { padding: 2px 0; }
 }
 </style>
+
+<style id="emperor-attachment-upgrade-style">
+.attach-input-row{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.attach-preview-inline{
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+.attach-preview-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 7px 10px;
+    color: var(--title-color);
+    max-width: 100%;
+}
+.attach-preview-thumb{
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+.attach-card{
+    margin-top: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: #fbfcfc;
+    padding: 14px;
+}
+.attach-card-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.attach-card-left{
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.attach-icon{
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(108,141,135,0.1);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.attach-name-wrap{
+    min-width: 0;
+}
+.attach-name{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--title-color);
+    line-height: 1.4;
+    word-break: break-word;
+}
+.attach-meta{
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.attach-actions{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.attach-image-wrap{
+    margin-top: 12px;
+}
+.attach-image{
+    max-width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+.attach-note{
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+@media (max-width: 780px){
+    .attach-card-head{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .attach-actions{
+        width: 100%;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -3766,6 +3881,556 @@ function renderFocusTimeline(){
     };
 
     processRedirectResultAndReplay();
+})();
+</script>
+
+
+<script id="emperor-attachment-upgrade-script">
+(function(){
+    const ATTACHMENT_ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.zip,.rar,.7z,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown,application/zip,application/x-zip-compressed";
+    const ONEDRIVE_ATTACHMENT_FOLDER = "attachments";
+    const ATTACHMENT_ENABLED_TYPES = ["literature", "learning"];
+    let tempAttachments = { literature: null, learning: null };
+    let cloudAttachmentObjectUrls = {};
+    let cloudAttachmentFetchPromises = {};
+
+    function sanitizeAttachmentFileName(name){
+        return (name || 'attachment').replace(/[^\u4e00-\u9fa5a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_').slice(-120);
+    }
+    function buildOneDriveAppContentUrl(path){
+        return `https://graph.microsoft.com/v1.0/me/drive/special/approot:/${path}:/content`;
+    }
+    async function uploadBlobToAppPath(blob, targetPath, contentType){
+        const accessToken = await getAccessToken();
+        const res = await fetch(buildOneDriveAppContentUrl(targetPath), {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': contentType || blob.type || 'application/octet-stream'
+            },
+            body: blob
+        });
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        return targetPath;
+    }
+    async function fetchCloudAttachmentObjectUrl(path){
+        if (!path) return null;
+        if (cloudAttachmentObjectUrls[path]) return cloudAttachmentObjectUrls[path];
+        if (cloudAttachmentFetchPromises[path]) return cloudAttachmentFetchPromises[path];
+        cloudAttachmentFetchPromises[path] = (async () => {
+            const accessToken = await getAccessToken();
+            const res = await fetch(buildOneDriveAppContentUrl(path), { headers: { Authorization: `Bearer ${accessToken}` } });
+            if (!res.ok) throw new Error(`附件下载失败: ${res.status}`);
+            const blob = await res.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            cloudAttachmentObjectUrls[path] = objectUrl;
+            return objectUrl;
+        })();
+        try{
+            return await cloudAttachmentFetchPromises[path];
+        } finally {
+            delete cloudAttachmentFetchPromises[path];
+        }
+    }
+    function revokeCloudAttachmentObjectUrls(){
+        Object.values(cloudAttachmentObjectUrls).forEach(url => { try { URL.revokeObjectURL(url); } catch(e){} });
+        cloudAttachmentObjectUrls = {};
+        cloudAttachmentFetchPromises = {};
+    }
+
+    function readFileAsDataUrl(file){
+        return new Promise((resolve, reject) => {
+            const rd = new FileReader();
+            rd.onload = e => resolve(e.target.result);
+            rd.onerror = reject;
+            rd.readAsDataURL(file);
+        });
+    }
+    function formatFileSize(size){
+        const n = Number(size || 0);
+        if (!n) return '未知大小';
+        if (n < 1024) return `${n} B`;
+        if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+        return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    function getAttachmentIcon(name, mimeType){
+        const lower = String(name || '').toLowerCase();
+        const mt = String(mimeType || '').toLowerCase();
+        if (mt.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(lower)) return '🖼️';
+        if (mt.includes('pdf') || /\.pdf$/i.test(lower)) return '📕';
+        if (/(doc|docx)/i.test(lower) || mt.includes('word')) return '📘';
+        if (/(ppt|pptx)/i.test(lower) || mt.includes('presentation')) return '📙';
+        if (/(xls|xlsx|csv)/i.test(lower) || mt.includes('spreadsheet') || mt.includes('excel')) return '📗';
+        if (/(zip|rar|7z)/i.test(lower) || mt.includes('zip') || mt.includes('compressed')) return '🗜️';
+        if (/(txt|md)/i.test(lower) || mt.startsWith('text/')) return '📝';
+        return '📎';
+    }
+    function isImageLike(meta){
+        const mt = String(meta?.type || '').toLowerCase();
+        const nm = String(meta?.name || '').toLowerCase();
+        return mt.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(nm);
+    }
+    function getItemAttachmentMeta(item){
+        if (!item) return null;
+        if (item.attachPath || item.attachData) {
+            return {
+                name: item.attachName || '附件',
+                type: item.attachType || '',
+                size: item.attachSize || 0,
+                path: item.attachPath || null,
+                data: item.attachData || null,
+                storage: item.attachStorage || (item.attachPath ? 'onedrive' : 'inline'),
+                legacy: false
+            };
+        }
+        if (item.imgPath || item.img) {
+            return {
+                name: item.imgName || '图片附件',
+                type: item.imgType || 'image/*',
+                size: item.imgSize || 0,
+                path: item.imgPath || null,
+                data: item.img || null,
+                storage: item.imgStorage || (item.imgPath ? 'onedrive' : 'inline'),
+                legacy: true
+            };
+        }
+        return null;
+    }
+    function clearItemAttachment(item){
+        if (!item) return;
+        item.attachName = null;
+        item.attachType = null;
+        item.attachSize = null;
+        item.attachPath = null;
+        item.attachData = null;
+        item.attachStorage = null;
+
+        if ('img' in item) item.img = null;
+        if ('imgPath' in item) item.imgPath = null;
+        if ('imgStorage' in item) item.imgStorage = null;
+        if ('imgName' in item) item.imgName = null;
+        if ('imgType' in item) item.imgType = null;
+        if ('imgSize' in item) item.imgSize = null;
+    }
+    function applyAttachmentPayload(item, payload){
+        clearItemAttachment(item);
+        Object.assign(item, payload || {});
+    }
+    function findCollectionByType(type){
+        if (type === 'literature') return db.literature || [];
+        if (type === 'learning') return db.learning || [];
+        return [];
+    }
+    function findItemByTypeAndId(type, idKey){
+        return findCollectionByType(type).find(x => x.idKey === idKey);
+    }
+
+    function getPreviewElementId(type){
+        return type === 'literature' ? 'preview-lit-attachment' : 'preview-learn-attachment';
+    }
+    function getInputElementId(type){
+        return type === 'literature' ? 'input-lit-attachment' : 'input-learn-attachment';
+    }
+
+    function renderAttachmentInputPreview(type){
+        const el = document.getElementById(getPreviewElementId(type));
+        if (!el) return;
+        const temp = tempAttachments[type];
+        if (!temp || !temp.file) {
+            el.innerHTML = '';
+            return;
+        }
+        const icon = getAttachmentIcon(temp.file.name, temp.file.type);
+        const isImg = String(temp.file.type || '').startsWith('image/');
+        let thumb = '';
+        if (isImg) {
+            if (temp.previewUrl) thumb = `<img class="attach-preview-thumb" src="${temp.previewUrl}" alt="预览">`;
+        }
+        el.innerHTML = `<div class="attach-preview-chip">${thumb}<span>${icon}</span><span>${temp.file.name}</span><span style="color:var(--text-muted);">${formatFileSize(temp.file.size)}</span></div>`;
+    }
+
+    window.previewAttachmentInput = function(inp, type){
+        const file = inp && inp.files && inp.files[0];
+        if (!file) return;
+        const previewUrl = String(file.type || '').startsWith('image/') ? URL.createObjectURL(file) : '';
+        tempAttachments[type] = { file, previewUrl };
+        renderAttachmentInputPreview(type);
+    };
+
+    function clearAttachmentInput(type){
+        const el = document.getElementById(getInputElementId(type));
+        if (el) el.value = '';
+        const temp = tempAttachments[type];
+        if (temp && temp.previewUrl) {
+            try { URL.revokeObjectURL(temp.previewUrl); } catch(e){}
+        }
+        tempAttachments[type] = null;
+        renderAttachmentInputPreview(type);
+    }
+
+    async function buildAttachmentPayloadFromTemp(temp, ownerType){
+        if (!temp || !temp.file) {
+            return { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        }
+        const file = temp.file;
+        const mimeType = file.type || 'application/octet-stream';
+        const ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop() : 'bin';
+        const safeOriginal = sanitizeAttachmentFileName(file.name || `${ownerType}.${ext}`);
+        if (isCloudLoggedIn()) {
+            try{
+                const unique = sanitizeAttachmentFileName(`${ownerType}_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeOriginal}`);
+                const attachPath = await uploadBlobToAppPath(file, `${ONEDRIVE_ATTACHMENT_FOLDER}/${ownerType}/${unique}`, mimeType);
+                return {
+                    attachName: file.name || safeOriginal,
+                    attachType: mimeType,
+                    attachSize: file.size || 0,
+                    attachPath,
+                    attachData: null,
+                    attachStorage: 'onedrive'
+                };
+            }catch(err){
+                console.error(err);
+                const useInline = confirm(`附件上传 OneDrive 失败。\n\n点“确定”则先本地保存，稍后仍可通过“保存到云端”自动迁移；点“取消”则本次不保存该附件。`);
+                if (!useInline) throw err;
+            }
+        }
+        const attachData = await readFileAsDataUrl(file);
+        return {
+            attachName: file.name || safeOriginal,
+            attachType: mimeType,
+            attachSize: file.size || 0,
+            attachPath: null,
+            attachData,
+            attachStorage: 'inline'
+        };
+    }
+
+    async function setAttachmentImageElementSource(imgEl, meta){
+        if (!imgEl || !meta) return;
+        imgEl.style.opacity = '1';
+        if (meta.data && typeof meta.data === 'string' && meta.data.startsWith('data:')) {
+            imgEl.src = meta.data;
+            return;
+        }
+        if (meta.path) {
+            imgEl.dataset.attachPath = meta.path;
+            try{
+                const url = await fetchCloudAttachmentObjectUrl(meta.path);
+                if (imgEl.dataset.attachPath === meta.path) imgEl.src = url;
+            }catch(err){
+                console.error(err);
+                imgEl.alt = '附件预览加载失败';
+                imgEl.style.opacity = '0.45';
+            }
+        }
+    }
+
+    function buildAttachmentCardHtml(item, type){
+        const meta = getItemAttachmentMeta(item);
+        if (!meta) return '';
+        const previewId = `attach-preview-${type}-${item.idKey}`;
+        const icon = getAttachmentIcon(meta.name, meta.type);
+        const locationText = meta.storage === 'onedrive' ? '云端同步' : '本地待同步';
+        const imageHtml = isImageLike(meta) ? `<div class="attach-image-wrap"><img id="${previewId}" class="attach-image" alt="附件预览"></div>` : '';
+        return `
+            <div class="attach-card">
+                <div class="attach-card-head">
+                    <div class="attach-card-left">
+                        <span class="attach-icon">${icon}</span>
+                        <div class="attach-name-wrap">
+                            <div class="attach-name">${meta.name || '附件'}</div>
+                            <div class="attach-meta">${formatFileSize(meta.size)} · ${locationText}</div>
+                        </div>
+                    </div>
+                    <div class="attach-actions">
+                        <span class="text-btn edit" onclick="openAttachmentForItem('${type}', ${item.idKey})">打开附件</span>
+                        <span class="text-btn edit" onclick="replaceAttachmentForItem('${type}', ${item.idKey})">替换附件</span>
+                        <span class="text-btn delete" onclick="removeAttachmentForItem('${type}', ${item.idKey})">删除附件</span>
+                    </div>
+                </div>
+                ${imageHtml}
+            </div>
+        `;
+    }
+
+    async function hydrateAttachmentPreviewForItem(type, item){
+        const meta = getItemAttachmentMeta(item);
+        if (!meta || !isImageLike(meta)) return;
+        const imgEl = document.getElementById(`attach-preview-${type}-${item.idKey}`);
+        if (!imgEl) return;
+        await setAttachmentImageElementSource(imgEl, meta);
+    }
+
+    window.openAttachmentForItem = async function(type, idKey){
+        const item = findItemByTypeAndId(type, idKey);
+        const meta = getItemAttachmentMeta(item);
+        if (!meta) return alert('该条目暂无附件。');
+        try{
+            let url = null;
+            if (meta.data && typeof meta.data === 'string') url = meta.data;
+            else if (meta.path) url = await fetchCloudAttachmentObjectUrl(meta.path);
+            if (!url) return alert('暂时无法打开该附件。');
+            window.open(url, '_blank', 'noopener');
+        }catch(err){
+            console.error(err);
+            alert('打开附件失败，请确认 Microsoft 登录状态后重试。');
+        }
+    };
+
+    window.replaceAttachmentForItem = function(type, idKey){
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = ATTACHMENT_ACCEPT;
+        input.onchange = async () => {
+            if (!input.files || !input.files[0]) return;
+            const item = findItemByTypeAndId(type, idKey);
+            if (!item) return;
+            const file = input.files[0];
+            const temp = { file, previewUrl: String(file.type || '').startsWith('image/') ? URL.createObjectURL(file) : '' };
+            try{
+                const payload = await buildAttachmentPayloadFromTemp(temp, type);
+                applyAttachmentPayload(item, payload);
+                await persist();
+                if (type === 'literature') renderLiterature();
+                if (type === 'learning') renderLearning();
+                alert('附件已替换。');
+            }catch(err){
+                if (!String((err && err.message) || err || '').includes('REDIRECTING_FOR_')) {
+                    console.error(err);
+                    alert('替换附件失败。');
+                }
+            }finally{
+                if (temp.previewUrl) try { URL.revokeObjectURL(temp.previewUrl); } catch(e){}
+            }
+        };
+        input.click();
+    };
+
+    window.removeAttachmentForItem = async function(type, idKey){
+        const item = findItemByTypeAndId(type, idKey);
+        if (!item) return;
+        if (!confirm('确定删除这个附件吗？')) return;
+        clearItemAttachment(item);
+        await persist();
+        if (type === 'literature') renderLiterature();
+        if (type === 'learning') renderLearning();
+    };
+
+    async function migrateInlineAttachmentsToOneDrive(showProgress = false){
+        const jobs = [];
+        ATTACHMENT_ENABLED_TYPES.forEach(type => {
+            (findCollectionByType(type) || []).forEach((item, index) => {
+                if (item && item.attachData && typeof item.attachData === 'string' && item.attachData.startsWith('data:') && !item.attachPath) {
+                    jobs.push({ type, index, item });
+                }
+            });
+        });
+        if (!jobs.length || !isCloudLoggedIn()) return 0;
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i];
+            const blob = dataUrlToBlob(job.item.attachData);
+            const ext = (job.item.attachName && job.item.attachName.includes('.'))
+                ? job.item.attachName.split('.').pop()
+                : ((blob.type || '').split('/').pop() || 'bin');
+            const safeOriginal = sanitizeAttachmentFileName(job.item.attachName || `${job.type}_${job.item.idKey}.${ext}`);
+            const unique = sanitizeAttachmentFileName(`${job.type}_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeOriginal}`);
+            const attachPath = await uploadBlobToAppPath(blob, `${ONEDRIVE_ATTACHMENT_FOLDER}/${job.type}/${unique}`, job.item.attachType || blob.type || 'application/octet-stream');
+            db[job.type][job.index].attachPath = attachPath;
+            db[job.type][job.index].attachData = null;
+            db[job.type][job.index].attachStorage = 'onedrive';
+            if (showProgress) updateCloudUI(`正在迁移附件 ${i + 1}/${jobs.length}...`);
+        }
+        await persist({ markDirty: true, skipAutoSave: true });
+        return jobs.length;
+    }
+
+    const __origSaveCloudData_attachment = saveCloudData;
+    saveCloudData = async function(options = {}){
+        const auto = !!options.auto;
+        try{
+            await migrateInlineAttachmentsToOneDrive(!auto);
+        }catch(err){
+            console.error('迁移附件到 OneDrive 失败：', err);
+        }
+        return await __origSaveCloudData_attachment(options);
+    };
+
+    const __origLoadCloudData_attachment = loadCloudData;
+    loadCloudData = async function(){
+        const res = await __origLoadCloudData_attachment();
+        if (typeof renderLiterature === 'function') renderLiterature();
+        if (typeof renderLearning === 'function') renderLearning();
+        return res;
+    };
+
+    function injectAttachmentInputs(){
+        const litDesc = document.getElementById('input-lit-desc');
+        if (litDesc && !document.getElementById('input-lit-attachment')) {
+            const row = document.createElement('div');
+            row.className = 'attach-input-row';
+            row.id = 'literature-attach-row';
+            row.innerHTML = `
+                <label class="file-upload-label">📎 上传附件
+                    <input type="file" id="input-lit-attachment" accept="${ATTACHMENT_ACCEPT}">
+                </label>
+                <div id="preview-lit-attachment" class="attach-preview-inline"></div>
+            `;
+            litDesc.insertAdjacentElement('afterend', row);
+            row.querySelector('input').addEventListener('change', function(){ previewAttachmentInput(this, 'literature'); });
+        }
+
+        const learnInput = document.getElementById('input-learn-img');
+        if (learnInput) {
+            const wrap = learnInput.parentElement && learnInput.parentElement.parentElement;
+            if (wrap && !document.getElementById('input-learn-attachment')) {
+                wrap.innerHTML = `
+                    <label class="file-upload-label">📎 上传附件
+                        <input type="file" id="input-learn-attachment" accept="${ATTACHMENT_ACCEPT}">
+                    </label>
+                    <div id="preview-learn-attachment" class="attach-preview-inline"></div>
+                `;
+                wrap.querySelector('input').addEventListener('change', function(){ previewAttachmentInput(this, 'learning'); });
+            }
+        }
+    }
+
+    saveLiterature = async function(){
+        const id = document.getElementById('input-lit-id').value.trim();
+        if (!id) return alert("必须填写文献标识！");
+        const tags = document.getElementById('input-lit-tags').value.split(',').map(s => s.trim()).filter(Boolean);
+        let attachmentPayload = { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        if (tempAttachments.literature) attachmentPayload = await buildAttachmentPayloadFromTemp(tempAttachments.literature, 'literature');
+        db.literature.push({
+            idKey: Date.now(),
+            time: getFullTime(),
+            litId: id,
+            journal: document.getElementById('input-lit-journal').value,
+            tags,
+            params: document.getElementById('input-lit-params').value,
+            desc: document.getElementById('input-lit-desc').value,
+            ...attachmentPayload
+        });
+        ['id','journal','tags','params','desc'].forEach(k => document.getElementById(`input-lit-${k}`).value = '');
+        clearAttachmentInput('literature');
+        await persist();
+        renderLiterature();
+    };
+
+    renderLiterature = function(){
+        const list = document.getElementById('list-literature');
+        if (!list) return;
+        list.innerHTML = '';
+        let allTags = new Set();
+        db.literature.forEach(item => (item.tags || []).forEach(t => allTags.add(t)));
+        document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${t}')">${t}</span>`).join('');
+        document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${t}">`).join('');
+        let items = [...db.literature].reverse();
+        if (currentFilterTag) items = items.filter(item => (item.tags || []).includes(currentFilterTag));
+        if (!items.length) {
+            list.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">暂无文献记录</div>';
+            return;
+        }
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'lit-card';
+            card.dataset.searchKey = `literature-${item.idKey}`;
+            const tagHtml = (item.tags || []).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
+            const detailsId = `lit-det-${item.idKey}`;
+            card.innerHTML = `
+                <div class="lit-summary" onclick="toggleLitDesc('${detailsId}')">
+                    <div>
+                        <div class="lit-id">${item.litId} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${item.journal || ''}</span></div>
+                        <div style="margin-top:6px;">${tagHtml}</div>
+                    </div>
+                    <div class="action-group" style="opacity: 1;" onclick="event.stopPropagation()">
+                        <span class="text-btn edit" onclick="editLiterature(${item.idKey})">✎ 修改</span>
+                        <span class="text-btn delete" onclick="deleteRecord('literature', ${item.idKey})">🗑️ 删除</span>
+                    </div>
+                </div>
+                <div class="lit-details" id="${detailsId}">
+                    ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${item.params}</div>` : ''}
+                    <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${item.desc || ''}</div>
+                    ${buildAttachmentCardHtml(item, 'literature')}
+                    <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${item.time}</div>
+                </div>
+            `;
+            list.appendChild(card);
+            hydrateAttachmentPreviewForItem('literature', item);
+        });
+    };
+
+    saveLearning = async function(){
+        const title = document.getElementById('input-learn-title').value.trim();
+        if (!title) return alert("必须填写标题！");
+        let attachmentPayload = { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        if (tempAttachments.learning) attachmentPayload = await buildAttachmentPayloadFromTemp(tempAttachments.learning, 'learning');
+        db.learning.push({
+            idKey: Date.now(),
+            time: getFullTime(),
+            title,
+            tags: document.getElementById('input-learn-tags').value,
+            desc: document.getElementById('input-learn-desc').value,
+            code: document.getElementById('input-learn-code').value,
+            ...attachmentPayload
+        });
+        ['title','tags','desc','code'].forEach(k => document.getElementById(`input-learn-${k}`).value = '');
+        clearAttachmentInput('learning');
+        await persist();
+        renderLearning();
+    };
+
+    renderLearning = function(){
+        const list = document.getElementById('list-learning');
+        if (!list) return;
+        list.innerHTML = '';
+        [...db.learning].reverse().forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'learn-card';
+            card.dataset.searchKey = `learning-${item.idKey}`;
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${item.title}</div>
+                        ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${item.tags}</div>` : ''}
+                    </div>
+                    <div class="action-group" style="opacity: 1;">
+                        <span class="text-btn edit" onclick="editLearning(${item.idKey})">✎</span>
+                        <span class="text-btn delete" onclick="deleteRecord('learning', ${item.idKey})">🗑️</span>
+                    </div>
+                </div>
+                ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${item.desc}</div>` : ''}
+                ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${item.code}</div>` : ''}
+                ${buildAttachmentCardHtml(item, 'learning')}
+                <div style="font-size:11px; color:var(--text-muted); text-align:right; margin-top:10px;">${item.time}</div>
+            `;
+            list.appendChild(card);
+            hydrateAttachmentPreviewForItem('learning', item);
+        });
+    };
+
+    const __origDeleteRecord_attachment = deleteRecord;
+    deleteRecord = function(type, identifier){
+        if (type === 'literature' || type === 'learning') {
+            revokeCloudAttachmentObjectUrls();
+        }
+        return __origDeleteRecord_attachment(type, identifier);
+    };
+
+    function bootAttachmentUpgrade(){
+        injectAttachmentInputs();
+        renderAttachmentInputPreview('literature');
+        renderAttachmentInputPreview('learning');
+        if (typeof renderLiterature === 'function') renderLiterature();
+        if (typeof renderLearning === 'function') renderLearning();
+        updateCloudUI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootAttachmentUpgrade);
+    } else {
+        bootAttachmentUpgrade();
+    }
+    window.addEventListener('load', bootAttachmentUpgrade);
 })();
 </script>
 
