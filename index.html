@@ -950,35 +950,34 @@ body {
 }
 </style>
 
-<style id="focus-timeline-style">
-.tl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px; }
-.tl-nav-group { display:flex; gap:6px; align-items:center; }
-.tl-nav-btn { background:#fff; border:1px solid var(--border-color); border-radius:8px; padding:4px 11px; font-size:12px; cursor:pointer; color:var(--title-color); transition:background 0.15s,color 0.15s,border-color 0.15s; font-family:inherit; }
-.tl-nav-btn:hover { background:var(--sidebar-active); border-color:var(--primary-color); }
-.tl-nav-btn.tl-today { background:var(--primary-color); color:#fff; border-color:var(--primary-color); }
-.tl-nav-btn:disabled { opacity:0.4; cursor:not-allowed; }
-.tl-date-label { font-size:12px; color:var(--text-muted); min-width:120px; text-align:center; }
-.tl-total-label { font-size:13px; font-weight:700; color:var(--primary-color); }
-.tl-body { display:flex; border:1px solid var(--border-color); border-radius:12px; overflow:hidden; background:#fff; position:relative; }
-.tl-axis { width:40px; flex-shrink:0; background:#f8fbfa; border-right:1px solid var(--border-color); }
-.tl-axis-hour { height:36px; display:flex; align-items:flex-start; justify-content:flex-end; padding:2px 6px 0 0; font-size:10px; color:var(--text-muted); font-family:"JetBrains Mono",monospace; border-bottom:1px solid #eef2f1; box-sizing:border-box; flex-shrink:0; }
-.tl-grid-wrap { flex:1; position:relative; height:864px; overflow:hidden; }
-.tl-hline { position:absolute; left:0; right:0; height:1px; pointer-events:none; z-index:0; }
-.tl-hline.hour { background:#e8eeec; }
-.tl-hline.half { background:#f4f7f6; }
-.tl-block { position:absolute; border-radius:3px; cursor:pointer; transition:filter 0.12s,box-shadow 0.12s; overflow:hidden; z-index:2; box-sizing:border-box; }
-.tl-block:hover { filter:brightness(1.12); box-shadow:0 2px 10px rgba(0,0,0,0.18); z-index:5; }
-.tl-block-inner { width:100%; height:100%; display:flex; align-items:flex-start; padding:2px 4px; overflow:hidden; }
-.tl-block-label { font-size:10px; color:rgba(255,255,255,0.92); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 2px rgba(0,0,0,0.3); pointer-events:none; line-height:1.3; }
-.tl-now-line { position:absolute; left:0; right:0; height:2px; background:#e05555; z-index:6; pointer-events:none; }
-.tl-now-dot { position:absolute; left:-4px; top:-4px; width:10px; height:10px; border-radius:50%; background:#e05555; }
-#tl-tooltip { position:fixed; background:rgba(28,38,36,0.93); color:#fff; font-size:12px; line-height:1.65; padding:8px 12px; border-radius:9px; pointer-events:none; z-index:9999; backdrop-filter:blur(6px); box-shadow:0 4px 18px rgba(0,0,0,0.28); display:none; max-width:220px; }
-.tl-legend { display:flex; flex-wrap:wrap; gap:10px; margin-top:10px; }
-.tl-legend-item { display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-main); }
-.tl-legend-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
-.tl-empty { display:flex; align-items:center; justify-content:center; height:80px; color:var(--text-muted); font-size:13px; }
+<style id="tl-style">
+.tl-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;}
+.tl-nav-group{display:flex;gap:6px;align-items:center;}
+.tl-nav-btn{background:#fff;border:1px solid var(--border-color);border-radius:8px;padding:4px 11px;font-size:12px;cursor:pointer;color:var(--title-color);transition:.15s;font-family:inherit;}
+.tl-nav-btn:hover{background:var(--sidebar-active);border-color:var(--primary-color);}
+.tl-nav-btn.is-today{background:var(--primary-color);color:#fff;border-color:var(--primary-color);}
+.tl-nav-btn:disabled{opacity:.4;cursor:not-allowed;}
+.tl-meta{display:flex;align-items:center;gap:12px;}
+.tl-date-lbl{font-size:12px;color:var(--text-muted);}
+.tl-total-lbl{font-size:13px;font-weight:700;color:var(--primary-color);}
+.tl-body{display:flex;border:1px solid var(--border-color);border-radius:12px;overflow:hidden;background:#fff;}
+.tl-axis{width:40px;flex-shrink:0;background:#f8fbfa;border-right:1px solid var(--border-color);}
+.tl-axis-row{height:36px;display:flex;align-items:flex-start;justify-content:flex-end;padding:2px 6px 0 0;font-size:10px;color:var(--text-muted);font-family:"JetBrains Mono",monospace;border-bottom:1px solid #eef2f1;box-sizing:border-box;}
+.tl-grid{flex:1;position:relative;height:864px;overflow:hidden;}
+.tl-line{position:absolute;left:0;right:0;height:1px;pointer-events:none;}
+.tl-line.h{background:#e8eeec;}
+.tl-line.hh{background:#f4f7f6;}
+.tl-block{position:absolute;border-radius:3px;cursor:pointer;overflow:hidden;box-sizing:border-box;transition:filter .12s,box-shadow .12s;}
+.tl-block:hover{filter:brightness(1.1);box-shadow:0 3px 12px rgba(0,0,0,.2);z-index:5!important;}
+.tl-blabel{font-size:10px;color:rgba(255,255,255,.92);font-weight:600;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px rgba(0,0,0,.3);line-height:1.3;}
+.tl-nowline{position:absolute;left:0;right:0;height:2px;background:#e05555;z-index:6;pointer-events:none;}
+.tl-nowdot{position:absolute;left:-4px;top:-4px;width:10px;height:10px;border-radius:50%;background:#e05555;}
+.tl-empty{display:flex;align-items:center;justify-content:center;height:80px;color:var(--text-muted);font-size:13px;}
+.tl-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+.tl-legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text-main);}
+.tl-legend-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+#tl-tip{position:fixed;background:rgba(24,34,32,.93);color:#fff;font-size:12px;line-height:1.7;padding:8px 12px;border-radius:9px;pointer-events:none;z-index:9999;backdrop-filter:blur(6px);box-shadow:0 4px 18px rgba(0,0,0,.28);display:none;max-width:220px;}
 </style>
-
 </head>
 <body>
 
@@ -1200,24 +1199,23 @@ body {
                 <div class="stats-subtitle">📉 近7天批阅趋势</div>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
                 <div class="stats-subtitle">⏱️ 专注时间轴</div>
-                <!-- 时间轴 -->
                 <div class="tl-header">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <span class="tl-date-label" id="tl-date-label"></span>
-                        <span class="tl-total-label" id="tl-total-label"></span>
+                    <div class="tl-meta">
+                        <span class="tl-date-lbl" id="tl-date-lbl"></span>
+                        <span class="tl-total-lbl" id="tl-total-lbl"></span>
                     </div>
                     <div class="tl-nav-group">
                         <button class="tl-nav-btn" onclick="tlShift(-1)">‹ 前一天</button>
-                        <button class="tl-nav-btn tl-today" onclick="tlToday()">今天</button>
+                        <button class="tl-nav-btn is-today" onclick="tlToday()">今天</button>
                         <button class="tl-nav-btn" id="tl-next-btn" onclick="tlShift(1)">后一天 ›</button>
                     </div>
                 </div>
-                <div class="tl-body" id="tl-body">
+                <div class="tl-body">
                     <div class="tl-axis" id="tl-axis"></div>
-                    <div class="tl-grid-wrap" id="tl-grid"></div>
+                    <div class="tl-grid" id="tl-grid"></div>
                 </div>
                 <div class="tl-legend" id="tl-legend"></div>
-                <div id="tl-tooltip"></div>
+                <div id="tl-tip"></div>
 
                 <div class="stats-subtitle">🧭 理政时间分布</div>
                 <div class="distribution-grid">
@@ -3031,7 +3029,7 @@ function renderStats() {
     ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = formatMinutesHuman(st[p].m); });
     drawTrendChart();
     renderFocusDistributionCharts();
-    if (typeof renderFocusTimeline === 'function') renderFocusTimeline();
+    if(typeof renderFocusTimeline==="function") renderFocusTimeline();
 }
 function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
@@ -3057,6 +3055,197 @@ function importData(e) {
     rd.onload = async ev => { try { if (confirm("确定要覆盖当前所有数据吗？此操作不可逆。")) { revokeCloudImageObjectUrls(); db = { ...db, ...JSON.parse(ev.target.result) }; ensureDbCompatibility(); await persist(); renderAll(); updateCloudUI(); alert("恢复成功！"); } } catch(err) { alert("格式错误，请检查文件是否为有效的 JSON 备份"); } };
     rd.readAsText(f); e.target.value = '';
 }
+
+// ============================================================
+// ⏱️ 专注时间轴 (Timeline)  — 完整独立模块
+// ============================================================
+var _tlDate = (function(){ var d=new Date(); d.setHours(0,0,0,0); return d; })();
+
+function _tlPad(n){ return String(n).padStart(2,'0'); }
+
+function _tlDateKey(d){
+    return d.getFullYear()+'-'+_tlPad(d.getMonth()+1)+'-'+_tlPad(d.getDate());
+}
+
+function tlShift(delta){
+    _tlDate = new Date(_tlDate);
+    _tlDate.setDate(_tlDate.getDate()+delta);
+    renderFocusTimeline();
+}
+function tlToday(){
+    _tlDate = new Date(); _tlDate.setHours(0,0,0,0);
+    renderFocusTimeline();
+}
+
+function renderFocusTimeline(){
+    var axis   = document.getElementById('tl-axis');
+    var grid   = document.getElementById('tl-grid');
+    var legend = document.getElementById('tl-legend');
+    var dateLbl= document.getElementById('tl-date-lbl');
+    var totLbl = document.getElementById('tl-total-lbl');
+    var nextBtn= document.getElementById('tl-next-btn');
+    var tip    = document.getElementById('tl-tip');
+    if(!axis||!grid) return;
+
+    var ROW_H = 36; // px per hour
+
+    // 判断今天
+    var today = new Date(); today.setHours(0,0,0,0);
+    var isToday = _tlDateKey(_tlDate) === _tlDateKey(today);
+
+    // 日期标签
+    var wd = '日一二三四五六'[_tlDate.getDay()];
+    dateLbl.textContent = _tlDate.getFullYear()+'/'
+        +_tlPad(_tlDate.getMonth()+1)+'/'+_tlPad(_tlDate.getDate())
+        +' 星期'+wd+(isToday?' · 今天':'');
+    if(nextBtn){ nextBtn.disabled = isToday; }
+
+    // 当天起止时间戳
+    var dayStart = new Date(_tlDate); dayStart.setHours(0,0,0,0);
+    var dayEnd   = new Date(_tlDate); dayEnd.setHours(24,0,0,0);
+
+    // 过滤当天有交集的记录
+    var recs = (db.focusRecords||[]).filter(function(r){
+        var endTs = r.endAt ? new Date(r.endAt) : (r.date ? new Date(r.date) : null);
+        var startTs = r.startAt ? new Date(r.startAt) : null;
+        if(!startTs && endTs && r.seconds) startTs = new Date(endTs.getTime()-r.seconds*1000);
+        if(!endTs||!startTs) return false;
+        return endTs > dayStart && startTs < dayEnd;
+    });
+
+    // 把每条记录映射到当天分钟数
+    var items = [];
+    var totalSec = 0;
+    recs.forEach(function(r){
+        var endTs = r.endAt ? new Date(r.endAt) : (r.date ? new Date(r.date) : null);
+        var startTs = r.startAt ? new Date(r.startAt) : null;
+        if(!startTs && endTs && r.seconds) startTs = new Date(endTs.getTime()-r.seconds*1000);
+        if(!endTs||!startTs) return;
+        var s = Math.max(startTs.getTime(), dayStart.getTime());
+        var e = Math.min(endTs.getTime(),   dayEnd.getTime());
+        if(e<=s) return;
+        var startMin = (s - dayStart.getTime())/60000;
+        var endMin   = (e - dayStart.getTime())/60000;
+        totalSec += (endMin-startMin)*60;
+        items.push({ r:r, startMin:startMin, endMin:endMin });
+    });
+
+    // 总时长
+    if(totalSec>=3600){
+        totLbl.textContent = Math.floor(totalSec/3600)+'h '+Math.floor((totalSec%3600)/60)+'m';
+    } else if(totalSec>0){
+        totLbl.textContent = Math.floor(totalSec/60)+'m';
+    } else {
+        totLbl.textContent = '';
+    }
+
+    // ── 左侧小时刻度 ──
+    axis.innerHTML='';
+    axis.style.height = (ROW_H*24)+'px';
+    for(var h=0;h<24;h++){
+        var row=document.createElement('div');
+        row.className='tl-axis-row';
+        row.textContent=_tlPad(h);
+        axis.appendChild(row);
+    }
+
+    // ── 右侧格子 ──
+    grid.innerHTML='';
+    grid.style.height=(ROW_H*24)+'px';
+
+    // 网格线
+    for(var h=0;h<24;h++){
+        var l1=document.createElement('div'); l1.className='tl-line h';
+        l1.style.top=(h*ROW_H)+'px'; grid.appendChild(l1);
+        var l2=document.createElement('div'); l2.className='tl-line hh';
+        l2.style.top=(h*ROW_H+ROW_H/2)+'px'; grid.appendChild(l2);
+    }
+
+    // 当前时间红线
+    if(isToday){
+        var now=new Date();
+        var minNow=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+        var nl=document.createElement('div'); nl.className='tl-nowline';
+        nl.style.top=((minNow/60)*ROW_H)+'px';
+        var nd=document.createElement('div'); nd.className='tl-nowdot';
+        nl.appendChild(nd); grid.appendChild(nl);
+    }
+
+    if(!items.length){
+        var em=document.createElement('div'); em.className='tl-empty';
+        em.textContent='当天暂无专注记录'; grid.appendChild(em);
+        legend.innerHTML=''; return;
+    }
+
+    // 泳道分配（贪心，避免同时段色块重叠）
+    items.sort(function(a,b){return a.startMin-b.startMin;});
+    var lanes=[];
+    items.forEach(function(item){
+        var lane=lanes.findIndex(function(e){return e<=item.startMin;});
+        if(lane===-1){lane=lanes.length; lanes.push(0);}
+        lanes[lane]=item.endMin;
+        item.lane=lane;
+    });
+    var totalLanes=Math.max(lanes.length,1);
+
+    // 画色块
+    var usedCats={};
+    items.forEach(function(item){
+        var r=item.r;
+        var color=getFocusCategoryColor(r.categoryId);
+        var catName=getFocusCategoryName(r.categoryId);
+        var sub=(r.subCategory||r.topic||'').trim();
+        var label=sub? catName+'·'+sub : catName;
+        usedCats[r.categoryId]=color;
+
+        var topPx=(item.startMin/60)*ROW_H;
+        var hpx=Math.max(((item.endMin-item.startMin)/60)*ROW_H, 4);
+        var laneW=100/totalLanes;
+        var leftPct=item.lane*laneW;
+
+        var block=document.createElement('div');
+        block.className='tl-block';
+        block.style.cssText='top:'+topPx+'px;height:'+hpx+'px;'
+            +'left:calc('+leftPct+'% + 3px);width:calc('+laneW+'% - 6px);'
+            +'background:'+color+';z-index:2;';
+
+        if(hpx>=14){
+            var lbl=document.createElement('div');
+            lbl.className='tl-blabel'; lbl.textContent=label;
+            block.appendChild(lbl);
+        }
+
+        // Tooltip
+        var sh=_tlPad(Math.floor(item.startMin/60));
+        var sm=_tlPad(Math.round(item.startMin%60));
+        var eh=_tlPad(Math.floor(item.endMin/60));
+        var em2=_tlPad(Math.round(item.endMin%60));
+        var dur=item.endMin-item.startMin;
+        var durStr=dur>=60? Math.floor(dur/60)+'h '+Math.round(dur%60)+'m' : Math.round(dur)+'m';
+
+        block.addEventListener('mouseenter',function(){
+            tip.style.display='block';
+            tip.innerHTML='<strong>'+label+'</strong><br>'+sh+':'+sm+' – '+eh+':'+em2+'<br>时长：'+durStr;
+        });
+        block.addEventListener('mousemove',function(e){
+            tip.style.left=(e.clientX+14)+'px';
+            tip.style.top=(e.clientY-10)+'px';
+        });
+        block.addEventListener('mouseleave',function(){tip.style.display='none';});
+
+        grid.appendChild(block);
+    });
+
+    // 图例
+    legend.innerHTML='';
+    Object.keys(usedCats).forEach(function(catId){
+        var li=document.createElement('div'); li.className='tl-legend-item';
+        li.innerHTML='<span class="tl-legend-dot" style="background:'+usedCats[catId]+'"></span>'
+            +getFocusCategoryName(catId);
+        legend.appendChild(li);
+    });
+}
+
 </script>
 
 
