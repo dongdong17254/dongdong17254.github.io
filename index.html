@@ -393,6 +393,946 @@
             .focus-field-row { flex-direction: column; align-items: stretch; }
         }
     </style>
+
+<style id="emperor-responsive-unified-style">
+/* ===== 统一修复与美化 ===== */
+html, body { overflow-x: hidden; }
+* { min-width: 0; }
+.card, .sub-box, .status-widget, .status-col, .media-card, .annual-item { max-width: 100%; }
+.card{
+    transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+    border-color:#EEF4F3;
+}
+.card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(0,0,0,.05);
+    border-color: rgba(108,141,135,.26);
+}
+.card{ margin-bottom:24px; }
+.card .sub-box{ margin-bottom:14px; }
+.section-title{ font-size:19px; margin-bottom:20px; }
+.sub-box h4{ font-size:15px !important; }
+.header-main::after{
+    content:"";
+    display:block;
+    width:220px;
+    max-width:42%;
+    height:1px;
+    margin:14px auto 0;
+    background:linear-gradient(90deg, transparent, rgba(108,141,135,.38), transparent);
+}
+.progress-bar-bg, .dist-bar{
+    height:10px !important;
+    border-radius:999px !important;
+}
+.progress-bar-fill, .dist-bar-fill{
+    background:linear-gradient(90deg, #A8C2BB, #6C8D87) !important;
+}
+.time-display.running-pulse{
+    animation: emperorPulse 1.8s ease-in-out infinite;
+}
+@keyframes emperorPulse{
+    0%,100%{ transform:scale(1); opacity:1; }
+    50%{ transform:scale(1.015); opacity:.92; }
+}
+.todo-text, .record-content, .media-desc, .search-result-snippet {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+.main-content { min-width: 0; }
+.layout { align-items: flex-start; }
+.sidebar > .status-widget, .sidebar > div[style*="border-top"] { width: 100%; }
+
+/* ===== 大平板 / 竖屏电脑 ===== */
+@media (max-width: 1180px), (orientation: portrait) {
+    body { padding: 14px; }
+    .header { flex-direction: column; align-items: stretch; }
+    .header-tools { width: 100%; justify-content: center; }
+    .header-search { max-width: none; }
+    .layout { flex-direction: column; }
+    .sidebar {
+        width: 100%;
+        position: static;
+        top: auto;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+        padding: 14px;
+    }
+    .sidebar > .nav-item {
+        margin-bottom: 0;
+        justify-content: center;
+        text-align: center;
+        min-height: 44px;
+    }
+    .sidebar > .status-widget,
+    .sidebar > div[style*="border-top"] {
+        grid-column: 1 / -1;
+    }
+
+    .grid-split,
+    .grid-split-half,
+    .grid-3,
+    .pie-grid,
+    .distribution-grid,
+    .stats-time-summary,
+    .status-records-grid {
+        grid-template-columns: 1fr 1fr !important;
+    }
+
+    .resp-home-hero-row,
+    .resp-overview-stats-row,
+    .resp-todo-row,
+    .resp-word-row,
+    .resp-status-input-row {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .resp-home-hero-row > .timer-box,
+    .resp-home-hero-row > .focus-side-panel {
+        flex: 1 1 320px !important;
+        width: 100% !important;
+    }
+
+    .resp-overview-stats-row > .sub-box {
+        flex: 1 1 220px !important;
+    }
+
+    .resp-todo-row > * {
+        flex: 1 1 160px !important;
+        min-width: 0 !important;
+    }
+    .resp-todo-row > .btn {
+        flex: 0 0 auto !important;
+    }
+    .prio-select-group { flex-wrap: wrap; }
+
+    .resp-word-row > * {
+        flex: 1 1 220px !important;
+        min-width: 0 !important;
+    }
+
+    .resp-status-input-row > * {
+        min-width: 0 !important;
+    }
+
+    .todo-content {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .todo-text {
+        white-space: normal;
+    }
+}
+
+/* ===== 手机 / 窄屏 ===== */
+@media (max-width: 780px) {
+    body { padding: 10px; }
+    .header h1 { font-size: 24px; }
+    .quote-container { font-size: 13px; flex-wrap: wrap; }
+    .header-search-bar {
+        padding: 6px;
+        gap: 6px;
+    }
+    .header-search-input {
+        font-size: 12px;
+    }
+    .header-search-btn {
+        min-width: auto;
+        padding: 8px 10px;
+    }
+    .search-hint-line { display: none; }
+
+    .sidebar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        border-radius: 16px;
+        padding: 10px;
+    }
+    .nav-item {
+        font-size: 13px;
+        padding: 10px 8px;
+    }
+
+    .card {
+        padding: 16px 14px;
+        border-radius: 16px;
+    }
+    .sub-box {
+        padding: 14px;
+        border-radius: 14px;
+    }
+    .section-title {
+        font-size: 17px;
+        margin-bottom: 16px;
+    }
+
+    .grid-split,
+    .grid-split-half,
+    .grid-3,
+    .pie-grid,
+    .distribution-grid,
+    .stats-time-summary,
+    .status-records-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .resp-home-hero-row,
+    .resp-overview-stats-row,
+    .resp-status-input-row {
+        flex-direction: column !important;
+    }
+
+    .resp-todo-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .resp-todo-row > * {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+    .resp-todo-row > .btn {
+        width: 100% !important;
+    }
+
+    .resp-word-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    .resp-word-row > * {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+    }
+
+    .resp-status-input-row .btn {
+        width: 100%;
+        align-self: auto !important;
+    }
+
+    .timer-box {
+        padding: 18px 14px !important;
+    }
+    .time-display {
+        font-size: 38px !important;
+    }
+    .timer-btn-grid,
+    .timer-btn-full {
+        max-width: none;
+        width: 100%;
+    }
+
+    .status-tabs {
+        flex-direction: column;
+    }
+
+    .word-stats-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .media-gallery {
+        grid-template-columns: 1fr;
+    }
+
+    .focus-category-chips,
+    .shortcut-tags {
+        gap: 6px;
+    }
+
+    .focus-category-chip,
+    .shortcut-tag,
+    .shortcut-item {
+        font-size: 11px;
+        padding: 6px 9px;
+    }
+
+    .focus-donut {
+        width: 180px;
+        height: 180px;
+    }
+    .focus-donut::after {
+        inset: 22px;
+    }
+}
+
+/* ===== 超小手机 ===== */
+@media (max-width: 520px) {
+    .sidebar {
+        grid-template-columns: 1fr;
+    }
+    .header h1 { font-size: 22px; }
+    .time-display { font-size: 34px !important; }
+    .focus-duration { min-width: 0; text-align: left; }
+    .calendar-grid { gap: 6px; }
+    .calendar-cell { min-height: 88px; padding: 6px; }
+    .search-results-popover { width: min(96vw, 420px); right: 50%; transform: translateX(50%); }
+}
+</style>
+
+
+<style id="emperor-mobile-cloud-ui-fix">
+/* 手机端显示云同步与今日概况卡片 */
+@media (max-width: 780px) {
+    .sidebar > .status-widget{
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        margin-top: 8px !important;
+    }
+    .sidebar > div[style*="border-top"]{
+        display: block !important;
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+    }
+    .sidebar .cloud-actions{
+        grid-template-columns: 1fr !important;
+    }
+    .sidebar .cloud-btn{
+        min-height: 42px;
+        font-size: 14px;
+    }
+    .sidebar .cloud-note{
+        font-size: 12px;
+        line-height: 1.55;
+    }
+}
+@media (max-width: 520px) {
+    .sidebar > .status-widget{
+        padding: 12px !important;
+        border-radius: 14px !important;
+    }
+    .sidebar .status-row{
+        font-size: 12px !important;
+        gap: 8px;
+    }
+    .sidebar .cloud-pill{
+        max-width: 132px !important;
+    }
+}
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
+<style id="emperor-beautify-2025">
+/* ══════════════════════════════════════════
+   字体系统
+══════════════════════════════════════════ */
+* {
+    font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+.header h1,
+.section-title,
+.modal-title,
+.stat-box-title {
+    font-family: "Noto Serif SC", "STSong", serif;
+    letter-spacing: 0.5px;
+}
+.time-display {
+    font-family: "JetBrains Mono", "Courier New", monospace !important;
+    letter-spacing: -3px;
+    font-feature-settings: "tnum";
+}
+#section-quotes #input-memorable-quote,
+#list-memorableQuotes .record-content,
+.quote-font,
+.quote-container span {
+    font-family: "STZhongsong", "华文中宋", "Songti SC", "Noto Serif SC", serif;
+}
+
+
+/* ══════════════════════════════════════════
+   背景：蓝绿渐变 + 光晕层次
+══════════════════════════════════════════ */
+body {
+    background-color: #E4EEF0 !important;
+    background-image:
+        radial-gradient(ellipse at 15% 15%, rgba(108,141,135,0.22) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 80%, rgba(91,139,148,0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(162,196,190,0.10) 0%, transparent 70%),
+        linear-gradient(160deg, #DFF0EC 0%, #E4EEF2 45%, #DCE9EE 100%) !important;
+}
+
+/* ══════════════════════════════════════════
+   标题渐变色
+══════════════════════════════════════════ */
+.header h1 {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, var(--title-color) 0%, var(--primary-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 2px;
+}
+.header-main::after {
+    width: 60px !important;
+    height: 2px !important;
+    background: linear-gradient(90deg, var(--primary-color), var(--warning-color), transparent) !important;
+    border-radius: 2px;
+    margin-top: 10px !important;
+}
+
+/* ══════════════════════════════════════════
+   卡片：有颜色的阴影 + 玻璃质感
+══════════════════════════════════════════ */
+.card {
+    box-shadow:
+        0 1px 2px rgba(54,79,74,0.04),
+        0 4px 12px rgba(54,79,74,0.05),
+        0 12px 28px rgba(54,79,74,0.05) !important;
+    border: 1px solid rgba(255,255,255,0.9) !important;
+    background: rgba(255,255,255,0.96) !important;
+}
+.card:hover {
+    box-shadow:
+        0 2px 4px rgba(54,79,74,0.04),
+        0 8px 20px rgba(54,79,74,0.08),
+        0 20px 40px rgba(54,79,74,0.08) !important;
+    border-color: rgba(108,141,135,0.3) !important;
+}
+
+/* ══════════════════════════════════════════
+   section-title 底部分隔线
+══════════════════════════════════════════ */
+.section-title {
+    padding-bottom: 14px !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-bottom: 22px !important;
+}
+
+/* ══════════════════════════════════════════
+   侧边栏 active：左彩条 + 渐变背景
+══════════════════════════════════════════ */
+.nav-item {
+    transition: background 0.18s, color 0.18s, padding-left 0.18s !important;
+}
+.nav-item.active {
+    border-left: 3px solid var(--primary-color) !important;
+    padding-left: 11px !important;
+    background: linear-gradient(90deg, rgba(108,141,135,0.13), rgba(108,141,135,0.03)) !important;
+}
+.nav-item:hover:not(.active) {
+    background: rgba(108,141,135,0.06) !important;
+    padding-left: 17px !important;
+}
+
+/* ══════════════════════════════════════════
+   进度条光泽动画
+══════════════════════════════════════════ */
+.progress-bar-bg {
+    height: 10px !important;
+    background: rgba(108,141,135,0.1) !important;
+}
+.progress-bar-fill {
+    position: relative;
+    overflow: hidden;
+}
+.progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: shimmerSlide 2.5s ease-in-out infinite;
+}
+@keyframes shimmerSlide {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+}
+
+/* ══════════════════════════════════════════
+   输入框 focus：上浮 + 光晕
+══════════════════════════════════════════ */
+.custom-input, .custom-textarea {
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.18s, background 0.2s !important;
+}
+.custom-input:focus, .custom-textarea:focus {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 14px rgba(108,141,135,0.18), 0 0 0 2px rgba(108,141,135,0.12) !important;
+    background: #fff !important;
+}
+
+/* ══════════════════════════════════════════
+   按钮点击下压感
+══════════════════════════════════════════ */
+.btn:active,
+.timer-btn:active,
+.cloud-btn:active {
+    transform: translateY(1px) !important;
+    box-shadow: none !important;
+    opacity: 0.9 !important;
+}
+
+/* ══════════════════════════════════════════
+   滚动条精致化
+══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px !important; height: 4px !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
+::-webkit-scrollbar-thumb {
+    background: rgba(108,141,135,0.28) !important;
+    border-radius: 4px !important;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color) !important;
+}
+
+/* ══════════════════════════════════════════
+   section 切换动画更平滑
+══════════════════════════════════════════ */
+.content-section {
+    animation: sectionFadeUp 0.28s cubic-bezier(0.22,1,0.36,1) !important;
+}
+@keyframes sectionFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   甜甜圈内圆配合暖背景
+══════════════════════════════════════════ */
+.focus-donut::after {
+    background: rgba(255,255,255,0.96) !important;
+}
+.focus-donut-total {
+    font-family: "Noto Serif SC", serif !important;
+}
+
+/* ══════════════════════════════════════════
+   列表项 hover 层次感
+══════════════════════════════════════════ */
+.todo-item:hover,
+.record-item:hover,
+.focus-item:hover {
+    box-shadow: 0 4px 16px rgba(54,79,74,0.08) !important;
+    transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════
+   stat-box hover
+══════════════════════════════════════════ */
+.stat-box {
+    border-top-width: 3px !important;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.stat-box:hover {
+    box-shadow: 0 6px 20px rgba(54,79,74,0.08);
+    transform: translateY(-2px);
+}
+
+/* ══════════════════════════════════════════
+   modal 精致化
+══════════════════════════════════════════ */
+.modal-card {
+    box-shadow: 0 8px 32px rgba(54,79,74,0.15), 0 2px 8px rgba(54,79,74,0.08) !important;
+}
+.modal-title {
+    font-family: "Noto Serif SC", serif !important;
+}
+
+/* ══════════════════════════════════════════
+   空列表统一样式
+══════════════════════════════════════════ */
+.empty-state {
+    text-align: center;
+    padding: 28px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+    line-height: 2;
+}
+.empty-state::before {
+    content: '📭';
+    display: block;
+    font-size: 26px;
+    margin-bottom: 6px;
+    opacity: 0.45;
+}
+</style>
+
+
+<style id="tl2-style">
+/* ── 时间轴整体：左宽右紧凑，更像参考图 ── */
+.tl2-nav {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.tl2-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+}
+.tl2-date {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.tl2-total {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--title-color);
+    font-family: "JetBrains Mono", monospace;
+    letter-spacing: -0.4px;
+}
+.tl2-nav-btns {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.tl2-btn,
+.tl2-date-input {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 6px 11px;
+    font-size: 12px;
+    color: var(--title-color);
+    transition: .15s;
+}
+.tl2-btn {
+    cursor: pointer;
+}
+.tl2-btn:hover,
+.tl2-date-input:hover {
+    background: var(--sidebar-active);
+    border-color: var(--primary-color);
+}
+.tl2-btn.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+.tl2-btn:disabled {
+    opacity: .42;
+    cursor: not-allowed;
+}
+.tl2-date-input {
+    min-width: 132px;
+    font-family: inherit;
+    outline: none;
+}
+.tl2-date-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(108,141,135,0.12);
+}
+
+.tl2-wrap {
+    display: grid;
+    grid-template-columns: minmax(240px, 300px) minmax(300px, 420px);
+    gap: 20px;
+    align-items: start;
+    max-width: 820px;
+    margin: 0 auto;
+}
+
+/* 左侧事项 */
+.tl2-list {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.tl2-task-row {
+    display: grid;
+    grid-template-columns: 12px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.78);
+    border: 1px solid rgba(108,141,135,0.10);
+}
+.tl2-task-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+}
+.tl2-task-main {
+    min-width: 0;
+}
+.tl2-task-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--title-color);
+    line-height: 1.35;
+    word-break: break-word;
+}
+.tl2-task-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.tl2-task-dur {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: "JetBrains Mono", monospace;
+    flex-shrink: 0;
+}
+
+/* 右侧时间轴 */
+.tl2-grid-outer {
+    min-width: 0;
+    width: 100%;
+}
+.tl2-grid-head {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 8px;
+    margin-bottom: 6px;
+    align-items: center;
+}
+.tl2-grid-head-spacer {
+    font-size: 11px;
+    color: transparent;
+}
+.tl2-grid-head-minutes {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0,1fr));
+    gap: 3px;
+}
+.tl2-grid-head-minutes span {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    font-family: "JetBrains Mono", monospace;
+}
+.tl2-hour-row {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+}
+.tl2-hour-label,
+.tl2-hour-end-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: right;
+    padding-right: 2px;
+    font-family: "JetBrains Mono", monospace;
+    line-height: 1;
+}
+.tl2-cells {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0,1fr));
+    gap: 3px;
+}
+.tl2-cell {
+    position: relative;
+    height: 13px;
+    border-radius: 4px;
+    background: #edf2f1;
+    overflow: hidden;
+    transition: filter .12s ease, transform .12s ease;
+}
+.tl2-cell.filled {
+    cursor: pointer;
+}
+.tl2-cell.filled:hover {
+    filter: brightness(1.08);
+    transform: translateY(-0.5px);
+}
+.tl2-cell-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    border-radius: 0;
+}
+.tl2-now-marker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e05555;
+    z-index: 5;
+    pointer-events: none;
+    box-shadow: 0 0 0 1px rgba(224,85,85,0.08);
+}
+.tl2-hour-end {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 8px;
+    align-items: center;
+    margin-top: 2px;
+}
+.tl2-hour-end-line {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(108,141,135,0.12), rgba(108,141,135,0.03));
+    border-radius: 999px;
+}
+
+/* 空状态 */
+.tl2-empty {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+/* tooltip */
+#tl2-tip {
+    position: fixed;
+    background: rgba(24,34,32,.93);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.65;
+    padding: 8px 11px;
+    border-radius: 10px;
+    pointer-events: none;
+    z-index: 9999;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 4px 18px rgba(0,0,0,.28);
+    display: none;
+    max-width: 220px;
+}
+
+@media (max-width: 900px) {
+    .tl2-wrap {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+}
+@media (max-width: 520px) {
+    .tl2-task-row {
+        grid-template-columns: 10px 1fr;
+    }
+    .tl2-task-dur {
+        grid-column: 2;
+        justify-self: start;
+    }
+    .tl2-grid-head,
+    .tl2-hour-row,
+    .tl2-hour-end {
+        grid-template-columns: 30px 1fr;
+        gap: 6px;
+    }
+    .tl2-cell {
+        height: 12px;
+    }
+}
+</style>
+
+
+<style id="emperor-attachment-upgrade-style">
+.attach-input-row{
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.attach-preview-inline{
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+.attach-preview-chip{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 7px 10px;
+    color: var(--title-color);
+    max-width: 100%;
+}
+.attach-preview-thumb{
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+.attach-card{
+    margin-top: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    background: #fbfcfc;
+    padding: 14px;
+}
+.attach-card-head{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.attach-card-left{
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.attach-icon{
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(108,141,135,0.1);
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.attach-name-wrap{
+    min-width: 0;
+}
+.attach-name{
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--title-color);
+    line-height: 1.4;
+    word-break: break-word;
+}
+.attach-meta{
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.attach-actions{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.attach-image-wrap{
+    margin-top: 12px;
+}
+.attach-image{
+    max-width: 100%;
+    max-height: 240px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    background: #fff;
+}
+.attach-note{
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+@media (max-width: 780px){
+    .attach-card-head{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .attach-actions{
+        width: 100%;
+    }
+}
+</style>
+
 </head>
 <body>
 
@@ -418,22 +1358,21 @@
             <div class="search-hint-line">Ctrl / ⌘ + K</div>
             <div id="global-search-results" class="search-results search-results-popover"></div>
         </div>
-        </div>
-    </div>
+</div>
 </div>
 
 <div class="layout">
     <aside class="sidebar">
-        <div class="nav-item active" data-section="home" onclick="switchTab(event, \'home\')"><span class="nav-icon">👑</span> 帝王总览</div>
-        <div class="nav-item" data-section="literature" onclick="switchTab(event, \'literature\')"><span class="nav-icon">📖</span> 文献指南</div>
-        <div class="nav-item" data-section="learning" onclick="switchTab(event, \'learning\')"><span class="nav-icon">💡</span> 学习笔记</div>
-        <div class="nav-item" data-section="annual" onclick="switchTab(event, \'annual\')"><span class="nav-icon">🎯</span> 年计划</div>
-        <div class="nav-item" data-section="life" onclick="switchTab(event, \'life\')"><span class="nav-icon">🍱</span> 生活碎片</div>
-        <div class="nav-item" data-section="reading" onclick="switchTab(event, \'reading\')"><span class="nav-icon">📚</span> 阅读指南</div>
-        <div class="nav-item" data-section="movie" onclick="switchTab(event, \'movie\')"><span class="nav-icon">🎬</span> 观影指南</div>
-        <div class="nav-item" data-section="blog" onclick="switchTab(event, \'blog\')"><span class="nav-icon">🎧</span> 播客指南</div>
-        <div class="nav-item" data-section="quotes" onclick="switchTab(event, \'quotes\')"><span class="nav-icon">✒️</span> 抄点好句</div>
-        <div class="nav-item" data-section="ideas" onclick="switchTab(event, \'ideas\')"><span class="nav-icon">⚡</span> 闪念归档</div>
+        <div class="nav-item active" data-section="home" onclick="switchTab(event, 'home')"><span class="nav-icon">👑</span> 帝王总览</div>
+        <div class="nav-item" data-section="literature" onclick="switchTab(event, 'literature')"><span class="nav-icon">📖</span> 文献指南</div>
+        <div class="nav-item" data-section="learning" onclick="switchTab(event, 'learning')"><span class="nav-icon">💡</span> 学习笔记</div>
+        <div class="nav-item" data-section="annual" onclick="switchTab(event, 'annual')"><span class="nav-icon">🎯</span> 年计划</div>
+        <div class="nav-item" data-section="life" onclick="switchTab(event, 'life')"><span class="nav-icon">🍱</span> 生活碎片</div>
+        <div class="nav-item" data-section="reading" onclick="switchTab(event, 'reading')"><span class="nav-icon">📚</span> 阅读指南</div>
+        <div class="nav-item" data-section="movie" onclick="switchTab(event, 'movie')"><span class="nav-icon">🎬</span> 观影指南</div>
+        <div class="nav-item" data-section="blog" onclick="switchTab(event, 'blog')"><span class="nav-icon">🎧</span> 播客指南</div>
+        <div class="nav-item" data-section="quotes" onclick="switchTab(event, 'quotes')"><span class="nav-icon">✒️</span> 抄点好句</div>
+        <div class="nav-item" data-section="ideas" onclick="switchTab(event, 'ideas')"><span class="nav-icon">⚡</span> 闪念归档</div>
 
         <div style="border-top: 1px dashed var(--border-color); margin: 20px 0 10px 0; padding-top: 15px;">
             <div class="nav-item" onclick="exportData()" style="color: var(--primary-color); font-size: 13px;"><span class="nav-icon">💾</span> 导出备份</div>
@@ -614,6 +1553,27 @@
                 </div>
                 <div class="stats-subtitle">📉 近7天批阅趋势</div>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
+                <div class="stats-subtitle">⏱️ 专注时间轴</div>
+                <!-- 时间轴导航 -->
+                <div class="tl2-nav">
+                    <div class="tl2-info">
+                        <span class="tl2-date" id="tl2-date"></span>
+                        <span class="tl2-total" id="tl2-total"></span>
+                    </div>
+                    <div class="tl2-nav-btns">
+                        <button class="tl2-btn" onclick="tl2Shift(-1)">‹ 前一天</button>
+                        <button class="tl2-btn active" onclick="tl2Today()">今天</button>
+                        <input class="tl2-date-input" type="date" id="tl2-date-input" onchange="tl2PickDate(this.value)">
+                        <button class="tl2-btn" id="tl2-next" onclick="tl2Shift(1)">后一天 ›</button>
+                    </div>
+                </div>
+                <!-- 主体：左列表 + 右网格 -->
+                <div class="tl2-wrap" id="tl2-wrap">
+                    <div class="tl2-list" id="tl2-list"></div>
+                    <div class="tl2-grid-outer" id="tl2-grid"></div>
+                </div>
+                <div id="tl2-tip"></div>
+
                 <div class="stats-subtitle">🧭 理政时间分布</div>
                 <div class="distribution-grid">
                     <div class="distribution-card">
@@ -632,7 +1592,6 @@
                         <div id="focusBreakdownYear" class="focus-breakdown"></div>
                     </div>
                 </div>
-            </div>
             </div>
 
             <div class="card">
@@ -2427,6 +3386,7 @@ function renderStats() {
     ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = formatMinutesHuman(st[p].m); });
     drawTrendChart();
     renderFocusDistributionCharts();
+    if(typeof renderFocusTimeline==="function") renderFocusTimeline();
 }
 function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
@@ -2452,13 +3412,358 @@ function importData(e) {
     rd.onload = async ev => { try { if (confirm("确定要覆盖当前所有数据吗？此操作不可逆。")) { revokeCloudImageObjectUrls(); db = { ...db, ...JSON.parse(ev.target.result) }; ensureDbCompatibility(); await persist(); renderAll(); updateCloudUI(); alert("恢复成功！"); } } catch(err) { alert("格式错误，请检查文件是否为有效的 JSON 备份"); } };
     rd.readAsText(f); e.target.value = '';
 }
+
+// ============================================================
+// ⏱️ 专注时间轴 v2  (aTimeLogger 网格风格)
+// ============================================================
+var _tl2Date = (function(){ var d=new Date(); d.setHours(0,0,0,0); return d; })();
+
+function _tl2Pad(n){ return String(n).padStart(2,'0'); }
+function _tl2DayKey(d){ return d.getFullYear()+'-'+_tl2Pad(d.getMonth()+1)+'-'+_tl2Pad(d.getDate()); }
+function _tl2Fmt(sec){
+    var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=Math.round(sec%60);
+    if(h>0) return h+'H '+_tl2Pad(m)+'M';
+    return _tl2Pad(m)+'M '+_tl2Pad(s)+'S';
+}
+function _tl2FmtShort(sec){
+    var h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60);
+    if(h>0) return h+'h'+_tl2Pad(m)+'m';
+    return m+'m'+_tl2Pad(Math.round(sec%60))+'s';
+}
+
+// 颜色加深/变浅用于子分类区分
+function _tl2Darken(hex, pct){
+    hex = hex.replace('#','');
+    if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+    r=Math.max(0,Math.round(r*(1-pct)));
+    g=Math.max(0,Math.round(g*(1-pct)));
+    b=Math.max(0,Math.round(b*(1-pct)));
+    return '#'+[r,g,b].map(function(v){return _tl2Pad(v.toString(16));}).join('');
+}
+function _tl2Lighten(hex, pct){
+    hex = hex.replace('#','');
+    if(hex.length===3) hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    var r=parseInt(hex.slice(0,2),16), g=parseInt(hex.slice(2,4),16), b=parseInt(hex.slice(4,6),16);
+    r=Math.min(255,Math.round(r+(255-r)*pct));
+    g=Math.min(255,Math.round(g+(255-g)*pct));
+    b=Math.min(255,Math.round(b+(255-b)*pct));
+    return '#'+[r,g,b].map(function(v){return _tl2Pad(v.toString(16));}).join('');
+}
+
+function tl2Shift(delta){
+    _tl2Date = new Date(_tl2Date);
+    _tl2Date.setDate(_tl2Date.getDate()+delta);
+    renderFocusTimeline();
+}
+function tl2Today(){
+    _tl2Date = new Date(); _tl2Date.setHours(0,0,0,0);
+    renderFocusTimeline();
+}
+function tl2PickDate(value){
+    if(!value) return;
+    var parts = String(value).split('-');
+    if(parts.length!==3) return;
+    _tl2Date = new Date(Number(parts[0]), Number(parts[1])-1, Number(parts[2]));
+    _tl2Date.setHours(0,0,0,0);
+    renderFocusTimeline();
+}
+
+
+function renderFocusTimeline(){
+    var listEl = document.getElementById('tl2-list');
+    var gridEl = document.getElementById('tl2-grid');
+    var dateEl = document.getElementById('tl2-date');
+    var totEl  = document.getElementById('tl2-total');
+    var nextBtn= document.getElementById('tl2-next');
+    var tip    = document.getElementById('tl2-tip');
+    var dateInput = document.getElementById('tl2-date-input');
+    if(!listEl||!gridEl) return;
+
+    var today = new Date(); today.setHours(0,0,0,0);
+    var isToday = _tl2DayKey(_tl2Date) === _tl2DayKey(today);
+    var wd = '日一二三四五六'[_tl2Date.getDay()];
+    dateEl.textContent = _tl2Date.getFullYear()+'/'+
+        _tl2Pad(_tl2Date.getMonth()+1)+'/'+_tl2Pad(_tl2Date.getDate())+
+        ' 周'+wd+(isToday?' · 今天':'');
+    if(nextBtn) nextBtn.disabled = _tl2Date.getTime() >= today.getTime();
+    if(dateInput) {
+        dateInput.value = _tl2DayKey(_tl2Date);
+        dateInput.max = _tl2DayKey(today);
+    }
+
+    var dayStart = new Date(_tl2Date); dayStart.setHours(0,0,0,0);
+    var dayEnd   = new Date(_tl2Date); dayEnd.setHours(24,0,0,0);
+
+    var segments = [];
+    (db.focusRecords||[]).forEach(function(r){
+        var endTs   = r.endAt ? new Date(r.endAt) : (r.date ? new Date(r.date) : null);
+        var startTs = r.startAt ? new Date(r.startAt) : null;
+        if(!startTs && endTs && r.seconds) startTs = new Date(endTs.getTime()-r.seconds*1000);
+        if(!endTs||!startTs) return;
+        var s = Math.max(startTs.getTime(), dayStart.getTime());
+        var e = Math.min(endTs.getTime(), dayEnd.getTime());
+        if(e<=s) return;
+        var startMin = (s-dayStart.getTime())/60000;
+        var endMin   = (e-dayStart.getTime())/60000;
+        segments.push({
+            startMin: startMin, endMin: endMin,
+            categoryId: r.categoryId,
+            subCategory: (r.subCategory||r.topic||'').trim(),
+            seconds: (endMin-startMin)*60,
+            rec: r
+        });
+    });
+
+    var totalSec = segments.reduce(function(s,x){ return s+x.seconds; },0);
+    totEl.textContent = totalSec>0 ? _tl2Fmt(totalSec) : '0M 00S';
+
+    // 左侧：按“事项”聚合，颜色取一级分类
+    var taskMap = {};
+    segments.sort(function(a,b){ return a.startMin-b.startMin; }).forEach(function(seg){
+        var cid = seg.categoryId || '_default';
+        var catName = getFocusCategoryName(cid);
+        var taskName = seg.subCategory || catName || '未命名事项';
+        var key = cid + '||' + taskName;
+        if(!taskMap[key]){
+            taskMap[key] = {
+                categoryId: cid,
+                categoryName: catName,
+                taskName: taskName,
+                color: getFocusCategoryColor(cid),
+                totalSec: 0,
+                firstStart: seg.startMin
+            };
+        }
+        taskMap[key].totalSec += seg.seconds;
+        taskMap[key].firstStart = Math.min(taskMap[key].firstStart, seg.startMin);
+    });
+    var taskList = Object.values(taskMap).sort(function(a,b){
+        return a.firstStart - b.firstStart || b.totalSec - a.totalSec;
+    });
+
+    listEl.innerHTML = '';
+    if(!taskList.length){
+        listEl.innerHTML = '<div class="tl2-empty">当天暂无理政记录</div>';
+    }else{
+        taskList.forEach(function(task){
+            var row = document.createElement('div');
+            row.className = 'tl2-task-row';
+            row.innerHTML =
+                '<span class="tl2-task-dot" style="background:'+task.color+'"></span>' +
+                '<div class="tl2-task-main">' +
+                    '<div class="tl2-task-name">'+task.taskName+'</div>' +
+                    '<div class="tl2-task-meta">'+task.categoryName+'</div>' +
+                '</div>' +
+                '<span class="tl2-task-dur">'+_tl2FmtShort(task.totalSec)+'</span>';
+            listEl.appendChild(row);
+        });
+    }
+
+    // 右侧：固定完整 24 小时 × 6 个 10 分钟
+    gridEl.innerHTML = '';
+
+    var head = document.createElement('div');
+    head.className = 'tl2-grid-head';
+    head.innerHTML =
+        '<div class="tl2-grid-head-spacer">.</div>' +
+        '<div class="tl2-grid-head-minutes">' +
+            '<span>00</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span>' +
+        '</div>';
+    gridEl.appendChild(head);
+
+    var cellData = [];
+    for(var i=0;i<144;i++) cellData.push([]);
+    segments.forEach(function(seg){
+        var startCell = Math.floor(seg.startMin/10);
+        var endCell   = Math.ceil(seg.endMin/10);
+        for(var c=startCell; c<endCell && c<144; c++){
+            cellData[c].push(seg);
+        }
+    });
+
+    var nowMin = isToday ? (new Date().getHours()*60+new Date().getMinutes()) : -1;
+
+    for(var h=0; h<24; h++){
+        var row = document.createElement('div');
+        row.className = 'tl2-hour-row';
+
+        var lbl = document.createElement('div');
+        lbl.className = 'tl2-hour-label';
+        lbl.textContent = _tl2Pad(h);
+        row.appendChild(lbl);
+
+        var cells = document.createElement('div');
+        cells.className = 'tl2-cells';
+
+        for(var m=0; m<6; m++){
+            var cellMin = h*60+m*10;
+            var cellIdx = h*6+m;
+            var segsInCell = cellData[cellIdx] || [];
+
+            var cell = document.createElement('div');
+            cell.className = 'tl2-cell' + (segsInCell.length ? ' filled' : '');
+
+            if(segsInCell.length){
+                var segH = 100/segsInCell.length;
+                segsInCell.forEach(function(seg, si){
+                    var fill = document.createElement('div');
+                    fill.className = 'tl2-cell-fill';
+                    fill.style.cssText = 'background:'+getFocusCategoryColor(seg.categoryId)+';top:'+(si*segH)+'%;height:'+segH+'%;';
+                    cell.appendChild(fill);
+                });
+
+                (function(segsSnap, cellMinSnap){
+                    cell.addEventListener('mouseenter', function(e){
+                        var lines = segsSnap.map(function(s){
+                            var cat = getFocusCategoryName(s.categoryId);
+                            var sub = s.subCategory || '';
+                            return sub ? (sub + ' · ' + cat) : cat;
+                        });
+                        tip.innerHTML =
+                            '<strong>'+_tl2Pad(Math.floor(cellMinSnap/60))+':'+_tl2Pad(cellMinSnap%60)+'</strong><br>' +
+                            [...new Set(lines)].join('<br>');
+                        tip.style.display = 'block';
+                    });
+                    cell.addEventListener('mousemove', function(e){
+                        tip.style.left = (e.clientX + 14) + 'px';
+                        tip.style.top  = (e.clientY - 10) + 'px';
+                    });
+                    cell.addEventListener('mouseleave', function(){
+                        tip.style.display = 'none';
+                    });
+                })(segsInCell, cellMin);
+            }
+
+            if(isToday && nowMin>=cellMin && nowMin<cellMin+10){
+                var nowMark = document.createElement('div');
+                nowMark.className = 'tl2-now-marker';
+                nowMark.style.top = (((nowMin-cellMin)/10)*100) + '%';
+                cell.appendChild(nowMark);
+            }
+
+            cells.appendChild(cell);
+        }
+
+        row.appendChild(cells);
+        gridEl.appendChild(row);
+    }
+
+    var endRow = document.createElement('div');
+    endRow.className = 'tl2-hour-end';
+    endRow.innerHTML = '<div class="tl2-hour-end-label">24</div><div class="tl2-hour-end-line"></div>';
+    gridEl.appendChild(endRow);
+}
+
+
 </script>
 
 
-<script id="emperor-auth-fix-20260407">
+<script id="emperor-responsive-unified-script">
 (function(){
-    const CLOUD_PENDING_ACTION_KEY = 'emperor_cloud_pending_action_v2';
-    const CLOUD_FLASH_MESSAGE_KEY = 'emperor_cloud_flash_message_v2';
+    function normalizeSectionLayout(){
+        const main = document.querySelector('main.main-content');
+        if(!main) return;
+        const sections = Array.from(document.querySelectorAll('.content-section'));
+        sections.forEach(sec => {
+            if (sec.parentElement !== main) main.appendChild(sec);
+        });
+    }
+
+    function markResponsiveRows(){
+        const timerBox = document.getElementById('focus-stopwatch')?.closest('.timer-box');
+        const homeHeroRow = timerBox?.parentElement;
+        if(homeHeroRow) homeHeroRow.classList.add('resp-home-hero-row');
+        const sidePanel = timerBox?.nextElementSibling;
+        if(sidePanel) sidePanel.classList.add('focus-side-panel');
+
+        const checkinRate = document.getElementById('stat-checkin-rate');
+        const overviewStatsRow = checkinRate?.closest('.sub-box')?.parentElement;
+        if(overviewStatsRow) overviewStatsRow.classList.add('resp-overview-stats-row');
+
+        const statusInput = document.getElementById('input-daily-status');
+        const statusInputRow = statusInput?.parentElement;
+        if(statusInputRow) statusInputRow.classList.add('resp-status-input-row');
+
+        const todoLong = document.getElementById('input-todo-long');
+        const todoLongRow = todoLong?.parentElement;
+        if(todoLongRow) todoLongRow.classList.add('resp-todo-row');
+
+        const todoToday = document.getElementById('input-todo-today');
+        const todoTodayRow = todoToday?.parentElement;
+        if(todoTodayRow) todoTodayRow.classList.add('resp-todo-row');
+
+        const wordInput = document.getElementById('input-words');
+        const wordRow = wordInput?.parentElement;
+        if(wordRow) wordRow.classList.add('resp-word-row');
+    }
+
+    function syncTimerPulse(){
+        const timer = document.getElementById('focus-stopwatch');
+        if(!timer) return;
+        const running = !!(window.db && window.db.activeTimer && window.db.activeTimer.running);
+        timer.classList.toggle('running-pulse', running);
+    }
+
+    function activateSectionFixed(id){
+        normalizeSectionLayout();
+        document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-item[data-section]').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('section-' + id);
+        if(target) target.classList.add('active');
+        const nav = document.querySelector('.nav-item[data-section="' + id + '"]');
+        if(nav) nav.classList.add('active');
+        if(id === 'home'){
+            if(typeof window.drawTrendChart === 'function') { try { window.drawTrendChart(); } catch(e) {} }
+            if(typeof window.renderFocusPieCharts === 'function') { try { window.renderFocusPieCharts(); } catch(e) {} }
+        }
+        syncTimerPulse();
+    }
+
+    window.activateSection = activateSectionFixed;
+    window.switchTab = function(e, id){
+        if(e && typeof e.preventDefault === 'function') e.preventDefault();
+        if(e && typeof e.stopPropagation === 'function') e.stopPropagation();
+        activateSectionFixed(id);
+        return false;
+    };
+
+    function bindSidebarNav(){
+        document.querySelectorAll('.nav-item[data-section]').forEach(el => {
+            if(el.dataset.responsiveBound === '1') return;
+            el.dataset.responsiveBound = '1';
+            el.addEventListener('click', function(ev){
+                ev.preventDefault();
+                ev.stopPropagation();
+                activateSectionFixed(el.dataset.section);
+            }, true);
+        });
+    }
+
+    function boot(){
+        normalizeSectionLayout();
+        markResponsiveRows();
+        bindSidebarNav();
+        const activeId = document.querySelector('.nav-item.active[data-section]')?.dataset.section || 'home';
+        activateSectionFixed(activeId);
+    }
+
+    if(document.readyState === 'loading'){
+        document.addEventListener('DOMContentLoaded', boot);
+    } else {
+        boot();
+    }
+    window.addEventListener('load', boot);
+    window.addEventListener('resize', markResponsiveRows);
+    setInterval(syncTimerPulse, 800);
+})();
+</script>
+
+
+<script id="emperor-stable-mobile-auth-patch">
+(function(){
+    const CLOUD_PENDING_ACTION_KEY = 'emperor_cloud_pending_action_v1';
+    const CLOUD_LAST_MESSAGE_KEY = 'emperor_cloud_last_message_v1';
 
     function isMobileLike(){
         const ua = navigator.userAgent || '';
@@ -2467,37 +3772,80 @@ function importData(e) {
         return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || coarse || narrow;
     }
 
-    function setPendingAction(action){
+    function setPendingCloudAction(action){
         try{
             if(action) sessionStorage.setItem(CLOUD_PENDING_ACTION_KEY, action);
             else sessionStorage.removeItem(CLOUD_PENDING_ACTION_KEY);
         }catch(e){}
     }
-    function getPendingAction(){
+
+    function getPendingCloudAction(){
         try{
             return sessionStorage.getItem(CLOUD_PENDING_ACTION_KEY) || '';
         }catch(e){
             return '';
         }
     }
-    function setFlashMessage(msg){
+
+    function setCloudFlashMessage(msg){
         try{
-            if(msg) sessionStorage.setItem(CLOUD_FLASH_MESSAGE_KEY, msg);
-            else sessionStorage.removeItem(CLOUD_FLASH_MESSAGE_KEY);
+            if(msg) sessionStorage.setItem(CLOUD_LAST_MESSAGE_KEY, msg);
+            else sessionStorage.removeItem(CLOUD_LAST_MESSAGE_KEY);
         }catch(e){}
     }
-    function consumeFlashMessage(){
+
+    function consumeCloudFlashMessage(){
         try{
-            const msg = sessionStorage.getItem(CLOUD_FLASH_MESSAGE_KEY) || '';
-            sessionStorage.removeItem(CLOUD_FLASH_MESSAGE_KEY);
+            const msg = sessionStorage.getItem(CLOUD_LAST_MESSAGE_KEY) || '';
+            sessionStorage.removeItem(CLOUD_LAST_MESSAGE_KEY);
             return msg;
         }catch(e){
             return '';
         }
     }
 
-    function redirectTarget(){
-        return ONEDRIVE_REDIRECT_URI;
+    async function processRedirectResultAndReplay(){
+        try{
+            const client = initMsal();
+            const resp = await client.handleRedirectPromise();
+            if (resp && resp.account) {
+                client.setActiveAccount(resp.account);
+                updateCloudUI('Microsoft 账户已连接');
+                setCloudFlashMessage('Microsoft 账户已连接');
+            } else {
+                updateCloudUI();
+            }
+
+            const flash = consumeCloudFlashMessage();
+            if (flash) {
+                setTimeout(() => {
+                    try { updateCloudUI(flash); } catch(e){}
+                }, 120);
+            }
+
+            const pending = getPendingCloudAction();
+            if (!pending) return;
+
+            if (isCloudLoggedIn()) {
+                setPendingCloudAction('');
+                setTimeout(async () => {
+                    try{
+                        if (pending === 'loadCloudData' && typeof window.loadCloudData === 'function') {
+                            await window.loadCloudData();
+                        } else if (pending === 'saveCloudData' && typeof window.saveCloudData === 'function') {
+                            await window.saveCloudData();
+                        } else if (pending === 'loginOnly') {
+                            try { alert('Microsoft 登录成功。'); } catch(e){}
+                        }
+                    }catch(err){
+                        console.error(err);
+                    }
+                }, 250);
+            }
+        }catch(err){
+            console.error(err);
+            try { updateCloudUI('登录回调失败'); } catch(e){}
+        }
     }
 
     async function ensureMicrosoftAccountStable(){
@@ -2510,31 +3858,22 @@ function importData(e) {
         }
 
         if (isMobileLike()) {
-            setPendingAction(getPendingAction() || 'loginOnly');
-            setFlashMessage('请完成 Microsoft 登录后返回当前页面');
-            await client.loginRedirect({
-                scopes: ONEDRIVE_SCOPES,
-                redirectStartPage: location.href
-            });
+            setPendingCloudAction(getPendingCloudAction() || 'loginOnly');
+            setCloudFlashMessage('请完成 Microsoft 登录后返回当前页面');
+            await client.loginRedirect({ scopes: ONEDRIVE_SCOPES });
             throw new Error('REDIRECTING_FOR_LOGIN');
         }
 
         try{
-            const loginResp = await client.loginPopup({
-                scopes: ONEDRIVE_SCOPES,
-                redirectUri: redirectTarget()
-            });
+            const loginResp = await client.loginPopup({ scopes: ONEDRIVE_SCOPES });
             account = loginResp.account;
-            if (account) client.setActiveAccount(account);
+            client.setActiveAccount(account);
             return account;
         }catch(err){
             console.warn('Popup 登录失败，回退到 redirect：', err);
-            setPendingAction(getPendingAction() || 'loginOnly');
-            setFlashMessage('正在切换到更稳定的登录方式');
-            await client.loginRedirect({
-                scopes: ONEDRIVE_SCOPES,
-                redirectStartPage: location.href
-            });
+            setPendingCloudAction(getPendingCloudAction() || 'loginOnly');
+            setCloudFlashMessage('正在切换到更稳定的登录方式');
+            await client.loginRedirect({ scopes: ONEDRIVE_SCOPES });
             throw new Error('REDIRECTING_FOR_LOGIN');
         }
     }
@@ -2547,103 +3886,51 @@ function importData(e) {
             return tokenResp.accessToken;
         }catch(err){
             if (isMobileLike()) {
-                setFlashMessage('请完成授权后返回当前页面');
-                await client.acquireTokenRedirect({
-                    scopes: ONEDRIVE_SCOPES,
-                    account,
-                    redirectStartPage: location.href
-                });
+                setCloudFlashMessage('请完成授权后返回当前页面');
+                await client.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
                 throw new Error('REDIRECTING_FOR_TOKEN');
             }
             try{
-                const tokenResp = await client.acquireTokenPopup({
-                    scopes: ONEDRIVE_SCOPES,
-                    account,
-                    redirectUri: redirectTarget()
-                });
+                const tokenResp = await client.acquireTokenPopup({ scopes: ONEDRIVE_SCOPES, account });
                 return tokenResp.accessToken;
             }catch(err2){
                 console.warn('Popup 授权失败，回退到 redirect：', err2);
-                setFlashMessage('正在切换到更稳定的授权方式');
-                await client.acquireTokenRedirect({
-                    scopes: ONEDRIVE_SCOPES,
-                    account,
-                    redirectStartPage: location.href
-                });
+                setCloudFlashMessage('正在切换到更稳定的授权方式');
+                await client.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
                 throw new Error('REDIRECTING_FOR_TOKEN');
             }
         }
     }
 
-    async function processRedirectResultAndReplay(){
-        try{
-            const client = initMsal();
-            const resp = await client.handleRedirectPromise();
-            if (resp && resp.account) {
-                client.setActiveAccount(resp.account);
-                try { updateCloudUI('Microsoft 账户已连接'); } catch(e){}
-                setFlashMessage('Microsoft 账户已连接');
-            } else {
-                try { updateCloudUI(); } catch(e){}
-            }
-
-            const flash = consumeFlashMessage();
-            if (flash) {
-                try { updateCloudUI(flash); } catch(e){}
-            }
-
-            const pending = getPendingAction();
-            if (!pending) return;
-
-            if (isCloudLoggedIn()) {
-                setPendingAction('');
-                setTimeout(async () => {
-                    try{
-                        if (pending === 'loadCloudData' && typeof window.loadCloudData === 'function') {
-                            await window.loadCloudData();
-                        } else if (pending === 'saveCloudData' && typeof window.saveCloudData === 'function') {
-                            await window.saveCloudData();
-                        } else if (pending === 'loginOnly') {
-                            try { updateCloudUI('Microsoft 账户已连接'); } catch(e){}
-                        }
-                    }catch(err){
-                        console.error(err);
-                    }
-                }, 250);
-            }
-        }catch(err){
-            console.error('处理登录跳转失败：', err);
-            try { updateCloudUI('登录回调失败'); } catch(e){}
-        }
-    }
-
-    const __origLoadCloudData_auth = window.loadCloudData;
-    if (typeof __origLoadCloudData_auth === 'function') {
+    const __origLoadCloudData = window.loadCloudData;
+    if (typeof __origLoadCloudData === 'function') {
         window.loadCloudData = async function(...args){
-            setPendingAction('loadCloudData');
+            setPendingCloudAction('loadCloudData');
             try{
-                const result = await __origLoadCloudData_auth.apply(this, args);
-                setPendingAction('');
+                const result = await __origLoadCloudData.apply(this, args);
+                setPendingCloudAction('');
                 return result;
             }catch(err){
-                const msg = String((err && err.message) || err || '');
-                if (!msg.includes('REDIRECTING_FOR_')) setPendingAction('');
+                if (!String(err && err.message || err).includes('REDIRECTING_FOR_')) {
+                    setPendingCloudAction('');
+                }
                 throw err;
             }
         };
     }
 
-    const __origSaveCloudData_auth = window.saveCloudData;
-    if (typeof __origSaveCloudData_auth === 'function') {
+    const __origSaveCloudData = window.saveCloudData;
+    if (typeof __origSaveCloudData === 'function') {
         window.saveCloudData = async function(...args){
-            setPendingAction('saveCloudData');
+            setPendingCloudAction('saveCloudData');
             try{
-                const result = await __origSaveCloudData_auth.apply(this, args);
-                setPendingAction('');
+                const result = await __origSaveCloudData.apply(this, args);
+                setPendingCloudAction('');
                 return result;
             }catch(err){
-                const msg = String((err && err.message) || err || '');
-                if (!msg.includes('REDIRECTING_FOR_')) setPendingAction('');
+                if (!String(err && err.message || err).includes('REDIRECTING_FOR_')) {
+                    setPendingCloudAction('');
+                }
                 throw err;
             }
         };
@@ -2656,10 +3943,10 @@ function importData(e) {
     window.loginMicrosoft = async function(){
         try{
             updateCloudUI(isMobileLike() ? '正在跳转 Microsoft 登录...' : '正在打开 Microsoft 登录...');
-            setPendingAction('loginOnly');
+            setPendingCloudAction('loginOnly');
             await ensureMicrosoftAccountStable();
             updateCloudUI('Microsoft 账户已连接');
-            setPendingAction('');
+            setPendingCloudAction('');
             const lastLocal = db.__meta?.lastLocalWriteAt;
             const lastCloud = db.__meta?.lastCloudSyncAt;
             if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) scheduleCloudAutoSave();
@@ -2670,11 +3957,832 @@ function importData(e) {
             console.error(e);
             alert('登录失败：' + msg);
             updateCloudUI('登录失败');
-            setPendingAction('');
+            setPendingCloudAction('');
         }
     };
 
     processRedirectResultAndReplay();
+})();
+</script>
+
+
+<script id="emperor-attachment-upgrade-script">
+(function(){
+    const ATTACHMENT_ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.zip,.rar,.7z,image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/markdown,application/zip,application/x-zip-compressed";
+    const ONEDRIVE_ATTACHMENT_FOLDER = "attachments";
+    const ATTACHMENT_ENABLED_TYPES = ["literature", "learning"];
+    let tempAttachments = { literature: null, learning: null };
+    let cloudAttachmentObjectUrls = {};
+    let cloudAttachmentFetchPromises = {};
+
+    function sanitizeAttachmentFileName(name){
+        return (name || 'attachment').replace(/[^\u4e00-\u9fa5a-zA-Z0-9._-]/g, '_').replace(/_+/g, '_').slice(-120);
+    }
+    function buildOneDriveAppContentUrl(path){
+        return `https://graph.microsoft.com/v1.0/me/drive/special/approot:/${path}:/content`;
+    }
+    async function uploadBlobToAppPath(blob, targetPath, contentType){
+        const accessToken = await getAccessToken();
+        const res = await fetch(buildOneDriveAppContentUrl(targetPath), {
+            method: 'PUT',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': contentType || blob.type || 'application/octet-stream'
+            },
+            body: blob
+        });
+        if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
+        return targetPath;
+    }
+    async function fetchCloudAttachmentObjectUrl(path){
+        if (!path) return null;
+        if (cloudAttachmentObjectUrls[path]) return cloudAttachmentObjectUrls[path];
+        if (cloudAttachmentFetchPromises[path]) return cloudAttachmentFetchPromises[path];
+        cloudAttachmentFetchPromises[path] = (async () => {
+            const accessToken = await getAccessToken();
+            const res = await fetch(buildOneDriveAppContentUrl(path), { headers: { Authorization: `Bearer ${accessToken}` } });
+            if (!res.ok) throw new Error(`附件下载失败: ${res.status}`);
+            const blob = await res.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            cloudAttachmentObjectUrls[path] = objectUrl;
+            return objectUrl;
+        })();
+        try{
+            return await cloudAttachmentFetchPromises[path];
+        } finally {
+            delete cloudAttachmentFetchPromises[path];
+        }
+    }
+    function revokeCloudAttachmentObjectUrls(){
+        Object.values(cloudAttachmentObjectUrls).forEach(url => { try { URL.revokeObjectURL(url); } catch(e){} });
+        cloudAttachmentObjectUrls = {};
+        cloudAttachmentFetchPromises = {};
+    }
+
+    function readFileAsDataUrl(file){
+        return new Promise((resolve, reject) => {
+            const rd = new FileReader();
+            rd.onload = e => resolve(e.target.result);
+            rd.onerror = reject;
+            rd.readAsDataURL(file);
+        });
+    }
+    function formatFileSize(size){
+        const n = Number(size || 0);
+        if (!n) return '未知大小';
+        if (n < 1024) return `${n} B`;
+        if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+        return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+    }
+    function getAttachmentIcon(name, mimeType){
+        const lower = String(name || '').toLowerCase();
+        const mt = String(mimeType || '').toLowerCase();
+        if (mt.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(lower)) return '🖼️';
+        if (mt.includes('pdf') || /\.pdf$/i.test(lower)) return '📕';
+        if (/(doc|docx)/i.test(lower) || mt.includes('word')) return '📘';
+        if (/(ppt|pptx)/i.test(lower) || mt.includes('presentation')) return '📙';
+        if (/(xls|xlsx|csv)/i.test(lower) || mt.includes('spreadsheet') || mt.includes('excel')) return '📗';
+        if (/(zip|rar|7z)/i.test(lower) || mt.includes('zip') || mt.includes('compressed')) return '🗜️';
+        if (/(txt|md)/i.test(lower) || mt.startsWith('text/')) return '📝';
+        return '📎';
+    }
+    function isImageLike(meta){
+        const mt = String(meta?.type || '').toLowerCase();
+        const nm = String(meta?.name || '').toLowerCase();
+        return mt.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(nm);
+    }
+    function getItemAttachmentMeta(item){
+        if (!item) return null;
+        if (item.attachPath || item.attachData) {
+            return {
+                name: item.attachName || '附件',
+                type: item.attachType || '',
+                size: item.attachSize || 0,
+                path: item.attachPath || null,
+                data: item.attachData || null,
+                storage: item.attachStorage || (item.attachPath ? 'onedrive' : 'inline'),
+                legacy: false
+            };
+        }
+        if (item.imgPath || item.img) {
+            return {
+                name: item.imgName || '图片附件',
+                type: item.imgType || 'image/*',
+                size: item.imgSize || 0,
+                path: item.imgPath || null,
+                data: item.img || null,
+                storage: item.imgStorage || (item.imgPath ? 'onedrive' : 'inline'),
+                legacy: true
+            };
+        }
+        return null;
+    }
+    function clearItemAttachment(item){
+        if (!item) return;
+        item.attachName = null;
+        item.attachType = null;
+        item.attachSize = null;
+        item.attachPath = null;
+        item.attachData = null;
+        item.attachStorage = null;
+
+        if ('img' in item) item.img = null;
+        if ('imgPath' in item) item.imgPath = null;
+        if ('imgStorage' in item) item.imgStorage = null;
+        if ('imgName' in item) item.imgName = null;
+        if ('imgType' in item) item.imgType = null;
+        if ('imgSize' in item) item.imgSize = null;
+    }
+    function applyAttachmentPayload(item, payload){
+        clearItemAttachment(item);
+        Object.assign(item, payload || {});
+    }
+    function findCollectionByType(type){
+        if (type === 'literature') return db.literature || [];
+        if (type === 'learning') return db.learning || [];
+        return [];
+    }
+    function findItemByTypeAndId(type, idKey){
+        return findCollectionByType(type).find(x => x.idKey === idKey);
+    }
+
+    function getPreviewElementId(type){
+        return type === 'literature' ? 'preview-lit-attachment' : 'preview-learn-attachment';
+    }
+    function getInputElementId(type){
+        return type === 'literature' ? 'input-lit-attachment' : 'input-learn-attachment';
+    }
+
+    function renderAttachmentInputPreview(type){
+        const el = document.getElementById(getPreviewElementId(type));
+        if (!el) return;
+        const temp = tempAttachments[type];
+        if (!temp || !temp.file) {
+            el.innerHTML = '';
+            return;
+        }
+        const icon = getAttachmentIcon(temp.file.name, temp.file.type);
+        const isImg = String(temp.file.type || '').startsWith('image/');
+        let thumb = '';
+        if (isImg) {
+            if (temp.previewUrl) thumb = `<img class="attach-preview-thumb" src="${temp.previewUrl}" alt="预览">`;
+        }
+        el.innerHTML = `<div class="attach-preview-chip">${thumb}<span>${icon}</span><span>${temp.file.name}</span><span style="color:var(--text-muted);">${formatFileSize(temp.file.size)}</span></div>`;
+    }
+
+    window.previewAttachmentInput = function(inp, type){
+        const file = inp && inp.files && inp.files[0];
+        if (!file) return;
+        const previewUrl = String(file.type || '').startsWith('image/') ? URL.createObjectURL(file) : '';
+        tempAttachments[type] = { file, previewUrl };
+        renderAttachmentInputPreview(type);
+    };
+
+    function clearAttachmentInput(type){
+        const el = document.getElementById(getInputElementId(type));
+        if (el) el.value = '';
+        const temp = tempAttachments[type];
+        if (temp && temp.previewUrl) {
+            try { URL.revokeObjectURL(temp.previewUrl); } catch(e){}
+        }
+        tempAttachments[type] = null;
+        renderAttachmentInputPreview(type);
+    }
+
+    async function buildAttachmentPayloadFromTemp(temp, ownerType){
+        if (!temp || !temp.file) {
+            return { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        }
+        const file = temp.file;
+        const mimeType = file.type || 'application/octet-stream';
+        const ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop() : 'bin';
+        const safeOriginal = sanitizeAttachmentFileName(file.name || `${ownerType}.${ext}`);
+        if (isCloudLoggedIn()) {
+            try{
+                const unique = sanitizeAttachmentFileName(`${ownerType}_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeOriginal}`);
+                const attachPath = await uploadBlobToAppPath(file, `${ONEDRIVE_ATTACHMENT_FOLDER}/${ownerType}/${unique}`, mimeType);
+                return {
+                    attachName: file.name || safeOriginal,
+                    attachType: mimeType,
+                    attachSize: file.size || 0,
+                    attachPath,
+                    attachData: null,
+                    attachStorage: 'onedrive'
+                };
+            }catch(err){
+                console.error(err);
+                const useInline = confirm(`附件上传 OneDrive 失败。\n\n点“确定”则先本地保存，稍后仍可通过“保存到云端”自动迁移；点“取消”则本次不保存该附件。`);
+                if (!useInline) throw err;
+            }
+        }
+        const attachData = await readFileAsDataUrl(file);
+        return {
+            attachName: file.name || safeOriginal,
+            attachType: mimeType,
+            attachSize: file.size || 0,
+            attachPath: null,
+            attachData,
+            attachStorage: 'inline'
+        };
+    }
+
+    async function setAttachmentImageElementSource(imgEl, meta){
+        if (!imgEl || !meta) return;
+        imgEl.style.opacity = '1';
+        if (meta.data && typeof meta.data === 'string' && meta.data.startsWith('data:')) {
+            imgEl.src = meta.data;
+            return;
+        }
+        if (meta.path) {
+            imgEl.dataset.attachPath = meta.path;
+            try{
+                const url = await fetchCloudAttachmentObjectUrl(meta.path);
+                if (imgEl.dataset.attachPath === meta.path) imgEl.src = url;
+            }catch(err){
+                console.error(err);
+                imgEl.alt = '附件预览加载失败';
+                imgEl.style.opacity = '0.45';
+            }
+        }
+    }
+
+    function buildAttachmentCardHtml(item, type){
+        const meta = getItemAttachmentMeta(item);
+        if (!meta) return '';
+        const previewId = `attach-preview-${type}-${item.idKey}`;
+        const icon = getAttachmentIcon(meta.name, meta.type);
+        const locationText = meta.storage === 'onedrive' ? '云端同步' : '本地待同步';
+        const imageHtml = isImageLike(meta) ? `<div class="attach-image-wrap"><img id="${previewId}" class="attach-image" alt="附件预览"></div>` : '';
+        return `
+            <div class="attach-card">
+                <div class="attach-card-head">
+                    <div class="attach-card-left">
+                        <span class="attach-icon">${icon}</span>
+                        <div class="attach-name-wrap">
+                            <div class="attach-name">${meta.name || '附件'}</div>
+                            <div class="attach-meta">${formatFileSize(meta.size)} · ${locationText}</div>
+                        </div>
+                    </div>
+                    <div class="attach-actions">
+                        <span class="text-btn edit" onclick="openAttachmentForItem('${type}', ${item.idKey})">打开附件</span>
+                        <span class="text-btn edit" onclick="replaceAttachmentForItem('${type}', ${item.idKey})">替换附件</span>
+                        <span class="text-btn delete" onclick="removeAttachmentForItem('${type}', ${item.idKey})">删除附件</span>
+                    </div>
+                </div>
+                ${imageHtml}
+            </div>
+        `;
+    }
+
+    async function hydrateAttachmentPreviewForItem(type, item){
+        const meta = getItemAttachmentMeta(item);
+        if (!meta || !isImageLike(meta)) return;
+        const imgEl = document.getElementById(`attach-preview-${type}-${item.idKey}`);
+        if (!imgEl) return;
+        await setAttachmentImageElementSource(imgEl, meta);
+    }
+
+    window.openAttachmentForItem = async function(type, idKey){
+        const item = findItemByTypeAndId(type, idKey);
+        const meta = getItemAttachmentMeta(item);
+        if (!meta) return alert('该条目暂无附件。');
+        try{
+            let url = null;
+            if (meta.data && typeof meta.data === 'string') url = meta.data;
+            else if (meta.path) url = await fetchCloudAttachmentObjectUrl(meta.path);
+            if (!url) return alert('暂时无法打开该附件。');
+            window.open(url, '_blank', 'noopener');
+        }catch(err){
+            console.error(err);
+            alert('打开附件失败，请确认 Microsoft 登录状态后重试。');
+        }
+    };
+
+    window.replaceAttachmentForItem = function(type, idKey){
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = ATTACHMENT_ACCEPT;
+        input.onchange = async () => {
+            if (!input.files || !input.files[0]) return;
+            const item = findItemByTypeAndId(type, idKey);
+            if (!item) return;
+            const file = input.files[0];
+            const temp = { file, previewUrl: String(file.type || '').startsWith('image/') ? URL.createObjectURL(file) : '' };
+            try{
+                const payload = await buildAttachmentPayloadFromTemp(temp, type);
+                applyAttachmentPayload(item, payload);
+                await persist();
+                if (type === 'literature') renderLiterature();
+                if (type === 'learning') renderLearning();
+                alert('附件已替换。');
+            }catch(err){
+                if (!String((err && err.message) || err || '').includes('REDIRECTING_FOR_')) {
+                    console.error(err);
+                    alert('替换附件失败。');
+                }
+            }finally{
+                if (temp.previewUrl) try { URL.revokeObjectURL(temp.previewUrl); } catch(e){}
+            }
+        };
+        input.click();
+    };
+
+    window.removeAttachmentForItem = async function(type, idKey){
+        const item = findItemByTypeAndId(type, idKey);
+        if (!item) return;
+        if (!confirm('确定删除这个附件吗？')) return;
+        clearItemAttachment(item);
+        await persist();
+        if (type === 'literature') renderLiterature();
+        if (type === 'learning') renderLearning();
+    };
+
+    async function migrateInlineAttachmentsToOneDrive(showProgress = false){
+        const jobs = [];
+        ATTACHMENT_ENABLED_TYPES.forEach(type => {
+            (findCollectionByType(type) || []).forEach((item, index) => {
+                if (item && item.attachData && typeof item.attachData === 'string' && item.attachData.startsWith('data:') && !item.attachPath) {
+                    jobs.push({ type, index, item });
+                }
+            });
+        });
+        if (!jobs.length || !isCloudLoggedIn()) return 0;
+        for (let i = 0; i < jobs.length; i++) {
+            const job = jobs[i];
+            const blob = dataUrlToBlob(job.item.attachData);
+            const ext = (job.item.attachName && job.item.attachName.includes('.'))
+                ? job.item.attachName.split('.').pop()
+                : ((blob.type || '').split('/').pop() || 'bin');
+            const safeOriginal = sanitizeAttachmentFileName(job.item.attachName || `${job.type}_${job.item.idKey}.${ext}`);
+            const unique = sanitizeAttachmentFileName(`${job.type}_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${safeOriginal}`);
+            const attachPath = await uploadBlobToAppPath(blob, `${ONEDRIVE_ATTACHMENT_FOLDER}/${job.type}/${unique}`, job.item.attachType || blob.type || 'application/octet-stream');
+            db[job.type][job.index].attachPath = attachPath;
+            db[job.type][job.index].attachData = null;
+            db[job.type][job.index].attachStorage = 'onedrive';
+            if (showProgress) updateCloudUI(`正在迁移附件 ${i + 1}/${jobs.length}...`);
+        }
+        await persist({ markDirty: true, skipAutoSave: true });
+        return jobs.length;
+    }
+
+    const __origSaveCloudData_attachment = saveCloudData;
+    saveCloudData = async function(options = {}){
+        const auto = !!options.auto;
+        try{
+            await migrateInlineAttachmentsToOneDrive(!auto);
+        }catch(err){
+            console.error('迁移附件到 OneDrive 失败：', err);
+        }
+        return await __origSaveCloudData_attachment(options);
+    };
+
+    const __origLoadCloudData_attachment = loadCloudData;
+    loadCloudData = async function(){
+        const res = await __origLoadCloudData_attachment();
+        if (typeof renderLiterature === 'function') renderLiterature();
+        if (typeof renderLearning === 'function') renderLearning();
+        return res;
+    };
+
+    function injectAttachmentInputs(){
+        const litDesc = document.getElementById('input-lit-desc');
+        if (litDesc && !document.getElementById('input-lit-attachment')) {
+            const row = document.createElement('div');
+            row.className = 'attach-input-row';
+            row.id = 'literature-attach-row';
+            row.innerHTML = `
+                <label class="file-upload-label">📎 上传附件
+                    <input type="file" id="input-lit-attachment" accept="${ATTACHMENT_ACCEPT}">
+                </label>
+                <div id="preview-lit-attachment" class="attach-preview-inline"></div>
+            `;
+            litDesc.insertAdjacentElement('afterend', row);
+            row.querySelector('input').addEventListener('change', function(){ previewAttachmentInput(this, 'literature'); });
+        }
+
+        const learnInput = document.getElementById('input-learn-img');
+        if (learnInput) {
+            const wrap = learnInput.parentElement && learnInput.parentElement.parentElement;
+            if (wrap && !document.getElementById('input-learn-attachment')) {
+                wrap.innerHTML = `
+                    <label class="file-upload-label">📎 上传附件
+                        <input type="file" id="input-learn-attachment" accept="${ATTACHMENT_ACCEPT}">
+                    </label>
+                    <div id="preview-learn-attachment" class="attach-preview-inline"></div>
+                `;
+                wrap.querySelector('input').addEventListener('change', function(){ previewAttachmentInput(this, 'learning'); });
+            }
+        }
+    }
+
+    saveLiterature = async function(){
+        const id = document.getElementById('input-lit-id').value.trim();
+        if (!id) return alert("必须填写文献标识！");
+        const tags = document.getElementById('input-lit-tags').value.split(',').map(s => s.trim()).filter(Boolean);
+        let attachmentPayload = { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        if (tempAttachments.literature) attachmentPayload = await buildAttachmentPayloadFromTemp(tempAttachments.literature, 'literature');
+        db.literature.push({
+            idKey: Date.now(),
+            time: getFullTime(),
+            litId: id,
+            journal: document.getElementById('input-lit-journal').value,
+            tags,
+            params: document.getElementById('input-lit-params').value,
+            desc: document.getElementById('input-lit-desc').value,
+            ...attachmentPayload
+        });
+        ['id','journal','tags','params','desc'].forEach(k => document.getElementById(`input-lit-${k}`).value = '');
+        clearAttachmentInput('literature');
+        await persist();
+        renderLiterature();
+    };
+
+    renderLiterature = function(){
+        const list = document.getElementById('list-literature');
+        if (!list) return;
+        list.innerHTML = '';
+        let allTags = new Set();
+        db.literature.forEach(item => (item.tags || []).forEach(t => allTags.add(t)));
+        document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${t}')">${t}</span>`).join('');
+        document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${t}">`).join('');
+        let items = [...db.literature].reverse();
+        if (currentFilterTag) items = items.filter(item => (item.tags || []).includes(currentFilterTag));
+        if (!items.length) {
+            list.innerHTML = '<div style="text-align:center; color:var(--text-muted); font-size:13px; padding:20px;">暂无文献记录</div>';
+            return;
+        }
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'lit-card';
+            card.dataset.searchKey = `literature-${item.idKey}`;
+            const tagHtml = (item.tags || []).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
+            const detailsId = `lit-det-${item.idKey}`;
+            card.innerHTML = `
+                <div class="lit-summary" onclick="toggleLitDesc('${detailsId}')">
+                    <div>
+                        <div class="lit-id">${item.litId} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${item.journal || ''}</span></div>
+                        <div style="margin-top:6px;">${tagHtml}</div>
+                    </div>
+                    <div class="action-group" style="opacity: 1;" onclick="event.stopPropagation()">
+                        <span class="text-btn edit" onclick="editLiterature(${item.idKey})">✎ 修改</span>
+                        <span class="text-btn delete" onclick="deleteRecord('literature', ${item.idKey})">🗑️ 删除</span>
+                    </div>
+                </div>
+                <div class="lit-details" id="${detailsId}">
+                    ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${item.params}</div>` : ''}
+                    <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${item.desc || ''}</div>
+                    ${buildAttachmentCardHtml(item, 'literature')}
+                    <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${item.time}</div>
+                </div>
+            `;
+            list.appendChild(card);
+            hydrateAttachmentPreviewForItem('literature', item);
+        });
+    };
+
+    saveLearning = async function(){
+        const title = document.getElementById('input-learn-title').value.trim();
+        if (!title) return alert("必须填写标题！");
+        let attachmentPayload = { attachName: null, attachType: null, attachSize: null, attachPath: null, attachData: null, attachStorage: null };
+        if (tempAttachments.learning) attachmentPayload = await buildAttachmentPayloadFromTemp(tempAttachments.learning, 'learning');
+        db.learning.push({
+            idKey: Date.now(),
+            time: getFullTime(),
+            title,
+            tags: document.getElementById('input-learn-tags').value,
+            desc: document.getElementById('input-learn-desc').value,
+            code: document.getElementById('input-learn-code').value,
+            ...attachmentPayload
+        });
+        ['title','tags','desc','code'].forEach(k => document.getElementById(`input-learn-${k}`).value = '');
+        clearAttachmentInput('learning');
+        await persist();
+        renderLearning();
+    };
+
+    renderLearning = function(){
+        const list = document.getElementById('list-learning');
+        if (!list) return;
+        list.innerHTML = '';
+        [...db.learning].reverse().forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'learn-card';
+            card.dataset.searchKey = `learning-${item.idKey}`;
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                    <div>
+                        <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${item.title}</div>
+                        ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${item.tags}</div>` : ''}
+                    </div>
+                    <div class="action-group" style="opacity: 1;">
+                        <span class="text-btn edit" onclick="editLearning(${item.idKey})">✎</span>
+                        <span class="text-btn delete" onclick="deleteRecord('learning', ${item.idKey})">🗑️</span>
+                    </div>
+                </div>
+                ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${item.desc}</div>` : ''}
+                ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${item.code}</div>` : ''}
+                ${buildAttachmentCardHtml(item, 'learning')}
+                <div style="font-size:11px; color:var(--text-muted); text-align:right; margin-top:10px;">${item.time}</div>
+            `;
+            list.appendChild(card);
+            hydrateAttachmentPreviewForItem('learning', item);
+        });
+    };
+
+    const __origDeleteRecord_attachment = deleteRecord;
+    deleteRecord = function(type, identifier){
+        if (type === 'literature' || type === 'learning') {
+            revokeCloudAttachmentObjectUrls();
+        }
+        return __origDeleteRecord_attachment(type, identifier);
+    };
+
+    function bootAttachmentUpgrade(){
+        injectAttachmentInputs();
+        renderAttachmentInputPreview('literature');
+        renderAttachmentInputPreview('learning');
+        if (typeof renderLiterature === 'function') renderLiterature();
+        if (typeof renderLearning === 'function') renderLearning();
+        updateCloudUI();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootAttachmentUpgrade);
+    } else {
+        bootAttachmentUpgrade();
+    }
+    window.addEventListener('load', bootAttachmentUpgrade);
+})();
+</script>
+
+
+<script id="emperor-login-fix-only-patch">
+(function(){
+    const FIXED_CLIENT_ID = "4591bdaa-c394-4ca0-887a-7a54d7fbb774";
+    const FIXED_AUTHORITY = "https://login.microsoftonline.com/consumers";
+    const FIXED_REDIRECT_URI =
+        (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+            ? "http://localhost:5500"
+            : "https://dongdong17254.github.io";
+
+    const PENDING_ACTION_KEY = "emperor_cloud_pending_action_login_fix_v1";
+    let __fixedMsalInstance = null;
+    let __redirectHandled = false;
+
+    function isMobileLikeFixed(){
+        const ua = navigator.userAgent || "";
+        const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+        const narrow = window.matchMedia && window.matchMedia("(max-width: 820px)").matches;
+        return /Android|iPhone|iPad|iPod|Mobile/i.test(ua) || coarse || narrow;
+    }
+
+    function setPendingAction(action){
+        try{
+            if(action) sessionStorage.setItem(PENDING_ACTION_KEY, action);
+            else sessionStorage.removeItem(PENDING_ACTION_KEY);
+        }catch(e){}
+    }
+    function getPendingAction(){
+        try{ return sessionStorage.getItem(PENDING_ACTION_KEY) || ""; }
+        catch(e){ return ""; }
+    }
+
+    function clearBrokenMsalCache(){
+        const stores = [window.localStorage, window.sessionStorage];
+        for(const store of stores){
+            try{
+                const toDelete = [];
+                for(let i = 0; i < store.length; i++){
+                    const k = store.key(i);
+                    if(!k) continue;
+                    if(k.startsWith("msal.") || k.includes(FIXED_CLIENT_ID) || k.includes("login.microsoftonline")){
+                        const v = String(store.getItem(k) || "");
+                        if(
+                            v.includes("undefined/consumers") ||
+                            v.includes("openid-configuration") ||
+                            k.includes("authority") ||
+                            k.includes("token.keys") ||
+                            k.includes("interaction.status")
+                        ){
+                            toDelete.push(k);
+                        }
+                    }
+                }
+                toDelete.forEach(k => store.removeItem(k));
+            }catch(e){}
+        }
+    }
+
+    function createFixedMsal(){
+        return new msal.PublicClientApplication({
+            auth: {
+                clientId: FIXED_CLIENT_ID,
+                authority: FIXED_AUTHORITY,
+                redirectUri: FIXED_REDIRECT_URI,
+                navigateToLoginRequestUrl: true
+            },
+            cache: {
+                cacheLocation: "localStorage",
+                storeAuthStateInCookie: false
+            }
+        });
+    }
+
+    function resetMsalInstance(){
+        __fixedMsalInstance = null;
+        msalInstance = null;
+    }
+
+    window.initMsal = function initMsalFixed(){
+        if (__fixedMsalInstance) return __fixedMsalInstance;
+        clearBrokenMsalCache();
+        __fixedMsalInstance = createFixedMsal();
+        msalInstance = __fixedMsalInstance;
+        return __fixedMsalInstance;
+    };
+
+    async function handleRedirectResultOnce(){
+        if(__redirectHandled) return;
+        __redirectHandled = true;
+        try{
+            const client = window.initMsal();
+            const resp = await client.handleRedirectPromise();
+            if(resp && resp.account){
+                client.setActiveAccount(resp.account);
+                try{ updateCloudUI("Microsoft 账户已连接"); }catch(e){}
+            }else{
+                const account = client.getActiveAccount() || client.getAllAccounts()[0];
+                if(account) client.setActiveAccount(account);
+                try{ updateCloudUI(); }catch(e){}
+            }
+
+            const pending = getPendingAction();
+            if(!pending) return;
+            setPendingAction("");
+
+            setTimeout(async () => {
+                try{
+                    if(pending === "loadCloudData" && typeof window.loadCloudData === "function"){
+                        await window.loadCloudData();
+                    }else if(pending === "saveCloudData" && typeof window.saveCloudData === "function"){
+                        await window.saveCloudData();
+                    }else if(pending === "loginOnly"){
+                        alert("Microsoft 登录成功。");
+                    }
+                }catch(err){
+                    console.error(err);
+                }
+            }, 220);
+        }catch(err){
+            console.error("handleRedirectPromise failed:", err);
+            try{ updateCloudUI("登录回调失败"); }catch(e){}
+        }
+    }
+
+    function isRetryableEndpointError(err){
+        const msg = String((err && err.message) || err || "");
+        return msg.includes("endpoints_resolution_error") ||
+               msg.includes("openid_config_error") ||
+               msg.includes("undefined/consumers") ||
+               msg.includes("could not resolve endpoints");
+    }
+
+    async function ensureMicrosoftAccountFixed(retried){
+        const client = window.initMsal();
+        const accounts = client.getAllAccounts();
+        let account = client.getActiveAccount() || accounts[0];
+        if(account){
+            client.setActiveAccount(account);
+            return account;
+        }
+
+        try{
+            if(isMobileLikeFixed()){
+                setPendingAction(getPendingAction() || "loginOnly");
+                await client.loginRedirect({ scopes: ONEDRIVE_SCOPES });
+                throw new Error("REDIRECTING_FOR_LOGIN");
+            }
+            const loginResp = await client.loginPopup({ scopes: ONEDRIVE_SCOPES });
+            account = loginResp.account;
+            if(account) client.setActiveAccount(account);
+            return account;
+        }catch(err){
+            if(isRetryableEndpointError(err) && !retried){
+                clearBrokenMsalCache();
+                resetMsalInstance();
+                return ensureMicrosoftAccountFixed(true);
+            }
+            const msg = String((err && err.message) || err || "");
+            if(!msg.includes("REDIRECTING_FOR_LOGIN") && !isMobileLikeFixed()){
+                setPendingAction(getPendingAction() || "loginOnly");
+                const fallbackClient = window.initMsal();
+                await fallbackClient.loginRedirect({ scopes: ONEDRIVE_SCOPES });
+                throw new Error("REDIRECTING_FOR_LOGIN");
+            }
+            throw err;
+        }
+    }
+
+    async function getMicrosoftAccessTokenFixed(retried){
+        const client = window.initMsal();
+        const account = await ensureMicrosoftAccountFixed(false);
+        try{
+            const silent = await client.acquireTokenSilent({ scopes: ONEDRIVE_SCOPES, account });
+            return silent.accessToken;
+        }catch(err){
+            if(isRetryableEndpointError(err) && !retried){
+                clearBrokenMsalCache();
+                resetMsalInstance();
+                return getMicrosoftAccessTokenFixed(true);
+            }
+            if(isMobileLikeFixed()){
+                setPendingAction(getPendingAction() || "loginOnly");
+                const c = window.initMsal();
+                await c.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
+                throw new Error("REDIRECTING_FOR_TOKEN");
+            }
+            try{
+                const popup = await client.acquireTokenPopup({ scopes: ONEDRIVE_SCOPES, account });
+                return popup.accessToken;
+            }catch(err2){
+                if(isRetryableEndpointError(err2) && !retried){
+                    clearBrokenMsalCache();
+                    resetMsalInstance();
+                    return getMicrosoftAccessTokenFixed(true);
+                }
+                setPendingAction(getPendingAction() || "loginOnly");
+                const c = window.initMsal();
+                await c.acquireTokenRedirect({ scopes: ONEDRIVE_SCOPES, account });
+                throw new Error("REDIRECTING_FOR_TOKEN");
+            }
+        }
+    }
+
+    window.ensureMicrosoftAccount = ensureMicrosoftAccountFixed;
+    window.getMicrosoftAccessToken = function(){ return getMicrosoftAccessTokenFixed(false); };
+    window.getAccessToken = window.getMicrosoftAccessToken;
+
+    const __origLoadCloudData_loginFix = window.loadCloudData;
+    if(typeof __origLoadCloudData_loginFix === "function"){
+        window.loadCloudData = async function(...args){
+            setPendingAction("loadCloudData");
+            try{
+                const out = await __origLoadCloudData_loginFix.apply(this, args);
+                setPendingAction("");
+                return out;
+            }catch(err){
+                const msg = String((err && err.message) || err || "");
+                if(!msg.includes("REDIRECTING_FOR_")) setPendingAction("");
+                throw err;
+            }
+        };
+    }
+
+    const __origSaveCloudData_loginFix = window.saveCloudData;
+    if(typeof __origSaveCloudData_loginFix === "function"){
+        window.saveCloudData = async function(...args){
+            setPendingAction("saveCloudData");
+            try{
+                const out = await __origSaveCloudData_loginFix.apply(this, args);
+                setPendingAction("");
+                return out;
+            }catch(err){
+                const msg = String((err && err.message) || err || "");
+                if(!msg.includes("REDIRECTING_FOR_")) setPendingAction("");
+                throw err;
+            }
+        };
+    }
+
+    window.loginMicrosoft = async function(){
+        try{
+            try{ updateCloudUI(isMobileLikeFixed() ? "正在跳转 Microsoft 登录..." : "正在打开 Microsoft 登录窗口..."); }catch(e){}
+            setPendingAction("loginOnly");
+            await ensureMicrosoftAccountFixed(false);
+            setPendingAction("");
+            try{ updateCloudUI("Microsoft 账户已连接"); }catch(e){}
+            const lastLocal = db.__meta?.lastLocalWriteAt;
+            const lastCloud = db.__meta?.lastCloudSyncAt;
+            if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) {
+                try{ scheduleCloudAutoSave(); }catch(e){}
+            }
+            alert("Microsoft 登录成功。");
+        }catch(err){
+            const msg = String((err && err.message) || err || "");
+            if(msg.includes("REDIRECTING_FOR_")) return;
+            console.error(err);
+            try{ updateCloudUI("登录失败"); }catch(e){}
+            alert("登录失败：" + msg);
+            setPendingAction("");
+        }
+    };
+
+    if(document.readyState === "loading"){
+        document.addEventListener("DOMContentLoaded", handleRedirectResultOnce);
+    }else{
+        handleRedirectResultOnce();
+    }
+    window.addEventListener("load", handleRedirectResultOnce);
 })();
 </script>
 
