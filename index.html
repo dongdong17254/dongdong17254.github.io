@@ -1451,7 +1451,10 @@ body {
                         </div>
                     </div>
                     <div class="sub-box" style="flex-grow: 1;">
-                        <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--title-color);">今日理政纪要</h4>
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom: 12px;">
+                            <h4 style="font-size: 14px; margin-bottom: 0; color: var(--title-color);">今日理政纪要</h4>
+                            <button class="mini-chip-btn" type="button" onclick="openFocusRecordEditor()">手动补录</button>
+                        </div>
                         <ul id="list-focus-today" style="list-style:none; max-height: 180px; overflow-y: auto; padding-right:5px;"></ul>
                     </div>
                 </div>
@@ -2426,11 +2429,14 @@ function openModal(title, fields, callback) {
 }
 function closeModal() { const modal = document.getElementById('custom-modal'); modal.classList.remove('show'); setTimeout(() => modal.style.display = 'none', 300); }
 function confirmModal() {
+    let shouldClose = true;
     if (modalSaveCallback) {
-        const inputs = Array.from(document.getElementById('modal-body').querySelectorAll('input, textarea, select')).map(el => el.value);
-        modalSaveCallback(inputs);
+        const body = document.getElementById('modal-body');
+        const inputs = Array.from(body.querySelectorAll('input, textarea, select')).map(el => el.value);
+        const result = modalSaveCallback(inputs, body);
+        if (result === false) shouldClose = false;
     }
-    closeModal();
+    if (shouldClose) closeModal();
 }
 
 // =============================================================================
@@ -2758,6 +2764,144 @@ function parseClockOnBaseDate(baseIso, hhmm) {
     base.setHours(h, m, 0, 0);
     return base;
 }
+function formatDateInputValue(value) {
+    const d = value ? new Date(value) : new Date();
+    if (Number.isNaN(d.getTime())) return getDateKey();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+function createDateTimeFromInputs(dateStr, hhmm) {
+    if (!dateStr || !hhmm || !hhmm.includes(':')) return null;
+    const parts = String(dateStr).split('-').map(v => parseInt(v, 10));
+    const clock = String(hhmm).split(':').map(v => parseInt(v, 10));
+    if (parts.length !== 3 || clock.length !== 2) return null;
+    const [y, mo, d] = parts;
+    const [h, m] = clock;
+    if ([y, mo, d, h, m].some(v => Number.isNaN(v))) return null;
+    const dt = new Date(y, mo - 1, d, h, m, 0, 0);
+    return Number.isNaN(dt.getTime()) ? null : dt;
+}
+function roundDateToFiveMinutes(date) {
+    const d = new Date(date || Date.now());
+    if (Number.isNaN(d.getTime())) return new Date();
+    d.setSeconds(0, 0);
+    const mins = d.getMinutes();
+    d.setMinutes(Math.floor(mins / 5) * 5);
+    return d;
+}
+function buildFocusRecordEditorHtml(rec, isNew) {
+    const categories = getFocusCategories();
+    const selectedCategoryId = rec.categoryId && categories.some(cat => cat.id === rec.categoryId) ? rec.categoryId : categories[0]?.id;
+    const dateValue = formatDateInputValue(rec.date || rec.startAt || rec.endAt || new Date());
+    const { start, end } = getFocusRange(rec);
+    const startClock = start && !Number.isNaN(start.getTime()) ? formatClock(start) : '09:00';
+    const endClock = end && !Number.isNaN(end.getTime()) ? formatClock(end) : '10:00';
+    const durationMin = Math.max(1, Math.round((rec.seconds || 3600) / 60));
+    return `
+        <div class="modal-input-group">
+            <label>一级分类</label>
+            <select id="focus-edit-category" class="custom-input">
+                ${categories.map(cat => `<option value="${cat.id}" ${String(cat.id) === String(selectedCategoryId) ? 'selected' : ''}>${escapeHtml(cat.name)}</option>`).join('')}
+            </select>
+        </div>
+        <div class="modal-input-group">
+            <label>二级细分类</label>
+            <input id="focus-edit-subcategory" class="custom-input" type="text" value="${escapeHtml(rec.subCategory || rec.topic || '')}" placeholder="#写论文 / #强化学习" list="focus-subcategory-list">
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+            <div class="modal-input-group" style="margin-bottom:0;">
+                <label>归属日期</label>
+                <input id="focus-edit-date" class="custom-input" type="date" value="${dateValue}">
+            </div>
+            <div class="modal-input-group" style="margin-bottom:0;">
+                <label>开始时间</label>
+                <input id="focus-edit-start" class="custom-input" type="time" value="${startClock}">
+            </div>
+            <div class="modal-input-group" style="margin-bottom:0;">
+                <label>结束时间</label>
+                <input id="focus-edit-end" class="custom-input" type="time" value="${endClock}">
+            </div>
+        </div>
+        <div class="modal-input-group">
+            <label>总时长（分钟）</label>
+            <input id="focus-edit-duration" class="custom-input" type="number" value="${durationMin}" readonly>
+        </div>
+        <div id="focus-edit-note" style="font-size:12px; color:var(--text-muted); line-height:1.55; margin-top:-6px;">修改开始/结束时间后会自动换算分钟数；若结束时间早于开始时间，将按次日结束处理。</div>
+    `;
+}
+function bindFocusRecordEditor() {
+    const dateInput = document.getElementById('focus-edit-date');
+    const startInput = document.getElementById('focus-edit-start');
+    const endInput = document.getElementById('focus-edit-end');
+    const durationInput = document.getElementById('focus-edit-duration');
+    const noteEl = document.getElementById('focus-edit-note');
+    if (!dateInput || !startInput || !endInput || !durationInput) return;
+    const syncDuration = () => {
+        const startAt = createDateTimeFromInputs(dateInput.value, startInput.value);
+        let endAt = createDateTimeFromInputs(dateInput.value, endInput.value);
+        if (!startAt || !endAt) {
+            durationInput.value = '';
+            if (noteEl) noteEl.textContent = '请填写完整的日期、开始时间和结束时间。';
+            return;
+        }
+        let crossDay = false;
+        if (endAt.getTime() < startAt.getTime()) {
+            endAt.setDate(endAt.getDate() + 1);
+            crossDay = true;
+        }
+        const mins = Math.round((endAt.getTime() - startAt.getTime()) / 60000);
+        durationInput.value = mins > 0 ? mins : '';
+        if (noteEl) noteEl.textContent = crossDay ? '已按跨日记录处理：结束时间视为次日。' : '修改开始/结束时间后会自动换算分钟数。';
+    };
+    [dateInput, startInput, endInput].forEach(el => el.addEventListener('input', syncDuration));
+    syncDuration();
+}
+function saveFocusRecordFromModal(existingId) {
+    const categories = getFocusCategories();
+    const categoryInput = document.getElementById('focus-edit-category');
+    const subInput = document.getElementById('focus-edit-subcategory');
+    const dateInput = document.getElementById('focus-edit-date');
+    const startInput = document.getElementById('focus-edit-start');
+    const endInput = document.getElementById('focus-edit-end');
+    const durationInput = document.getElementById('focus-edit-duration');
+    const rec = existingId ? db.focusRecords.find(r => r.id === existingId) : null;
+    const startAt = createDateTimeFromInputs(dateInput?.value, startInput?.value);
+    let endAt = createDateTimeFromInputs(dateInput?.value, endInput?.value);
+    if (!dateInput?.value) { alert('请先选择归属日期。'); return false; }
+    if (!startAt || !endAt) { alert('请填写有效的开始时间与结束时间。'); return false; }
+    if (endAt.getTime() < startAt.getTime()) endAt.setDate(endAt.getDate() + 1);
+    const durationMinutes = parseInt(durationInput?.value, 10);
+    if (Number.isNaN(durationMinutes) || durationMinutes < 1) { alert('总时长必须至少为 1 分钟。'); return false; }
+    const target = rec || { id: Date.now(), time: getFullTime() };
+    const categoryId = categoryInput?.value && categories.some(cat => cat.id === categoryInput.value) ? categoryInput.value : categories[0]?.id;
+    target.categoryId = categoryId;
+    target.subCategory = (subInput?.value || target.subCategory || target.topic || '未命名事项').trim() || '未命名事项';
+    target.topic = target.subCategory;
+    target.startAt = startAt.toISOString();
+    target.endAt = endAt.toISOString();
+    target.date = startAt.toISOString();
+    target.seconds = durationMinutes * 60;
+    target.time = target.time || getFullTime();
+    if (!rec) db.focusRecords.push(target);
+    persist(); renderFocusToday(); updateOverviewStats(); renderStats();
+    return true;
+}
+function openFocusRecordEditor(id) {
+    const existing = id ? db.focusRecords.find(r => r.id === id) : null;
+    const activeCategoryId = getActiveFocusCategoryId();
+    const draftNow = roundDateToFiveMinutes(new Date());
+    const draftStart = new Date(draftNow.getTime() - 30 * 60000);
+    const draft = existing || {
+        categoryId: activeCategoryId,
+        subCategory: (document.getElementById('focus-subcategory')?.value || '').trim(),
+        topic: (document.getElementById('focus-subcategory')?.value || '').trim(),
+        startAt: draftStart.toISOString(),
+        endAt: draftNow.toISOString(),
+        date: draftStart.toISOString(),
+        seconds: 30 * 60
+    };
+    openRichModal(existing ? '修改理政纪要' : '手动补录理政时间', buildFocusRecordEditorHtml(draft, !existing), () => saveFocusRecordFromModal(id));
+    setTimeout(() => bindFocusRecordEditor(), 0);
+}
 function getFocusRange(rec) {
     const end = rec?.endAt ? new Date(rec.endAt) : (rec?.date ? new Date(rec.date) : null);
     const validEnd = end && !Number.isNaN(end.getTime()) ? end : null;
@@ -3056,40 +3200,7 @@ function focusTimerCtrl(act) {
     }
 }
 function editFocusRecord(id) {
-    const rec = db.focusRecords.find(r => r.id === id); if (!rec) return;
-    const { start, end } = getFocusRange(rec);
-    openModal('修改理政纪要', [
-        {label: '一级分类', type: 'select', value: rec.categoryId, options: getFocusCategories().map(cat => ({ value: cat.id, text: cat.name }))},
-        {label: '二级细分类', value: rec.subCategory || rec.topic || ''},
-        {label: '开始时间 (HH:MM)', value: formatClock(start)},
-        {label: '结束时间 (HH:MM)', value: formatClock(end)},
-        {label: '总时长 (分钟)', value: Math.max(1, Math.round((rec.seconds || 0) / 60)), type: 'number'}
-    ], (vals) => {
-        rec.categoryId = vals[0] || rec.categoryId;
-        rec.subCategory = (vals[1] || rec.subCategory || '未命名事项').trim();
-        rec.topic = rec.subCategory;
-        const baseIso = rec.endAt || rec.date || new Date().toISOString();
-        const startObj = parseClockOnBaseDate(baseIso, vals[2]);
-        const endObj = parseClockOnBaseDate(baseIso, vals[3]);
-        let durationSeconds = rec.seconds || 0;
-        if (startObj && endObj) {
-            if (endObj.getTime() < startObj.getTime()) endObj.setDate(endObj.getDate() + 1);
-            durationSeconds = Math.round((endObj.getTime() - startObj.getTime()) / 1000);
-            if (durationSeconds < 60) return alert('结束时间需晚于开始时间，且总时长至少 1 分钟。');
-            rec.startAt = startObj.toISOString();
-            rec.endAt = endObj.toISOString();
-            rec.date = rec.endAt;
-        }
-        if (vals[4] && !isNaN(vals[4]) && !(startObj && endObj)) {
-            durationSeconds = parseInt(vals[4], 10) * 60;
-            const endBase = endObj || end || new Date(baseIso);
-            rec.endAt = endBase.toISOString();
-            rec.startAt = new Date(endBase.getTime() - durationSeconds * 1000).toISOString();
-            rec.date = rec.endAt;
-        }
-        rec.seconds = durationSeconds;
-        persist(); renderFocusToday(); updateOverviewStats(); renderStats();
-    });
+    openFocusRecordEditor(id);
 }
 function deleteFocusRecord(id) { if (confirm('确定删除这条纪要吗？')) { db.focusRecords = db.focusRecords.filter(r => r.id !== id); persist(); renderFocusToday(); updateOverviewStats(); renderStats(); } }
 function renderFocusToday() {
