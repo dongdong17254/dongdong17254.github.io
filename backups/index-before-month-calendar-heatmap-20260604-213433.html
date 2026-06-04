@@ -143,19 +143,12 @@
         .sync-status-chip.good .dot { background: var(--primary-color); }
         .sync-status-chip.warn .dot { background: var(--warning-color); }
         .sync-status-chip.bad .dot { background: var(--danger-color); }
-        .heatmap-wrap { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; padding: 2px; }
-        .heat-month-title { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
-        .heat-month-title strong { color: var(--title-color); font-size: 13px; }
-        .heat-weekday { text-align: center; font-size: 10px; color: var(--text-muted); padding-bottom: 2px; }
-        .heat-cell { min-width: 0; min-height: 48px; border-radius: 8px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); padding: 5px; display: flex; flex-direction: column; justify-content: space-between; }
-        .heat-cell.blank { background: transparent; border-color: transparent; box-shadow: none; }
-        .heat-cell.today { outline: 2px solid rgba(45,142,154,0.36); outline-offset: 1px; }
+        .heatmap-wrap { display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; padding: 2px; }
+        .heat-cell { aspect-ratio: 1; min-width: 0; border-radius: 5px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); }
         .heat-cell.l1 { background: #DDF5EA; border-color: rgba(121,190,156,0.16); }
         .heat-cell.l2 { background: #AEE8D7; border-color: rgba(74,174,145,0.20); }
         .heat-cell.l3 { background: #6FC9C8; border-color: rgba(58,151,154,0.22); }
-        .heat-cell.l4 { background: #2D8E9A; border-color: rgba(35,113,124,0.28); color: #fff; }
-        .heat-day { font-size: 10px; font-weight: 700; opacity: 0.78; }
-        .heat-time { font-size: 11px; font-weight: 800; font-variant-numeric: tabular-nums; align-self: flex-end; }
+        .heat-cell.l4 { background: #2D8E9A; border-color: rgba(35,113,124,0.28); }
         .heat-legend { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; font-size: 11px; color: var(--text-muted); }
         .heat-scale { display: inline-flex; align-items: center; gap: 4px; }
         .heat-scale i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); }
@@ -1774,9 +1767,9 @@ body {
                         <div class="dash-sub" id="studio-sync-note" style="margin-top:10px;">登录 Microsoft 后可跨设备同步计时。</div>
                     </div>
                     <div class="studio-panel">
-                        <div class="studio-panel-title">本月专注日历</div>
+                        <div class="studio-panel-title">最近专注热力</div>
                         <div id="focus-heatmap" class="heatmap-wrap"></div>
-                        <div class="heat-legend"><span>每日累计时长</span><span class="heat-scale"><i></i><i></i><i></i><i></i><i></i></span></div>
+                        <div class="heat-legend"><span>过去 91 天</span><span class="heat-scale"><i></i><i></i><i></i><i></i><i></i></span></div>
                     </div>
                 </div>
             </div>
@@ -3394,31 +3387,19 @@ function renderFocusHeatmap() {
     const byDay = {};
     (db.focusRecords || []).forEach(r => {
         const key = getDateKey(r.date || r.endAt);
-        byDay[key] = (byDay[key] || 0) + (r.seconds || 0);
+        byDay[key] = (byDay[key] || 0) + Math.round((r.seconds || 0) / 60);
     });
+    const days = [];
     const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const cells = [
-        `<div class="heat-month-title"><strong>${year}年${month + 1}月</strong><span>YPT style</span></div>`,
-        ...'日一二三四五六'.split('').map(d => `<div class="heat-weekday">${d}</div>`)
-    ];
-    for (let i = 0; i < firstDay.getDay(); i++) cells.push('<div class="heat-cell blank"></div>');
-    for (let day = 1; day <= daysInMonth; day++) {
-        const d = new Date(year, month, day);
+    for (let i = 90; i >= 0; i--) {
+        const d = new Date(today);
+        d.setDate(today.getDate() - i);
         const key = getDateKey(d);
-        const seconds = byDay[key] || 0;
-        const mins = Math.round(seconds / 60);
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const label = seconds > 0 ? `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}` : '';
+        const mins = byDay[key] || 0;
         const level = mins >= 240 ? 4 : mins >= 120 ? 3 : mins >= 45 ? 2 : mins > 0 ? 1 : 0;
-        const isToday = getDateKey(today) === key;
-        cells.push(`<div class="heat-cell${level ? ` l${level}` : ''}${isToday ? ' today' : ''}" title="${key} · ${label || '00:00'}"><span class="heat-day">${day}</span><span class="heat-time">${label}</span></div>`);
+        days.push(`<div class="heat-cell${level ? ` l${level}` : ''}" title="${key} · ${mins}min"></div>`);
     }
-    box.innerHTML = cells.join('');
+    box.innerHTML = days.join('');
 }
 function renderStudioFocusControls() {
     const catBox = document.getElementById('studio-focus-category-chips');
