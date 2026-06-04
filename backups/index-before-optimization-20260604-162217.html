@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="越冬皇帝的个人进步日记：记录学习、文献、专注时间、阅读观影、生活碎片与年度计划。">
-    <meta name="theme-color" content="#6C8D87">
     <title>越冬皇帝的进步日记</title>
     <script src="https://cdn.jsdelivr.net/npm/localforage@1.10.0/dist/localforage.min.js"></script>
     <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
@@ -1901,7 +1899,7 @@ function formatSecondsHuman(seconds) { return formatMinutesHuman(Math.max(1, Mat
 function getFocusCategories() { return Array.isArray(db.focusCategories) ? db.focusCategories : []; }
 function getFocusCategoryById(id) { return getFocusCategories().find(c => c.id === id) || getFocusCategories()[0] || null; }
 function getFocusCategoryName(id) { return getFocusCategoryById(id)?.name || '工作'; }
-function getFocusCategoryColor(id) { return sanitizeCssColor(getFocusCategoryById(id)?.color || '#AEBACC'); }
+function getFocusCategoryColor(id) { return getFocusCategoryById(id)?.color || '#AEBACC'; }
 function getActiveFocusCategoryId() { return db.focusSelectedCategoryId || getFocusCategories()[0]?.id || 'focus_work'; }
 function getFocusDisplayTitle(rec) {
     const cat = getFocusCategoryName(rec?.categoryId);
@@ -2466,8 +2464,8 @@ function renderLiterature() {
     let allTags = new Set();
     db.literature.forEach(item => (item.tags||[]).forEach(t => allTags.add(t)));
     
-    document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${escapeJsString(t)}')">${escapeHtml(t)}</span>`).join('');
-    document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${escapeHtml(t)}">`).join('');
+    document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${t}')">${t}</span>`).join('');
+    document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${t}">`).join('');
 
     let items = [...db.literature].reverse();
     if (currentFilterTag) items = items.filter(item => (item.tags||[]).includes(currentFilterTag));
@@ -2475,12 +2473,12 @@ function renderLiterature() {
 
     items.forEach(item => {
         const card = document.createElement('div'); card.className = 'lit-card'; card.dataset.searchKey = `literature-${item.idKey}`;
-        const tagHtml = (item.tags||[]).map(t => `<span class="lit-tag">${escapeHtml(t)}</span>`).join(' ');
+        const tagHtml = (item.tags||[]).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
         const detailsId = `lit-det-${item.idKey}`;
         card.innerHTML = `
             <div class="lit-summary" onclick="toggleLitDesc('${detailsId}')">
                 <div>
-                    <div class="lit-id">${escapeHtml(item.litId)} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${escapeHtml(item.journal)}</span></div>
+                    <div class="lit-id">${item.litId} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${item.journal}</span></div>
                     <div style="margin-top:6px;">${tagHtml}</div>
                 </div>
                 <div class="action-group" style="opacity: 1;" onclick="event.stopPropagation()">
@@ -2489,9 +2487,9 @@ function renderLiterature() {
                 </div>
             </div>
             <div class="lit-details" id="${detailsId}">
-                ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${escapeHtml(item.params)}</div>` : ''}
-                <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${escapeHtml(item.desc)}</div>
-                <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${escapeHtml(item.time)}</div>
+                ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${item.params}</div>` : ''}
+                <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${item.desc}</div>
+                <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${item.time}</div>
             </div>`;
         list.appendChild(card);
     });
@@ -2552,18 +2550,18 @@ function renderLearning() {
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                 <div>
-                    <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${escapeHtml(item.title)}</div>
-                    ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${escapeHtml(item.tags)}</div>` : ''}
+                    <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${item.title}</div>
+                    ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${item.tags}</div>` : ''}
                 </div>
                 <div class="action-group" style="opacity: 1;">
                     <span class="text-btn edit" onclick="editLearning(${item.idKey})">✎</span>
                     <span class="text-btn delete" onclick="deleteRecord('learning', ${item.idKey})">🗑️</span>
                 </div>
             </div>
-            ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${escapeHtml(item.desc)}</div>` : ''}
-            ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${escapeHtml(item.code)}</div>` : ''}
+            ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${item.desc}</div>` : ''}
+            ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${item.code}</div>` : ''}
             ${(item.img || item.imgPath) ? `<img id="learn-img-${item.idKey}" style="max-width:100%; border-radius:8px; border:1px solid var(--border-color); margin-bottom:10px; object-fit:contain;">` : ''}
-            <div style="font-size:11px; color:var(--text-muted); text-align:right;">${escapeHtml(item.time)}</div>`;
+            <div style="font-size:11px; color:var(--text-muted); text-align:right;">${item.time}</div>`;
         list.appendChild(card);
         if (item.img || item.imgPath) {
             const imgEl = document.getElementById(`learn-img-${item.idKey}`);
@@ -2671,15 +2669,15 @@ function renderLifeList(type) {
         const li = document.createElement('li'); li.className = 'life-item';
         if (type === 'sport') {
             li.innerHTML = `
-                <div class="life-title"><span class="life-time-badge">${escapeHtml(item.time)}</span> ${escapeHtml(item.name)}</div>
-                <div class="life-meta">时长: <strong>${escapeHtml(item.val)}</strong> 分</div>
+                <div class="life-title"><span class="life-time-badge">${item.time}</span> ${item.name}</div>
+                <div class="life-meta">时长: <strong>${item.val}</strong> 分</div>
                 <div class="action-group" style="position:absolute;right:15px;top:15px;">
                     <span class="text-btn edit" onclick="editLifeRecord('${type}', ${realIndex})">${ICON_EDIT}</span>
                     <span class="text-btn delete" onclick="deleteRecord('${type}', ${item.idKey ? item.idKey : realIndex})">${ICON_DELETE}</span>
                 </div>`;
         } else {
             li.innerHTML = `
-                <div class="life-title"><span class="life-time-badge">${escapeHtml(item.time)}</span> ${escapeHtml(item.val)}</div>
+                <div class="life-title"><span class="life-time-badge">${item.time}</span> ${item.val}</div>
                 <div class="action-group" style="position:absolute;right:15px;top:15px;">
                     <span class="text-btn edit" onclick="editLifeRecord('${type}', ${realIndex})">${ICON_EDIT}</span>
                     <span class="text-btn delete" onclick="deleteRecord('${type}', ${item.idKey ? item.idKey : realIndex})">${ICON_DELETE}</span>
@@ -2921,14 +2919,6 @@ function focusRangeText(rec) {
 }
 function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[s] || s));
-}
-function escapeJsString(value) {
-    return String(value ?? '').replace(/[\\']/g, s => ({'\\':'\\\\', "'":"\\'"}[s]));
-}
-function sanitizeCssColor(value, fallback = '#AEBACC') {
-    const color = String(value || '').trim();
-    if (/^#[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(color)) return color;
-    return fallback;
 }
 function makeSearchSnippet(text, query) {
     const raw = String(text || '').replace(/\s+/g, ' ').trim();
@@ -3262,10 +3252,10 @@ function renderStatusRecords() {
     recs.forEach(r => {
         const timeOnly = new Date(r.time).toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
         cols[r.period] = cols[r.period] || [];
-        cols[r.period].push(`<div class="status-card"><div class="status-card-time">${escapeHtml(timeOnly)}<div class="action-group" style="margin-left:auto;">
+        cols[r.period].push(`<div class="status-card"><div class="status-card-time">${timeOnly}<div class="action-group" style="margin-left:auto;">
             <span class="text-btn edit" onclick="editStatusRecord(${r.id})">${ICON_EDIT}</span>
             <span class="text-btn delete" onclick="deleteStatusRecord(${r.id})">${ICON_DELETE}</span>
-        </div></div><div class="status-card-content">${escapeHtml(r.text)}</div></div>`);
+        </div></div><div class="status-card-content">${r.text}</div></div>`);
     });
     grid.innerHTML = '';
     ['🌅 上午', '☀️ 下午', '🌙 晚上'].forEach(period => {
@@ -3329,7 +3319,7 @@ function renderWordsList() {
     document.getElementById('word-stats').innerHTML = `<span style="flex:1">今日: <strong>${todayTotal}</strong></span><span style="flex:1">本周: <strong>${weekTotal}</strong></span><span style="flex:1">本月: <strong>${monthTotal}</strong></span>`;
     [...(db.words || [])].reverse().forEach((item, i) => {
         const realIdx = db.words.length - 1 - i;
-        ul.innerHTML += `<li class="record-item compact-record"><div class="record-header"><span class="record-time">${escapeHtml(item.time)}</span><div class="action-group"><span class="text-btn edit" onclick="editWordRecord(${realIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('words', ${item.idKey ? item.idKey : realIdx})">${ICON_DELETE}</span></div></div><div class="record-content">新增打卡: <strong>${escapeHtml(item.val)}</strong> 字</div></li>`;
+        ul.innerHTML += `<li class="record-item compact-record"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editWordRecord(${realIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('words', ${item.idKey ? item.idKey : realIdx})">${ICON_DELETE}</span></div></div><div class="record-content">新增打卡: <strong>${item.val}</strong> 字</div></li>`;
     });
     document.getElementById('sidebar-words').textContent = `${weekTotal} 字`;
 }
@@ -3342,7 +3332,7 @@ function renderIdeasList() {
         [...(db.cns || [])].reverse().forEach((item, i) => {
             const rIdx = db.cns.length - 1 - i;
             const imgHtml = (item.img || item.imgPath) ? `<img id="${prefix}-cns-img-${item.idKey}" style="max-width:100%;max-height:300px;border-radius:8px;margin-top:12px;border:1px solid var(--border-color);object-fit:contain;">` : '';
-            ul.innerHTML += `<li class="record-item" data-search-key="ideas-${escapeHtml(item.idKey || item.time)}" style="padding:15px;"><div class="record-header"><span class="record-time">${escapeHtml(item.time)}</span><div class="action-group"><span class="text-btn edit" onclick="editCNSRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('cns', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content" style="${item.val ? 'margin-bottom: 5px;' : ''}">${escapeHtml(item.val || '')}</div>${imgHtml}</li>`;
+            ul.innerHTML += `<li class="record-item" data-search-key="ideas-${item.idKey || item.time}" style="padding:15px;"><div class="record-header"><span class="record-time">${item.time}</span><div class="action-group"><span class="text-btn edit" onclick="editCNSRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('cns', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content" style="${item.val ? 'margin-bottom: 5px;' : ''}">${item.val||''}</div>${imgHtml}</li>`;
         });
         [...(db.cns || [])].reverse().forEach(item => {
             if (item.img || item.imgPath) {
@@ -3358,7 +3348,7 @@ function renderQuotesList() {
     const ul = document.getElementById('list-memorableQuotes'); ul.innerHTML = '';
     [...(db.memorableQuotes||[])].reverse().forEach((item, i) => {
         const rIdx = db.memorableQuotes.length - 1 - i;
-        ul.innerHTML += `<li class="record-item" data-search-key="quotes-${escapeHtml(item.idKey || item.time)}"><div class="record-header"><span class="record-time">摘录于 ${escapeHtml(String(item.time || '').split(' ')[0])}</span><div class="action-group"><span class="text-btn edit" onclick="editQuoteRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('memorableQuotes', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content">${escapeHtml(item.val)}</div></li>`;
+        ul.innerHTML += `<li class="record-item" data-search-key="quotes-${item.idKey || item.time}"><div class="record-header"><span class="record-time">摘录于 ${item.time.split(' ')[0]}</span><div class="action-group"><span class="text-btn edit" onclick="editQuoteRecord(${rIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('memorableQuotes', ${item.idKey ? item.idKey : rIdx})">${ICON_DELETE}</span></div></div><div class="record-content">${item.val}</div></li>`;
     });
 }
 function editQuoteRecord(i) { openModal("修改金句", [{label: "摘录内容", value: db.memorableQuotes[i].val, type: "textarea", className: "quote-font"}], (vals) => { if (vals[0] && vals[0].trim()) { db.memorableQuotes[i].val = vals[0].trim(); persist(); renderQuotesList(); } }); }
@@ -3389,7 +3379,7 @@ function renderAnnualPlans() {
         else if (p.type === 'blog') { cur = (db.blog||[]).filter(r => r.time.includes(p.year)).length; unit = 'EP'; title = '播客指南'; }
         else { cur = p.current || 0; unit = '次'; title = p.title || '自定义目标'; manualHtml = `<button class="annual-manual-btn" onclick="updateAnnualManual(${idx}, -1)">-1</button><button class="annual-manual-btn" onclick="updateAnnualManual(${idx}, 1)">+1</button>`; }
         const pct = p.target > 0 ? Math.min((cur / p.target) * 100, 100).toFixed(1) : 0;
-        container.innerHTML += `<div class="annual-item"><div class="annual-bg" style="width:${pct}%;"></div><div class="annual-content"><div class="annual-header"><span class="annual-badge">${escapeHtml(p.year)} | ${escapeHtml(title)}</span><div class="action-group"><span class="text-btn edit" onclick="editAnnualPlan(${idx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteAnnual(${idx})">${ICON_DELETE}</span></div></div><div style="font-size:14px; font-weight:bold; color:var(--title-color); display:flex; align-items:center;">${escapeHtml(pct)}% &nbsp;|&nbsp; ${escapeHtml(cur)} / ${escapeHtml(p.target)} ${escapeHtml(unit)} &nbsp;${manualHtml}</div></div></div>`;
+        container.innerHTML += `<div class="annual-item"><div class="annual-bg" style="width:${pct}%;"></div><div class="annual-content"><div class="annual-header"><span class="annual-badge">${p.year} | ${title}</span><div class="action-group"><span class="text-btn edit" onclick="editAnnualPlan(${idx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteAnnual(${idx})">${ICON_DELETE}</span></div></div><div style="font-size:14px; font-weight:bold; color:var(--title-color); display:flex; align-items:center;">${pct}% &nbsp;|&nbsp; ${cur} / ${p.target} ${unit} &nbsp;${manualHtml}</div></div></div>`;
     });
 }
 function changeMonth(o) { currentCalMonth.setMonth(currentCalMonth.getMonth() + o); renderCalendar(); renderUnifiedLifeCalendar(); }
@@ -3402,7 +3392,7 @@ function renderCalendar() {
     for (let d = 1; d <= daysInMonth; d++) {
         const ds = getDateKey(new Date(y, m, d));
         let cellHtml = `<div class="calendar-cell${ds === todayKey ? ' today' : ''}"><div class="calendar-date">${d}</div>`;
-        (db.todos || []).filter(t => t.status === 'done' && t.dateCompleted && getDateKey(t.dateCompleted) === ds).forEach(t => { cellHtml += `<div class="calendar-task">${escapeHtml(t.text)}</div>`; });
+        (db.todos || []).filter(t => t.status === 'done' && t.dateCompleted && getDateKey(t.dateCompleted) === ds).forEach(t => { cellHtml += `<div class="calendar-task">${t.text}</div>`; });
         cellHtml += `</div>`; grid.innerHTML += cellHtml;
     }
 }
@@ -4248,7 +4238,7 @@ function renderFocusTimeline(){
         if (isImg) {
             if (temp.previewUrl) thumb = `<img class="attach-preview-thumb" src="${temp.previewUrl}" alt="预览">`;
         }
-        el.innerHTML = `<div class="attach-preview-chip">${thumb}<span>${icon}</span><span>${escapeHtml(temp.file.name)}</span><span style="color:var(--text-muted);">${formatFileSize(temp.file.size)}</span></div>`;
+        el.innerHTML = `<div class="attach-preview-chip">${thumb}<span>${icon}</span><span>${temp.file.name}</span><span style="color:var(--text-muted);">${formatFileSize(temp.file.size)}</span></div>`;
     }
 
     window.previewAttachmentInput = function(inp, type){
@@ -4340,7 +4330,7 @@ function renderFocusTimeline(){
                     <div class="attach-card-left">
                         <span class="attach-icon">${icon}</span>
                         <div class="attach-name-wrap">
-                            <div class="attach-name">${escapeHtml(meta.name || '附件')}</div>
+                            <div class="attach-name">${meta.name || '附件'}</div>
                             <div class="attach-meta">${formatFileSize(meta.size)} · ${locationText}</div>
                         </div>
                     </div>
@@ -4524,8 +4514,8 @@ function renderFocusTimeline(){
         list.innerHTML = '';
         let allTags = new Set();
         db.literature.forEach(item => (item.tags || []).forEach(t => allTags.add(t)));
-        document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${escapeJsString(t)}')">${escapeHtml(t)}</span>`).join('');
-        document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${escapeHtml(t)}">`).join('');
+        document.getElementById('lit-filter-tags').innerHTML = Array.from(allTags).map(t => `<span class="shortcut-tag ${currentFilterTag === t ? 'active' : ''}" onclick="setLitFilter('${t}')">${t}</span>`).join('');
+        document.getElementById('lit-tags-list').innerHTML = Array.from(allTags).map(t => `<option value="${t}">`).join('');
         let items = [...db.literature].reverse();
         if (currentFilterTag) items = items.filter(item => (item.tags || []).includes(currentFilterTag));
         if (!items.length) {
@@ -4536,12 +4526,12 @@ function renderFocusTimeline(){
             const card = document.createElement('div');
             card.className = 'lit-card';
             card.dataset.searchKey = `literature-${item.idKey}`;
-            const tagHtml = (item.tags || []).map(t => `<span class="lit-tag">${escapeHtml(t)}</span>`).join(' ');
+            const tagHtml = (item.tags || []).map(t => `<span class="lit-tag">${t}</span>`).join(' ');
             const detailsId = `lit-det-${item.idKey}`;
             card.innerHTML = `
                 <div class="lit-summary" onclick="toggleLitDesc('${detailsId}')">
                     <div>
-                        <div class="lit-id">${escapeHtml(item.litId)} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${escapeHtml(item.journal || '')}</span></div>
+                        <div class="lit-id">${item.litId} <span style="font-size:12px; font-weight:normal; color:var(--text-muted);">${item.journal || ''}</span></div>
                         <div style="margin-top:6px;">${tagHtml}</div>
                     </div>
                     <div class="action-group" style="opacity: 1;" onclick="event.stopPropagation()">
@@ -4550,10 +4540,10 @@ function renderFocusTimeline(){
                     </div>
                 </div>
                 <div class="lit-details" id="${detailsId}">
-                    ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${escapeHtml(item.params)}</div>` : ''}
-                    <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${escapeHtml(item.desc || '')}</div>
+                    ${item.params ? `<div class="lit-params"><strong>核心参数:</strong> ${item.params}</div>` : ''}
+                    <div style="font-size:14px; white-space:pre-wrap; line-height:1.6; color:var(--text-main);">${item.desc || ''}</div>
                     ${buildAttachmentCardHtml(item, 'literature')}
-                    <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${escapeHtml(item.time)}</div>
+                    <div style="font-size:12px; color:var(--text-muted); text-align:right; margin-top:15px;">录入于 ${item.time}</div>
                 </div>
             `;
             list.appendChild(card);
@@ -4592,18 +4582,18 @@ function renderFocusTimeline(){
             card.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
                     <div>
-                        <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${escapeHtml(item.title)}</div>
-                        ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${escapeHtml(item.tags)}</div>` : ''}
+                        <div style="font-size:16px; font-weight:bold; color:var(--title-color);">${item.title}</div>
+                        ${item.tags ? `<div style="font-size:12px; color:var(--primary-color); margin-top:4px;">🏷️ ${item.tags}</div>` : ''}
                     </div>
                     <div class="action-group" style="opacity: 1;">
                         <span class="text-btn edit" onclick="editLearning(${item.idKey})">✎</span>
                         <span class="text-btn delete" onclick="deleteRecord('learning', ${item.idKey})">🗑️</span>
                     </div>
                 </div>
-                ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${escapeHtml(item.desc)}</div>` : ''}
-                ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${escapeHtml(item.code)}</div>` : ''}
+                ${item.desc ? `<div style="font-size:14px; white-space:pre-wrap; margin-bottom:15px;">${item.desc}</div>` : ''}
+                ${item.code ? `<div class="code-textarea" style="margin-bottom:15px; border-radius:8px; white-space:pre-wrap;">${item.code}</div>` : ''}
                 ${buildAttachmentCardHtml(item, 'learning')}
-                <div style="font-size:11px; color:var(--text-muted); text-align:right; margin-top:10px;">${escapeHtml(item.time)}</div>
+                <div style="font-size:11px; color:var(--text-muted); text-align:right; margin-top:10px;">${item.time}</div>
             `;
             list.appendChild(card);
             hydrateAttachmentPreviewForItem('learning', item);
