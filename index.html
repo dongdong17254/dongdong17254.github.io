@@ -143,13 +143,19 @@
         .sync-status-chip.good .dot { background: var(--primary-color); }
         .sync-status-chip.warn .dot { background: var(--warning-color); }
         .sync-status-chip.bad .dot { background: var(--danger-color); }
-        .heatmap-wrap { display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; }
-        .heat-cell { aspect-ratio: 1; min-width: 0; border-radius: 4px; background: #E9F0EE; border: 1px solid rgba(108,141,135,0.08); }
-        .heat-cell.l1 { background: #D8E7E3; }
-        .heat-cell.l2 { background: #BBD4CE; }
-        .heat-cell.l3 { background: #8FB4AA; }
-        .heat-cell.l4 { background: #5F877E; }
+        .heatmap-wrap { display: grid; grid-template-columns: repeat(13, 1fr); gap: 5px; padding: 2px; }
+        .heat-cell { aspect-ratio: 1; min-width: 0; border-radius: 5px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); }
+        .heat-cell.l1 { background: #DDF5EA; border-color: rgba(121,190,156,0.16); }
+        .heat-cell.l2 { background: #AEE8D7; border-color: rgba(74,174,145,0.20); }
+        .heat-cell.l3 { background: #6FC9C8; border-color: rgba(58,151,154,0.22); }
+        .heat-cell.l4 { background: #2D8E9A; border-color: rgba(35,113,124,0.28); }
         .heat-legend { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 10px; font-size: 11px; color: var(--text-muted); }
+        .heat-scale { display: inline-flex; align-items: center; gap: 4px; }
+        .heat-scale i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); }
+        .heat-scale i:nth-child(2) { background: #DDF5EA; }
+        .heat-scale i:nth-child(3) { background: #AEE8D7; }
+        .heat-scale i:nth-child(4) { background: #6FC9C8; }
+        .heat-scale i:nth-child(5) { background: #2D8E9A; }
         @media (max-width: 900px) {
             .quiet-dashboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .focus-studio { grid-template-columns: 1fr; }
@@ -1755,7 +1761,7 @@ body {
                     <div class="studio-panel">
                         <div class="studio-panel-title">最近专注热力</div>
                         <div id="focus-heatmap" class="heatmap-wrap"></div>
-                        <div class="heat-legend"><span>过去 91 天</span><span>浅 → 深：时长增加</span></div>
+                        <div class="heat-legend"><span>过去 91 天</span><span class="heat-scale"><i></i><i></i><i></i><i></i><i></i></span></div>
                     </div>
                 </div>
             </div>
