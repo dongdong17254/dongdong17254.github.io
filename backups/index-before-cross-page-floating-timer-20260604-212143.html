@@ -165,7 +165,7 @@
             .quiet-dashboard { grid-template-columns: 1fr; }
             .dash-tile { min-height: 108px; }
             .studio-actions { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
-            .studio-actions .btn, .studio-actions .timer-btn, .studio-actions .timer-btn-full, .studio-actions .timer-btn-text { width: 100%; max-width: none; }
+            .studio-actions .btn, .studio-actions .timer-btn { width: 100%; }
         }
 
         .timer-box { background: #F0F6F5; border-radius: 16px; padding: 20px 30px; text-align: center; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center;}
@@ -184,40 +184,34 @@
             right: 24px;
             bottom: 24px;
             z-index: 80;
-            width: min(220px, calc(100vw - 32px));
-            min-width: 142px;
-            max-width: min(360px, calc(100vw - 24px));
-            min-height: 66px;
-            max-height: min(260px, calc(100vh - 24px));
+            width: min(290px, calc(100vw - 32px));
             background: rgba(255,255,255,0.96);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: 0 14px 34px rgba(31, 48, 45, 0.16);
-            padding: 10px;
+            border-radius: 16px;
+            box-shadow: 0 18px 42px rgba(31, 48, 45, 0.18);
+            padding: 12px;
             display: none;
             user-select: none;
             backdrop-filter: blur(10px);
-            resize: both;
-            overflow: auto;
         }
         .floating-timer.active { display: block; }
         .floating-timer.dragging { opacity: 0.92; cursor: grabbing; }
         .floating-timer-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: grab; margin-bottom: 8px; }
-        .floating-timer-title { font-size: 11px; font-weight: 700; color: var(--title-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .floating-timer-title { font-size: 12px; font-weight: 700; color: var(--title-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .floating-timer-hint { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
-        .floating-timer-time { font-size: 22px; line-height: 1; font-weight: 800; color: var(--title-color); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
-        .floating-timer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .floating-timer-time { font-size: 28px; line-height: 1; font-weight: 800; color: var(--title-color); font-variant-numeric: tabular-nums; margin-bottom: 10px; }
+        .floating-timer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .floating-timer-actions .mini-chip-btn { width: 100%; justify-content: center; }
         .floating-timer-toggle { border: 0; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 12px; padding: 2px 4px; }
-        .floating-timer-sync { margin-top: 7px; font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+        .floating-timer-sync { margin-top: 8px; font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
         .floating-timer-sync .dot { width: 7px; height: 7px; border-radius: 50%; background: #c9d5d2; }
         .floating-timer-sync.good .dot { background: var(--primary-color); }
         .floating-timer-sync.warn .dot { background: var(--warning-color); }
-        .floating-timer.collapsed { width: auto; min-width: 112px; min-height: 42px; padding: 8px 10px; cursor: grab; resize: none; overflow: hidden; }
+        .floating-timer.collapsed { width: auto; min-width: 138px; padding: 10px 12px; cursor: grab; }
         .floating-timer.collapsed .floating-timer-head,
         .floating-timer.collapsed .floating-timer-actions,
         .floating-timer.collapsed .floating-timer-sync { display: none; }
-        .floating-timer.collapsed .floating-timer-time { margin-bottom: 0; font-size: 18px; }
+        .floating-timer.collapsed .floating-timer-time { margin-bottom: 0; font-size: 23px; }
         @media (max-width: 720px) {
             .floating-timer { right: 16px; bottom: 16px; width: min(260px, calc(100vw - 24px)); }
             .floating-timer-time { font-size: 24px; }
@@ -1449,7 +1443,6 @@ body {
     <div class="floating-timer-actions">
         <button class="mini-chip-btn" type="button" id="floating-timer-pause" onclick="focusTimerCtrl(db.activeTimer.running ? 'pause' : 'start')">暂停</button>
         <button class="mini-chip-btn" type="button" onclick="focusTimerCtrl('stop')">结束保存</button>
-        <button class="mini-chip-btn" type="button" onclick="openTimerPictureInPicture()">跨页</button>
     </div>
     <div class="floating-timer-sync" id="floating-timer-sync"><span class="dot"></span><span id="floating-timer-sync-text">仅本地</span></div>
 </div>
@@ -1739,7 +1732,6 @@ body {
                         <button class="timer-btn timer-btn-primary" type="button" onclick="focusTimerCtrl('start')">开始</button>
                         <button class="timer-btn timer-btn-secondary" type="button" onclick="focusTimerCtrl('pause')">暂停</button>
                         <button class="timer-btn-full" type="button" onclick="focusTimerCtrl('stop')">结束保存</button>
-                        <button class="timer-btn-full" type="button" onclick="openTimerPictureInPicture()">跨页悬浮</button>
                         <button class="timer-btn-text" type="button" onclick="focusTimerCtrl('reset')">清零</button>
                     </div>
                 </div>
@@ -2023,7 +2015,6 @@ let cloudAutoSaveTimer = null;
 let cloudSyncInProgress = false;
 let timerCloudSyncInterval = null;
 let timerImmediateCloudSaveTimer = null;
-let timerPipWindow = null;
 
 
 // 获取完整的 年-月-日 时:分
@@ -3597,100 +3588,6 @@ function toggleFloatingTimerCompact(force) {
     panel.classList.toggle('collapsed', compact);
     try { localStorage.setItem('floatingTimerCollapsed', compact ? '1' : '0'); } catch(e) {}
 }
-function renderTimerPipShell(pipDoc) {
-    pipDoc.body.innerHTML = `
-        <style>
-            * { box-sizing: border-box; }
-            body {
-                margin: 0;
-                width: 100vw;
-                height: 100vh;
-                overflow: hidden;
-                background: #F7FBFA;
-                color: #364F4A;
-                font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-            }
-            .pip {
-                height: 100vh;
-                min-width: 160px;
-                padding: 10px;
-                display: grid;
-                grid-template-rows: auto 1fr auto;
-                gap: 7px;
-                border: 1px solid #DCE8E5;
-                background: linear-gradient(135deg, #FFFFFF, #EEF6F4);
-            }
-            .title {
-                font-size: 11px;
-                font-weight: 700;
-                color: #6C8D87;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-            .time {
-                align-self: center;
-                justify-self: center;
-                font-size: clamp(22px, 19vw, 40px);
-                line-height: 1;
-                font-weight: 900;
-                font-variant-numeric: tabular-nums;
-                color: #364F4A;
-            }
-            .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-            button {
-                border: 1px solid #DCE8E5;
-                background: #fff;
-                color: #364F4A;
-                border-radius: 8px;
-                padding: 7px 6px;
-                font-size: 12px;
-                cursor: pointer;
-            }
-            button.primary { background: #6C8D87; border-color: #6C8D87; color: #fff; }
-        </style>
-        <div class="pip">
-            <div class="title" id="pip-title">未命名事项</div>
-            <div class="time" id="pip-time">00:00:00</div>
-            <div class="actions">
-                <button id="pip-pause" onclick="opener.focusTimerCtrl(opener.db.activeTimer.running ? 'pause' : 'start')">暂停</button>
-                <button class="primary" onclick="opener.focusTimerCtrl('stop')">结束</button>
-            </div>
-        </div>
-    `;
-}
-function updateTimerPictureInPicture(totalSeconds = getTimerTotalSeconds()) {
-    if (!timerPipWindow || timerPipWindow.closed) return;
-    const doc = timerPipWindow.document;
-    const title = doc.getElementById('pip-title');
-    const time = doc.getElementById('pip-time');
-    const pause = doc.getElementById('pip-pause');
-    if (title) title.textContent = db.activeTimer.running || totalSeconds ? getFocusDisplayTitle(db.activeTimer) : '未开始计时';
-    if (time) time.textContent = formatTime(totalSeconds);
-    if (pause) pause.textContent = db.activeTimer.running ? '暂停' : '继续';
-}
-async function openTimerPictureInPicture() {
-    if (!('documentPictureInPicture' in window)) {
-        alert('当前浏览器不支持跨网页悬浮窗。建议使用新版 Chrome 或 Edge；网页内悬浮窗仍可拖动和缩放。');
-        return;
-    }
-    try {
-        if (timerPipWindow && !timerPipWindow.closed) {
-            timerPipWindow.focus();
-            updateTimerPictureInPicture();
-            return;
-        }
-        timerPipWindow = await window.documentPictureInPicture.requestWindow({ width: 210, height: 116 });
-        renderTimerPipShell(timerPipWindow.document);
-        timerPipWindow.addEventListener('pagehide', () => { timerPipWindow = null; });
-        updateTimerPictureInPicture();
-    } catch(e) {
-        console.error(e);
-        alert('跨页悬浮窗打开失败：请确认这是由点击按钮触发，并使用支持 Picture-in-Picture 的浏览器。');
-    }
-}
-window.openTimerPictureInPicture = openTimerPictureInPicture;
-window.updateTimerPictureInPicture = updateTimerPictureInPicture;
 function initFloatingTimerDrag() {
     const panel = document.getElementById('floating-timer');
     const handle = document.getElementById('floating-timer-drag');
@@ -3715,25 +3612,8 @@ function initFloatingTimerDrag() {
         panel.classList.add('dragging');
         handle.setPointerCapture?.(e.pointerId);
     });
-    panel.addEventListener('pointerdown', e => {
-        if (!panel.classList.contains('collapsed')) return;
-        if (e.button !== undefined && e.button !== 0) return;
-        const rect = panel.getBoundingClientRect();
-        drag = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        panel.classList.add('dragging');
-        panel.setPointerCapture?.(e.pointerId);
-    });
     handle.addEventListener('pointermove', e => {
         if (!drag) return;
-        const left = Math.max(8, Math.min(e.clientX - drag.x, window.innerWidth - panel.offsetWidth - 8));
-        const top = Math.max(8, Math.min(e.clientY - drag.y, window.innerHeight - panel.offsetHeight - 8));
-        panel.style.left = `${left}px`;
-        panel.style.top = `${top}px`;
-        panel.style.right = 'auto';
-        panel.style.bottom = 'auto';
-    });
-    panel.addEventListener('pointermove', e => {
-        if (!drag || !panel.classList.contains('collapsed')) return;
         const left = Math.max(8, Math.min(e.clientX - drag.x, window.innerWidth - panel.offsetWidth - 8));
         const top = Math.max(8, Math.min(e.clientY - drag.y, window.innerHeight - panel.offsetHeight - 8));
         panel.style.left = `${left}px`;
@@ -3752,15 +3632,12 @@ function initFloatingTimerDrag() {
     };
     handle.addEventListener('pointerup', stopDrag);
     handle.addEventListener('pointercancel', stopDrag);
-    panel.addEventListener('pointerup', stopDrag);
-    panel.addEventListener('pointercancel', stopDrag);
 }
 function updateTimerDisplay() {
     const total = getTimerTotalSeconds();
     const clock = document.getElementById('focus-stopwatch');
     if (clock) clock.textContent = formatTime(total);
     updateFloatingTimer(total);
-    updateTimerPictureInPicture(total);
     renderDashboard();
     renderFocusStudio();
 }
