@@ -146,9 +146,6 @@
         .heatmap-wrap { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; padding: 2px; }
         .heat-month-title { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
         .heat-month-title strong { color: var(--title-color); font-size: 13px; }
-        .heat-nav-btn { border: 1px solid var(--border-color); background: #fff; color: var(--title-color); border-radius: 8px; padding: 5px 8px; font-size: 11px; cursor: pointer; transition: 0.18s ease; }
-        .heat-nav-btn:hover:not(:disabled) { border-color: var(--primary-color); color: var(--primary-color); }
-        .heat-nav-btn:disabled { opacity: 0.38; cursor: default; }
         .heat-weekday { text-align: center; font-size: 10px; color: var(--text-muted); padding-bottom: 2px; }
         .heat-cell { min-width: 0; min-height: 48px; border-radius: 8px; background: #EEF3F2; border: 1px solid rgba(86,126,120,0.08); box-shadow: inset 0 1px 0 rgba(255,255,255,0.65); padding: 5px; display: flex; flex-direction: column; justify-content: space-between; }
         .heat-cell.blank { background: transparent; border-color: transparent; box-shadow: none; }
@@ -2013,7 +2010,6 @@ let currentInputPrio = { long: 3, today: 3 };
 let modalSaveCallback = null;
 let timerInterval = null;
 let currentFilterTag = null; // 用于文献过滤
-let currentHeatMonth = new Date();
 
 const periodNames = ["🌅 上午", "☀️ 下午", "🌙 晚上"];
 const ICON_EDIT = '&#9998;';
@@ -3401,14 +3397,12 @@ function renderFocusHeatmap() {
         byDay[key] = (byDay[key] || 0) + (r.seconds || 0);
     });
     const today = new Date();
-    const viewDate = currentHeatMonth || today;
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
+    const year = today.getFullYear();
+    const month = today.getMonth();
     const firstDay = new Date(year, month, 1);
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
     const cells = [
-        `<div class="heat-month-title"><button class="heat-nav-btn" type="button" onclick="changeHeatMonth(-1)">上一月</button><strong>${year}年${month + 1}月</strong><button class="heat-nav-btn" type="button" onclick="changeHeatMonth(1)" ${isCurrentMonth ? 'disabled' : ''}>下一月</button></div>`,
+        `<div class="heat-month-title"><strong>${year}年${month + 1}月</strong><span>YPT style</span></div>`,
         ...'日一二三四五六'.split('').map(d => `<div class="heat-weekday">${d}</div>`)
     ];
     for (let i = 0; i < firstDay.getDay(); i++) cells.push('<div class="heat-cell blank"></div>');
@@ -3426,17 +3420,6 @@ function renderFocusHeatmap() {
     }
     box.innerHTML = cells.join('');
 }
-function changeHeatMonth(offset) {
-    const next = new Date(currentHeatMonth || new Date());
-    next.setDate(1);
-    next.setMonth(next.getMonth() + offset);
-    const now = new Date();
-    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    if (next > thisMonth) currentHeatMonth = thisMonth;
-    else currentHeatMonth = next;
-    renderFocusHeatmap();
-}
-window.changeHeatMonth = changeHeatMonth;
 function renderStudioFocusControls() {
     const catBox = document.getElementById('studio-focus-category-chips');
     if (catBox) {
