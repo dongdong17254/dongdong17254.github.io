@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -105,7 +105,6 @@
         .section-title { font-size: 18px; font-weight: bold; margin-bottom: 18px; color: var(--title-color); display: flex; align-items: center; justify-content: space-between; gap: 8px;}
 
         .grid-split { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 18px; margin-bottom: 18px; }
-        .home-focus-grid { grid-template-columns: 1fr; }
         .grid-split-half { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .sub-box { background-color: #F9FBFB; border-radius: 16px; padding: 18px; border: 1px solid var(--border-color); }
@@ -121,33 +120,6 @@
         .timer-btn-full:hover { border-color: var(--primary-color); color: var(--primary-color); transform: translateY(-2px); }
         .timer-btn-text { background: transparent; color: var(--text-muted); font-size: 13px; padding: 5px; cursor: pointer; border: none; transition: 0.2s;}
         .timer-btn-text:hover { color: var(--primary-color); }
-        .floating-timer {
-            position: fixed;
-            right: 24px;
-            bottom: 24px;
-            z-index: 80;
-            width: min(290px, calc(100vw - 32px));
-            background: rgba(255,255,255,0.96);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            box-shadow: 0 18px 42px rgba(31, 48, 45, 0.18);
-            padding: 12px;
-            display: none;
-            user-select: none;
-            backdrop-filter: blur(10px);
-        }
-        .floating-timer.active { display: block; }
-        .floating-timer.dragging { opacity: 0.92; cursor: grabbing; }
-        .floating-timer-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: grab; margin-bottom: 8px; }
-        .floating-timer-title { font-size: 12px; font-weight: 700; color: var(--title-color); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .floating-timer-hint { color: var(--text-muted); font-size: 11px; flex-shrink: 0; }
-        .floating-timer-time { font-size: 28px; line-height: 1; font-weight: 800; color: var(--title-color); font-variant-numeric: tabular-nums; margin-bottom: 10px; }
-        .floating-timer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .floating-timer-actions .mini-chip-btn { width: 100%; justify-content: center; }
-        @media (max-width: 720px) {
-            .floating-timer { right: 16px; bottom: 16px; width: min(260px, calc(100vw - 24px)); }
-            .floating-timer-time { font-size: 24px; }
-        }
 
         .shortcut-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
         .shortcut-tag { font-size: 12px; background: var(--sidebar-active); color: var(--title-color); padding: 4px 10px; border-radius: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent;}
@@ -1366,18 +1338,6 @@ body {
 </head>
 <body>
 
-<div id="floating-timer" class="floating-timer" aria-live="polite">
-    <div class="floating-timer-head" id="floating-timer-drag">
-        <div class="floating-timer-title" id="floating-timer-title">未命名事项</div>
-        <div class="floating-timer-hint">拖动</div>
-    </div>
-    <div class="floating-timer-time" id="floating-timer-time">00:00:00</div>
-    <div class="floating-timer-actions">
-        <button class="mini-chip-btn" type="button" id="floating-timer-pause" onclick="focusTimerCtrl(db.activeTimer.running ? 'pause' : 'start')">暂停</button>
-        <button class="mini-chip-btn" type="button" onclick="focusTimerCtrl('stop')">结束保存</button>
-    </div>
-</div>
-
 <div class="header">
     <div class="header-main">
         <h1>越冬皇帝的进步日记</h1>
@@ -1438,7 +1398,8 @@ body {
         </div>
 
         <div class="status-widget">
-            <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--primary-color);">📌 待办概况</div>
+            <div style="font-size: 12px; font-weight: bold; margin-bottom: 10px; color: var(--primary-color);">📌 今日概况</div>
+            <div class="status-row"><span>本周码字:</span> <span id="sidebar-words">0 字</span></div>
             <div class="status-row"><span>待办奏折:</span> <span id="sidebar-todos" style="color: var(--title-color);">0 份</span></div>
         </div>
     </aside>
@@ -1448,7 +1409,7 @@ body {
 
         <!-- 首页总览 -->
         <section id="section-home" class="content-section active">
-            <div class="grid-split home-focus-grid">
+            <div class="grid-split">
                 <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
                     <div class="section-title">⏱️ 今日理政时间</div>
                     <div style="display: flex; gap: 15px; margin-bottom: 20px;">
@@ -1500,6 +1461,39 @@ body {
                     </div>
                 </div>
 
+                <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column;">
+                    <div class="section-title">📊 今日概览</div>
+                    <div class="sub-box" style="margin-bottom: 15px; padding: 20px;">
+                        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:10px;">
+                            <span style="font-weight: bold; color: var(--title-color);">目标进度</span><span id="progress-text" style="color: var(--text-muted);">0/240 分钟</span>
+                        </div>
+                        <div class="progress-bar-bg"><div id="progress-bar" class="progress-bar-fill"></div></div>
+                    </div>
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px;">
+                        <div class="sub-box" style="flex: 1; text-align: center; padding: 15px 10px;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">打卡完成率</div>
+                            <div style="font-size: 26px; font-weight: bold; color: var(--title-color);" id="stat-checkin-rate">0%</div>
+                        </div>
+                        <div class="sub-box" style="flex: 1; text-align: center; padding: 15px 10px;">
+                            <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 5px;">任务完成率</div>
+                            <div style="font-size: 26px; font-weight: bold; color: var(--title-color);" id="stat-todo-rate">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="sub-box" style="flex-grow: 1; display: flex; flex-direction: column;">
+                        <h4 style="font-size: 14px; margin-bottom: 12px; color: var(--title-color);">🌈 状态与打卡</h4>
+                        <div class="status-tabs">
+                            <div class="status-tab active" id="tab-0" onclick="selectStatusTab(0)">🌅 上午</div>
+                            <div class="status-tab" id="tab-1" onclick="selectStatusTab(1)">☀️ 下午</div>
+                            <div class="status-tab" id="tab-2" onclick="selectStatusTab(2)">🌙 晚上</div>
+                        </div>
+                        <div style="display:flex; gap:10px; align-items:flex-start;">
+                            <textarea id="input-daily-status" class="custom-textarea" placeholder="记录当前选中频道的感受... (Ctrl+Enter 提交)" style="flex-grow:1; min-height:50px; margin-bottom:0;"></textarea>
+                            <button class="btn" style="padding:10px 15px; align-self:stretch; background:var(--title-color);" onclick="saveDailyStatus()">打卡</button>
+                        </div>
+                        <div class="status-records-grid" id="status-records-grid"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="card">
@@ -1537,6 +1531,16 @@ body {
                         <ul class="todo-list" id="list-todo-today"></ul>
                     </div>
                 </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">📝 码字进度</div>
+                <div class="word-stats-bar" id="word-stats"></div>
+                <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                    <input type="number" id="input-words" class="custom-input" placeholder="今日新增字数..." style="margin-bottom: 0; flex: 1;">
+                    <button class="btn" onclick="saveRecord('words')">记录打卡</button>
+                </div>
+                <ul id="list-words" class="record-list"></ul>
             </div>
 
             <div class="card" style="margin-top: 20px;">
@@ -1848,8 +1852,6 @@ let cloudImageObjectUrls = {};
 let cloudImageFetchPromises = {};
 let cloudAutoSaveTimer = null;
 let cloudSyncInProgress = false;
-let timerCloudSyncInterval = null;
-let timerImmediateCloudSaveTimer = null;
 
 
 // 获取完整的 年-月-日 时:分
@@ -1888,19 +1890,6 @@ function makeDefaultFocusCategories() {
     ];
 }
 function makeUid(prefix = 'id') { return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`; }
-const CLIENT_DEVICE_ID = (() => {
-    try {
-        const key = 'yuedongDeviceId';
-        let id = localStorage.getItem(key);
-        if (!id) {
-            id = makeUid('device');
-            localStorage.setItem(key, id);
-        }
-        return id;
-    } catch(e) {
-        return makeUid('device');
-    }
-})();
 function formatMinutesHuman(minutes) {
     const safe = Math.max(0, Math.round(minutes || 0));
     const h = Math.floor(safe / 60), m = safe % 60;
@@ -1964,10 +1953,7 @@ function ensureDbCompatibility() {
         topic: db.activeTimer.topic || '',
         sessionStartAt: db.activeTimer.sessionStartAt || null,
         categoryId: db.activeTimer.categoryId || db.focusSelectedCategoryId,
-        subCategory: db.activeTimer.subCategory || db.activeTimer.topic || '',
-        sessionId: db.activeTimer.sessionId || null,
-        updatedAt: db.activeTimer.updatedAt || db.__meta?.lastLocalWriteAt || null,
-        deviceId: db.activeTimer.deviceId || CLIENT_DEVICE_ID
+        subCategory: db.activeTimer.subCategory || db.activeTimer.topic || ''
     };
     if (!Array.isArray(db.focusRecords)) db.focusRecords = [];
     db.focusRecords = db.focusRecords.map((rec, idx) => {
@@ -2241,8 +2227,6 @@ async function loginMicrosoft() {
         updateCloudUI('正在打开微软登录窗口...');
         await ensureMicrosoftAccount();
         updateCloudUI('Microsoft 账户已连接');
-        startTimerCloudSyncLoop();
-        syncTimerWithCloud({ silent: true });
         const lastLocal = db.__meta?.lastLocalWriteAt;
         const lastCloud = db.__meta?.lastCloudSyncAt;
         if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) scheduleCloudAutoSave();
@@ -2304,16 +2288,6 @@ async function saveCloudData(options = {}) {
         ensureDbCompatibility();
         updateCloudUI(auto ? '正在自动保存到云端...' : '正在保存到云端...');
         const accessToken = await getMicrosoftAccessToken();
-        try {
-            const remoteBeforeSave = await fetchCloudDatabaseSilent();
-            if (remoteBeforeSave?.activeTimer && isRemoteTimerNewer(remoteBeforeSave.activeTimer)) {
-                db.activeTimer = remoteBeforeSave.activeTimer;
-                db.focusRecords = mergeById(db.focusRecords, remoteBeforeSave.focusRecords, 'id');
-                ensureDbCompatibility();
-            }
-        } catch(e) {
-            console.warn('保存前计时状态核对失败:', e);
-        }
         const migratedCount = await migrateInlineImagesToOneDrive(auto);
         db.__meta.lastCloudSyncAt = new Date().toISOString();
         const res = await fetch(ONEDRIVE_DB_URL, {
@@ -2334,84 +2308,6 @@ async function saveCloudData(options = {}) {
     } finally {
         cloudSyncInProgress = false;
     }
-}
-
-async function fetchCloudDatabaseSilent() {
-    if (!isCloudLoggedIn()) return null;
-    const client = initMsal();
-    const account = client.getActiveAccount() || client.getAllAccounts()[0];
-    if (!account) return null;
-    let tokenResp;
-    try {
-        tokenResp = await client.acquireTokenSilent({ scopes: ONEDRIVE_SCOPES, account });
-    } catch(e) {
-        return null;
-    }
-    const accessToken = tokenResp.accessToken;
-    const res = await fetch(ONEDRIVE_DB_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
-    return JSON.parse(await res.text());
-}
-
-function mergeById(localItems, remoteItems, key = 'id') {
-    const map = new Map();
-    (localItems || []).forEach(item => map.set(item?.[key] || item?.idKey || item?.time, item));
-    (remoteItems || []).forEach(item => map.set(item?.[key] || item?.idKey || item?.time, item));
-    return Array.from(map.values()).filter(Boolean);
-}
-
-function isRemoteTimerNewer(remoteTimer) {
-    const remoteTime = new Date(remoteTimer?.updatedAt || 0).getTime();
-    const localTime = new Date(db.activeTimer?.updatedAt || 0).getTime();
-    return remoteTime > localTime;
-}
-
-async function saveTimerToCloudSoon(delay = 300) {
-    if (!isCloudLoggedIn()) return;
-    clearTimeout(timerImmediateCloudSaveTimer);
-    timerImmediateCloudSaveTimer = setTimeout(() => {
-        saveCloudData({ silent: true, auto: true });
-    }, delay);
-}
-
-async function syncTimerWithCloud(options = {}) {
-    const { silent = true } = options;
-    if (!isCloudLoggedIn() || cloudSyncInProgress) return false;
-    try {
-        const remote = await fetchCloudDatabaseSilent();
-        if (!remote) return false;
-        ensureDbCompatibility();
-        const remoteTimer = remote.activeTimer || {};
-        if (isRemoteTimerNewer(remoteTimer)) {
-            revokeCloudImageObjectUrls();
-            db.activeTimer = remoteTimer;
-            db.focusRecords = mergeById(db.focusRecords, remote.focusRecords, 'id');
-            db.__meta = { ...(db.__meta || {}), ...(remote.__meta || {}) };
-            ensureDbCompatibility();
-            await persist({ markDirty: false, skipAutoSave: true });
-            fillFocusTimerFromState();
-            updateTimerDisplay();
-            renderFocusToday();
-            renderStats();
-            updateOverviewStats();
-            updateCloudUI('已同步云端计时');
-            return true;
-        }
-        return false;
-    } catch(e) {
-        console.warn('计时同步失败:', e);
-        if (!silent) alert('计时同步失败：' + e.message);
-        updateCloudUI('计时同步失败');
-        return false;
-    }
-}
-
-function startTimerCloudSyncLoop() {
-    clearInterval(timerCloudSyncInterval);
-    timerCloudSyncInterval = setInterval(() => {
-        syncTimerWithCloud({ silent: true });
-    }, 15000);
 }
 
 async function persist(options = {}) {
@@ -2466,11 +2362,7 @@ window.onload = async () => {
 
     bindSidebarNav();
     bindGlobalSearchEvents();
-    initFloatingTimerDrag();
     renderAll();
-    updateTimerDisplay();
-    startTimerCloudSyncLoop();
-    syncTimerWithCloud({ silent: true });
     updateCloudUI();
 };
 
@@ -3234,83 +3126,11 @@ function manageFocusShortcuts() {
 
 // 恢复其余完整的原版代码功能 (专注、Todos、状态打卡、单词、年计划等)
 function formatTime(s) { return [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(v => String(v).padStart(2, '0')).join(':'); }
-function getTimerTotalSeconds(timer = db.activeTimer) {
-    let total = timer?.accumulatedSeconds || 0;
-    if (timer?.running && timer.startTime > 0) total += Math.floor((Date.now() - timer.startTime) / 1000);
-    return Math.max(0, total);
-}
-function markActiveTimerUpdated() {
-    db.activeTimer.updatedAt = new Date().toISOString();
-    db.activeTimer.deviceId = CLIENT_DEVICE_ID;
-    if ((db.activeTimer.running || db.activeTimer.accumulatedSeconds > 0) && !db.activeTimer.sessionId) {
-        db.activeTimer.sessionId = makeUid('timer');
-    }
-}
-function updateFloatingTimer(totalSeconds) {
-    const panel = document.getElementById('floating-timer');
-    if (!panel) return;
-    const hasTimer = !!(db.activeTimer?.running || (db.activeTimer?.accumulatedSeconds || 0) > 0);
-    panel.classList.toggle('active', hasTimer);
-    if (!hasTimer) return;
-    const timeEl = document.getElementById('floating-timer-time');
-    const titleEl = document.getElementById('floating-timer-title');
-    const pauseBtn = document.getElementById('floating-timer-pause');
-    if (timeEl) timeEl.textContent = formatTime(totalSeconds);
-    if (titleEl) {
-        const cat = getFocusCategoryName(db.activeTimer.categoryId);
-        const sub = db.activeTimer.subCategory || db.activeTimer.topic || '未命名事项';
-        titleEl.textContent = `${cat} / ${sub}`;
-    }
-    if (pauseBtn) pauseBtn.textContent = db.activeTimer.running ? '暂停' : '继续';
-}
-function initFloatingTimerDrag() {
-    const panel = document.getElementById('floating-timer');
-    const handle = document.getElementById('floating-timer-drag');
-    if (!panel || !handle || panel.dataset.dragBound) return;
-    panel.dataset.dragBound = '1';
-    try {
-        const saved = JSON.parse(localStorage.getItem('floatingTimerPos') || 'null');
-        if (saved && Number.isFinite(saved.left) && Number.isFinite(saved.top)) {
-            panel.style.left = `${Math.max(8, Math.min(saved.left, window.innerWidth - 80))}px`;
-            panel.style.top = `${Math.max(8, Math.min(saved.top, window.innerHeight - 80))}px`;
-            panel.style.right = 'auto';
-            panel.style.bottom = 'auto';
-        }
-    } catch(e) {}
-    let drag = null;
-    handle.addEventListener('pointerdown', e => {
-        if (e.button !== undefined && e.button !== 0) return;
-        const rect = panel.getBoundingClientRect();
-        drag = { x: e.clientX - rect.left, y: e.clientY - rect.top };
-        panel.classList.add('dragging');
-        handle.setPointerCapture?.(e.pointerId);
-    });
-    handle.addEventListener('pointermove', e => {
-        if (!drag) return;
-        const left = Math.max(8, Math.min(e.clientX - drag.x, window.innerWidth - panel.offsetWidth - 8));
-        const top = Math.max(8, Math.min(e.clientY - drag.y, window.innerHeight - panel.offsetHeight - 8));
-        panel.style.left = `${left}px`;
-        panel.style.top = `${top}px`;
-        panel.style.right = 'auto';
-        panel.style.bottom = 'auto';
-    });
-    const stopDrag = () => {
-        if (!drag) return;
-        drag = null;
-        panel.classList.remove('dragging');
-        try {
-            const rect = panel.getBoundingClientRect();
-            localStorage.setItem('floatingTimerPos', JSON.stringify({ left: rect.left, top: rect.top }));
-        } catch(e) {}
-    };
-    handle.addEventListener('pointerup', stopDrag);
-    handle.addEventListener('pointercancel', stopDrag);
-}
 function updateTimerDisplay() {
-    const total = getTimerTotalSeconds();
+    let total = db.activeTimer.accumulatedSeconds || 0;
+    if (db.activeTimer.running && db.activeTimer.startTime > 0) total += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
     const clock = document.getElementById('focus-stopwatch');
     if (clock) clock.textContent = formatTime(total);
-    updateFloatingTimer(total);
 }
 function startTimerInterval() { clearInterval(timerInterval); timerInterval = setInterval(updateTimerDisplay, 1000); }
 function fillFocusTimerFromState() {
@@ -3320,15 +3140,15 @@ function fillFocusTimerFromState() {
     renderFocusSubcategorySuggestions();
     renderFocusShortcuts();
 }
-async function startFocusShortcut(shortcutId) {
+function startFocusShortcut(shortcutId) {
     const item = (db.focusShortcuts || []).find(sc => sc.id === shortcutId);
     if (!item) return;
     if (db.activeTimer.running) {
         if (!confirm('当前有正在计时的事项，是否先结束并切换到新的快捷计时？')) return;
-        await focusTimerCtrl('stop');
+        focusTimerCtrl('stop');
     } else if ((db.activeTimer.accumulatedSeconds || 0) > 0) {
         if (!confirm('当前有尚未保存的计时，是否清零并切换到快捷计时？')) return;
-        await focusTimerCtrl('reset');
+        focusTimerCtrl('reset');
     }
     db.focusSelectedCategoryId = item.categoryId || getActiveFocusCategoryId();
     const subInput = document.getElementById('focus-subcategory');
@@ -3338,12 +3158,11 @@ async function startFocusShortcut(shortcutId) {
     db.activeTimer.subCategory = item.subCategory || '';
     db.activeTimer.topic = item.subCategory || '';
     renderFocusCategoryChips();
-    await focusTimerCtrl('start');
+    focusTimerCtrl('start');
 }
-async function focusTimerCtrl(act) {
-    await syncTimerWithCloud({ silent: true });
+function focusTimerCtrl(act) {
     const subInput = document.getElementById('focus-subcategory');
-    const categoryId = act === 'start' ? getActiveFocusCategoryId() : (db.activeTimer.categoryId || getActiveFocusCategoryId());
+    const categoryId = getActiveFocusCategoryId();
     const subCategory = (subInput?.value || db.activeTimer.subCategory || '').trim() || '未命名事项';
     if (subInput) subInput.value = subCategory;
     if (act === 'start' && !db.activeTimer.running) {
@@ -3354,19 +3173,16 @@ async function focusTimerCtrl(act) {
         db.activeTimer.categoryId = categoryId;
         db.activeTimer.subCategory = subCategory;
         db.activeTimer.topic = subCategory;
-        markActiveTimerUpdated();
         startTimerInterval();
-        await persist();
-        saveTimerToCloudSoon();
+        persist();
     } else if (act === 'pause' && db.activeTimer.running) {
         db.activeTimer.running = false;
         db.activeTimer.accumulatedSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
         db.activeTimer.startTime = 0;
-        markActiveTimerUpdated();
-        clearInterval(timerInterval); updateTimerDisplay(); await persist();
-        saveTimerToCloudSoon();
+        clearInterval(timerInterval); updateTimerDisplay(); persist();
     } else if (act === 'stop') {
-        let totalSeconds = getTimerTotalSeconds();
+        let totalSeconds = db.activeTimer.accumulatedSeconds || 0;
+        if (db.activeTimer.running && db.activeTimer.startTime > 0) totalSeconds += Math.floor((Date.now() - db.activeTimer.startTime) / 1000);
         if (totalSeconds < 60) return alert('总记录不满 1 分钟，无法保存。');
         clearInterval(timerInterval);
         const endAt = new Date().toISOString();
@@ -3383,18 +3199,14 @@ async function focusTimerCtrl(act) {
             endAt
         });
         db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: '', sessionStartAt: null, categoryId, subCategory: '' };
-        markActiveTimerUpdated();
         if (subInput) subInput.value = '';
-        updateTimerDisplay(); await persist(); renderFocusToday(); updateOverviewStats(); renderStats();
-        saveTimerToCloudSoon();
+        updateTimerDisplay(); persist(); renderFocusToday(); updateOverviewStats(); renderStats();
     } else if (act === 'reset') {
         clearInterval(timerInterval);
         const keepCategory = getActiveFocusCategoryId();
         db.activeTimer = { running: false, startTime: 0, accumulatedSeconds: 0, topic: '', sessionStartAt: null, categoryId: keepCategory, subCategory: '' };
-        markActiveTimerUpdated();
         if (subInput) subInput.value = '';
-        updateTimerDisplay(); await persist();
-        saveTimerToCloudSoon();
+        updateTimerDisplay(); persist();
     }
 }
 function editFocusRecord(id) {
@@ -3423,26 +3235,20 @@ function renderFocusToday() {
 function updateOverviewStats() {
     const todayKey = getDateKey(); db.focusTarget = parseInt(document.getElementById('focus-target').value) || 240;
     const mins = Math.floor((db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).reduce((s, r) => s + (r.seconds || 0), 0) / 60);
-    const progressText = document.getElementById('progress-text');
-    const progressBar = document.getElementById('progress-bar');
-    if (progressText) progressText.textContent = `${mins}/${db.focusTarget} 分钟`;
-    if (progressBar) progressBar.style.width = `${db.focusTarget > 0 ? Math.min((mins / db.focusTarget) * 100, 100) : 0}%`;
+    document.getElementById('progress-text').textContent = `${mins}/${db.focusTarget} 分钟`;
+    document.getElementById('progress-bar').style.width = `${db.focusTarget > 0 ? Math.min((mins / db.focusTarget) * 100, 100) : 0}%`;
     let checkedCount = 0; (db.checkins[todayKey] || [0, 0, 0]).forEach(v => { if (v) checkedCount++; });
-    const checkinRate = document.getElementById('stat-checkin-rate');
-    if (checkinRate) checkinRate.textContent = `${Math.round((checkedCount / 3) * 100)}%`;
+    document.getElementById('stat-checkin-rate').textContent = `${Math.round((checkedCount / 3) * 100)}%`;
     const tds = (db.todos || []).filter(t => t.type === 'today' && t.dateCreated && getDateKey(t.dateCreated) === todayKey);
-    const todoRate = document.getElementById('stat-todo-rate');
-    if (todoRate) todoRate.textContent = `${tds.length ? Math.round((tds.filter(t => t.status === 'done').length / tds.length) * 100) : 0}%`;
+    document.getElementById('stat-todo-rate').textContent = `${tds.length ? Math.round((tds.filter(t => t.status === 'done').length / tds.length) * 100) : 0}%`;
 }
 function selectStatusTab(idx) { activeStatusTab = idx; document.querySelectorAll('#tab-0, #tab-1, #tab-2').forEach((el, i) => el.classList.toggle('active', i === idx)); }
 function updateCheckinUI() { const todayKey = getDateKey(); const checks = db.checkins[todayKey] || [0, 0, 0]; document.querySelectorAll('#tab-0, #tab-1, #tab-2').forEach((el, i) => el.classList.toggle('checked', !!checks[i])); }
 function saveDailyStatus() {
-    const input = document.getElementById('input-daily-status');
-    if (!input) return;
-    const txt = input.value.trim(); if (!txt) return alert("请先填写记录内容！");
+    const txt = document.getElementById('input-daily-status').value.trim(); if (!txt) return alert("请先填写记录内容！");
     db.statusRecords.push({ id: Date.now(), time: new Date().toISOString(), fullTime: getFullTime(), period: periodNames[activeStatusTab], text: txt });
     const todayKey = getDateKey(); if (!db.checkins[todayKey]) db.checkins[todayKey] = [0, 0, 0]; db.checkins[todayKey][activeStatusTab] = 1;
-    input.value = ''; persist(); renderStatusRecords(); updateCheckinUI(); updateOverviewStats();
+    document.getElementById('input-daily-status').value = ''; persist(); renderStatusRecords(); updateCheckinUI(); updateOverviewStats();
 }
 function deleteStatusRecord(id) { if (confirm("确定删除这条记录吗？")) { db.statusRecords = db.statusRecords.filter(r => r.id !== id); persist(); renderStatusRecords(); } }
 function editStatusRecord(id) {
@@ -3520,14 +3326,12 @@ function renderWordsList() {
         if (d >= weekStart) weekTotal += val;
         if (getDateKey(d) === todayKey) todayTotal += val;
     });
-    const wordStats = document.getElementById('word-stats');
-    if (wordStats) wordStats.innerHTML = `<span style="flex:1">今日: <strong>${todayTotal}</strong></span><span style="flex:1">本周: <strong>${weekTotal}</strong></span><span style="flex:1">本月: <strong>${monthTotal}</strong></span>`;
+    document.getElementById('word-stats').innerHTML = `<span style="flex:1">今日: <strong>${todayTotal}</strong></span><span style="flex:1">本周: <strong>${weekTotal}</strong></span><span style="flex:1">本月: <strong>${monthTotal}</strong></span>`;
     [...(db.words || [])].reverse().forEach((item, i) => {
         const realIdx = db.words.length - 1 - i;
         ul.innerHTML += `<li class="record-item compact-record"><div class="record-header"><span class="record-time">${escapeHtml(item.time)}</span><div class="action-group"><span class="text-btn edit" onclick="editWordRecord(${realIdx})">${ICON_EDIT}</span><span class="text-btn delete" onclick="deleteRecord('words', ${item.idKey ? item.idKey : realIdx})">${ICON_DELETE}</span></div></div><div class="record-content">新增打卡: <strong>${escapeHtml(item.val)}</strong> 字</div></li>`;
     });
-    const sidebarWords = document.getElementById('sidebar-words');
-    if (sidebarWords) sidebarWords.textContent = `${weekTotal} 字`;
+    document.getElementById('sidebar-words').textContent = `${weekTotal} 字`;
 }
 function editWordRecord(i) { openModal("修改字数", [{label: "字数", value: db.words[i].val, type: "number"}], (vals) => { if (vals[0] && !isNaN(vals[0])) { db.words[i].val = vals[0]; persist(); renderWordsList(); } }); }
 
@@ -4927,12 +4731,10 @@ function renderFocusTimeline(){
             if(resp && resp.account){
                 client.setActiveAccount(resp.account);
                 try{ updateCloudUI("Microsoft 账户已连接"); }catch(e){}
-                try{ startTimerCloudSyncLoop(); syncTimerWithCloud({ silent: true }); }catch(e){}
             }else{
                 const account = client.getActiveAccount() || client.getAllAccounts()[0];
                 if(account) client.setActiveAccount(account);
                 try{ updateCloudUI(); }catch(e){}
-                if(account) try{ startTimerCloudSyncLoop(); syncTimerWithCloud({ silent: true }); }catch(e){}
             }
 
             const pending = getPendingAction();
@@ -5080,7 +4882,6 @@ function renderFocusTimeline(){
             await ensureMicrosoftAccountFixed(false);
             setPendingAction("");
             try{ updateCloudUI("Microsoft 账户已连接"); }catch(e){}
-            try{ startTimerCloudSyncLoop(); syncTimerWithCloud({ silent: true }); }catch(e){}
             const lastLocal = db.__meta?.lastLocalWriteAt;
             const lastCloud = db.__meta?.lastCloudSyncAt;
             if (lastLocal && (!lastCloud || new Date(lastLocal) > new Date(lastCloud))) {
