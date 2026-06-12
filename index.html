@@ -4237,7 +4237,7 @@ function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
     const ctx = cvs.getContext('2d'), rect = cvs.parentNode.getBoundingClientRect();
     cvs.width = rect.width * 2; cvs.height = 440; cvs.style.width = rect.width + 'px'; cvs.style.height = '220px'; ctx.scale(2, 2);
-    const w = rect.width, h = 220, padL = 44, padR = 24, padT = 18, padB = 32; ctx.clearRect(0, 0, w, h);
+    const w = rect.width, h = 220, padL = 44, padR = 24, padT = 18, padB = 44; ctx.clearRect(0, 0, w, h);
     const roundRect = (x, y, width, height, radius) => {
         const r = Math.min(radius, width / 2, height / 2);
         ctx.beginPath();
@@ -4250,12 +4250,13 @@ function drawTrendChart() {
         ctx.quadraticCurveTo(x, y, x + r, y);
         ctx.closePath();
     };
-    const dts = [], cts = [];
+    const dts = [], weekLabels = [], cts = [];
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dayKey = getDateKey(d);
         dts.push(`${d.getMonth()+1}/${d.getDate()}`);
+        weekLabels.push(`周${'日一二三四五六'[d.getDay()]}`);
         cts.push(Math.floor((db.focusRecords||[]).filter(r => r.date && getDateKey(r.date) === dayKey).reduce((sum, r) => sum + (r.seconds || 0), 0) / 60));
     }
     const plotW = Math.max(1, w - padL - padR);
@@ -4293,8 +4294,12 @@ function drawTrendChart() {
         ctx.fillStyle = '#9DBDB5';
         ctx.fill();
         ctx.shadowColor = 'transparent';
-        ctx.fillStyle = '#8A9895'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-        ctx.fillText(dts[i], pt.x, h - 8);
+        ctx.fillStyle = '#7B8A87'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.font = '10px sans-serif';
+        ctx.fillText(dts[i], pt.x, h - 20);
+        ctx.fillStyle = '#A2AEAB';
+        ctx.font = '9px sans-serif';
+        ctx.fillText(weekLabels[i], pt.x, h - 7);
     });
 
     ctx.beginPath();
