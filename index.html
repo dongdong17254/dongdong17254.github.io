@@ -4286,14 +4286,11 @@ function drawTrendChart() {
         const x = pt.x - barW / 2;
         const y = barH > 0 ? pt.y : padT + plotH - 1;
         const height = Math.max(1, barH);
-        const barGradient = ctx.createLinearGradient(0, y, 0, y + height);
-        barGradient.addColorStop(0, 'rgba(108,141,135,0.72)');
-        barGradient.addColorStop(1, 'rgba(108,141,135,0.14)');
-        ctx.shadowColor = 'rgba(54,79,74,0.10)';
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 3;
+        ctx.shadowColor = 'rgba(58,91,84,0.08)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
         roundRect(x, y, barW, height, 8);
-        ctx.fillStyle = barGradient;
+        ctx.fillStyle = '#9DBDB5';
         ctx.fill();
         ctx.shadowColor = 'transparent';
         ctx.fillStyle = '#8A9895'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
@@ -4302,13 +4299,13 @@ function drawTrendChart() {
 
     ctx.beginPath();
     points.forEach((pt, i) => { if (i === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); });
-    ctx.strokeStyle = 'rgba(76,111,104,0.82)'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.strokeStyle = '#4F746C'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     points.forEach(pt => {
         ctx.beginPath(); ctx.arc(pt.x, pt.y, 5.2, 0, Math.PI*2);
         ctx.fillStyle = 'white'; ctx.fill();
-        ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 2.2; ctx.stroke();
+        ctx.strokeStyle = '#4F746C'; ctx.lineWidth = 2.2; ctx.stroke();
         ctx.beginPath(); ctx.arc(pt.x, pt.y, 2, 0, Math.PI*2);
-        ctx.fillStyle = '#6C8D87'; ctx.fill();
+        ctx.fillStyle = '#4F746C'; ctx.fill();
     });
 }
 
