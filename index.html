@@ -4237,7 +4237,19 @@ function drawTrendChart() {
     const cvs = document.getElementById('trendChart'); if (!cvs) return;
     const ctx = cvs.getContext('2d'), rect = cvs.parentNode.getBoundingClientRect();
     cvs.width = rect.width * 2; cvs.height = 440; cvs.style.width = rect.width + 'px'; cvs.style.height = '220px'; ctx.scale(2, 2);
-    const w = rect.width, h = 220, padL = 42, padR = 22, padT = 18, padB = 30; ctx.clearRect(0, 0, w, h);
+    const w = rect.width, h = 220, padL = 44, padR = 24, padT = 18, padB = 32; ctx.clearRect(0, 0, w, h);
+    const roundRect = (x, y, width, height, radius) => {
+        const r = Math.min(radius, width / 2, height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height);
+        ctx.lineTo(x, y + height);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    };
     const dts = [], cts = [];
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -4249,7 +4261,7 @@ function drawTrendChart() {
     const plotW = Math.max(1, w - padL - padR);
     const plotH = Math.max(1, h - padT - padB);
     const maxMinutes = Math.max(...cts, 60);
-    const barW = Math.min(46, plotW / 11);
+    const barW = Math.min(30, Math.max(18, plotW / 16));
     const points = cts.map((v, i) => ({
         x: padL + (i / 6) * plotW,
         y: padT + plotH,
@@ -4260,32 +4272,43 @@ function drawTrendChart() {
     const yMaxMinutes = yMaxHours * 60;
     points.forEach(pt => { pt.y = padT + plotH - (pt.minutes / yMaxMinutes) * plotH; });
 
-    ctx.fillStyle = '#7A8A86'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillStyle = '#8A9895'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
     for (let i = 0; i <= 5; i++) {
         const hourVal = i * tickStep;
         const yPos = padT + plotH - (i / 5) * plotH;
         const label = `${Number.isInteger(hourVal) ? hourVal.toFixed(0) : hourVal.toFixed(1)}h`;
-        ctx.fillText(label, padL - 8, yPos + 3);
-        ctx.beginPath(); ctx.moveTo(padL, yPos); ctx.lineTo(w - padR, yPos); ctx.strokeStyle = '#E2EAE8'; ctx.lineWidth = 1; ctx.stroke();
+        ctx.fillText(label, padL - 10, yPos);
+        ctx.beginPath(); ctx.moveTo(padL, yPos); ctx.lineTo(w - padR, yPos); ctx.strokeStyle = i === 0 ? '#D8E4E1' : 'rgba(216,228,225,0.62)'; ctx.lineWidth = i === 0 ? 1.2 : 1; ctx.stroke();
     }
 
     points.forEach((pt, i) => {
         const barH = Math.max(0, padT + plotH - pt.y);
-        ctx.fillStyle = 'rgba(108,141,135,0.18)';
-        ctx.fillRect(pt.x - barW / 2, pt.y, barW, barH);
-        ctx.fillStyle = 'rgba(108,141,135,0.42)';
-        ctx.fillRect(pt.x - barW / 2, pt.y, barW, 3);
-        ctx.fillStyle = '#7A8A86'; ctx.textAlign = 'center';
+        const x = pt.x - barW / 2;
+        const y = barH > 0 ? pt.y : padT + plotH - 1;
+        const height = Math.max(1, barH);
+        const barGradient = ctx.createLinearGradient(0, y, 0, y + height);
+        barGradient.addColorStop(0, 'rgba(108,141,135,0.72)');
+        barGradient.addColorStop(1, 'rgba(108,141,135,0.14)');
+        ctx.shadowColor = 'rgba(54,79,74,0.10)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+        roundRect(x, y, barW, height, 8);
+        ctx.fillStyle = barGradient;
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.fillStyle = '#8A9895'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
         ctx.fillText(dts[i], pt.x, h - 8);
     });
 
     ctx.beginPath();
     points.forEach((pt, i) => { if (i === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y); });
-    ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.stroke();
+    ctx.strokeStyle = 'rgba(76,111,104,0.82)'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.stroke();
     points.forEach(pt => {
-        ctx.beginPath(); ctx.arc(pt.x, pt.y, 5, 0, Math.PI*2);
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 5.2, 0, Math.PI*2);
         ctx.fillStyle = 'white'; ctx.fill();
-        ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 2.2; ctx.stroke();
+        ctx.beginPath(); ctx.arc(pt.x, pt.y, 2, 0, Math.PI*2);
+        ctx.fillStyle = '#6C8D87'; ctx.fill();
     });
 }
 
