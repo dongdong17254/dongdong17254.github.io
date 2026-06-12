@@ -474,6 +474,7 @@
         .focus-donut-total { font-size: 22px; font-weight: 800; color: var(--title-color); line-height: 1.15; }
         .focus-donut-total span { font-size: 12px; font-weight: 500; color: var(--text-muted); }
         .focus-breakdown { display: grid; gap: 12px; }
+        .focus-breakdown.scroll-lock { overflow-y: auto; padding-right: 4px; align-content: start; }
         .dist-group { display: grid; gap: 8px; }
         .dist-group-head { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px; font-size: 12.5px; color: var(--title-color); }
         .dist-group-name { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 700; }
@@ -1188,6 +1189,17 @@ body {
     font-family: "JetBrains Mono", monospace;
     flex-shrink: 0;
 }
+.tl2-task-side {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.tl2-task-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 
 /* 右侧时间轴 */
 .tl2-grid-outer {
@@ -1316,9 +1328,10 @@ body {
     .tl2-task-row {
         grid-template-columns: 10px 1fr;
     }
-    .tl2-task-dur {
+    .tl2-task-side {
         grid-column: 2;
         justify-self: start;
+        flex-wrap: wrap;
     }
     .tl2-grid-head,
     .tl2-hour-row,
@@ -3160,6 +3173,9 @@ function bindFocusRecordEditor() {
     [dateInput, startInput, endInput].forEach(el => el.addEventListener('input', syncDuration));
     syncDuration();
 }
+function getFocusRecordById(id) {
+    return (db.focusRecords || []).find(r => String(r.id) === String(id));
+}
 function saveFocusRecordFromModal(existingId) {
     const categories = getFocusCategories();
     const categoryInput = document.getElementById('focus-edit-category');
@@ -3168,7 +3184,7 @@ function saveFocusRecordFromModal(existingId) {
     const startInput = document.getElementById('focus-edit-start');
     const endInput = document.getElementById('focus-edit-end');
     const durationInput = document.getElementById('focus-edit-duration');
-    const rec = existingId ? db.focusRecords.find(r => r.id === existingId) : null;
+    const rec = existingId ? getFocusRecordById(existingId) : null;
     const startAt = createDateTimeFromInputs(dateInput?.value, startInput?.value);
     let endAt = createDateTimeFromInputs(dateInput?.value, endInput?.value);
     if (!dateInput?.value) { alert('请先选择归属日期。'); return false; }
@@ -3191,7 +3207,7 @@ function saveFocusRecordFromModal(existingId) {
     return true;
 }
 function openFocusRecordEditor(id) {
-    const existing = id ? db.focusRecords.find(r => r.id === id) : null;
+    const existing = id ? getFocusRecordById(id) : null;
     const activeCategoryId = getActiveFocusCategoryId();
     const draftNow = roundDateToFiveMinutes(new Date());
     const draftStart = new Date(draftNow.getTime() - 30 * 60000);
@@ -3898,12 +3914,13 @@ async function focusTimerCtrl(act) {
 function editFocusRecord(id) {
     openFocusRecordEditor(id);
 }
-function deleteFocusRecord(id) { if (confirm('确定删除这条纪要吗？')) { db.focusRecords = db.focusRecords.filter(r => r.id !== id); persist(); renderFocusToday(); updateOverviewStats(); renderStats(); } }
+function deleteFocusRecord(id) { if (confirm('确定删除这条纪要吗？')) { db.focusRecords = db.focusRecords.filter(r => String(r.id) !== String(id)); persist(); renderFocusToday(); updateOverviewStats(); renderStats(); } }
 function renderFocusToday() {
     const todayKey = getDateKey(); const ul = document.getElementById('list-focus-today'); ul.innerHTML = '';
     const recs = (db.focusRecords || []).filter(r => r.date && getDateKey(r.date) === todayKey).sort((a,b) => String(b.endAt || b.date).localeCompare(String(a.endAt || a.date)));
     if (!recs.length) { ul.innerHTML = '<li style="font-size:13px; color:var(--text-muted); text-align:center; padding: 18px 0;">暂无记录，快去开启理政吧</li>'; return; }
     recs.forEach(r => {
+        const recId = escapeJsString(r.id);
         ul.innerHTML += `<li class="focus-item" data-search-key="focus-${r.id}">
             <div style="flex-grow: 1; min-width: 0;">
                 <div class="focus-title-line"><span class="focus-cat-badge" style="background:${getFocusCategoryColor(r.categoryId)}">${escapeHtml(getFocusCategoryName(r.categoryId))}</span><span class="focus-subtitle">${escapeHtml(r.subCategory || r.topic || '未命名事项')}</span></div>
@@ -3912,8 +3929,8 @@ function renderFocusToday() {
             <div style="display:flex; align-items:center; gap:12px; margin-left:12px;">
                 <div class="focus-duration">${formatSecondsHuman(r.seconds || 0)}</div>
                 <div class="action-group">
-                    <span class="text-btn edit" onclick="editFocusRecord(${r.id})">${ICON_EDIT}</span>
-                    <span class="text-btn delete" onclick="deleteFocusRecord(${r.id})">${ICON_DELETE}</span>
+                    <span class="text-btn edit" onclick="editFocusRecord('${recId}')">${ICON_EDIT}</span>
+                    <span class="text-btn delete" onclick="deleteFocusRecord('${recId}')">${ICON_DELETE}</span>
                 </div>
             </div></li>`;
     });
@@ -4193,6 +4210,18 @@ function renderFocusDistributionCharts() {
     renderFocusDistributionCard('day', 'focusDonutDay', 'focusDonutDayTotal', 'focusDayTotalLabel', 'focusBreakdownDay');
     renderFocusDistributionCard('month', 'focusDonutMonth', 'focusDonutMonthTotal', 'focusMonthTotalLabel', 'focusBreakdownMonth');
     renderFocusDistributionCard('year', 'focusDonutYear', 'focusDonutYearTotal', 'focusYearTotalLabel', 'focusBreakdownYear');
+    requestAnimationFrame(syncFocusYearBreakdownHeight);
+}
+function syncFocusYearBreakdownHeight() {
+    const month = document.getElementById('focusBreakdownMonth');
+    const year = document.getElementById('focusBreakdownYear');
+    if (!month || !year) return;
+    year.classList.remove('scroll-lock');
+    year.style.maxHeight = '';
+    const monthHeight = Math.ceil(month.getBoundingClientRect().height);
+    const targetHeight = Math.max(160, monthHeight);
+    year.style.maxHeight = `${targetHeight}px`;
+    year.classList.toggle('scroll-lock', year.scrollHeight > targetHeight + 1);
 }
 function renderStats() {
     const st = { w: {t:0,m:0}, m: {t:0,m:0}, y: {t:0,m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
@@ -4335,28 +4364,20 @@ function renderFocusTimeline(){
     var totalSec = segments.reduce(function(s,x){ return s+x.seconds; },0);
     totEl.textContent = totalSec>0 ? _tl2Fmt(totalSec) : '0M 00S';
 
-    // 左侧：按“事项”聚合，颜色取一级分类
-    var taskMap = {};
-    segments.sort(function(a,b){ return a.startMin-b.startMin; }).forEach(function(seg){
+    // 左侧：按单条记录展示，旧日期也可以直接修改或删除
+    var taskList = segments.sort(function(a,b){ return a.startMin-b.startMin; }).map(function(seg){
         var cid = seg.categoryId || '_default';
         var catName = getFocusCategoryName(cid);
         var taskName = seg.subCategory || catName || '未命名事项';
-        var key = cid + '||' + taskName;
-        if(!taskMap[key]){
-            taskMap[key] = {
-                categoryId: cid,
-                categoryName: catName,
-                taskName: taskName,
-                color: getFocusCategoryColor(cid),
-                totalSec: 0,
-                firstStart: seg.startMin
-            };
-        }
-        taskMap[key].totalSec += seg.seconds;
-        taskMap[key].firstStart = Math.min(taskMap[key].firstStart, seg.startMin);
-    });
-    var taskList = Object.values(taskMap).sort(function(a,b){
-        return a.firstStart - b.firstStart || b.totalSec - a.totalSec;
+        return {
+            id: seg.rec && seg.rec.id,
+            categoryName: catName,
+            taskName: taskName,
+            color: getFocusCategoryColor(cid),
+            totalSec: seg.seconds,
+            startText: _tl2Pad(Math.floor(seg.startMin / 60)) + ':' + _tl2Pad(Math.floor(seg.startMin % 60)),
+            endText: _tl2Pad(Math.floor(seg.endMin / 60)) + ':' + _tl2Pad(Math.floor(seg.endMin % 60))
+        };
     });
 
     listEl.innerHTML = '';
@@ -4366,13 +4387,20 @@ function renderFocusTimeline(){
         taskList.forEach(function(task){
             var row = document.createElement('div');
             row.className = 'tl2-task-row';
+            var recId = escapeJsString(task.id);
             row.innerHTML =
                 '<span class="tl2-task-dot" style="background:'+task.color+'"></span>' +
                 '<div class="tl2-task-main">' +
-                    '<div class="tl2-task-name">'+task.taskName+'</div>' +
-                    '<div class="tl2-task-meta">'+task.categoryName+'</div>' +
+                    '<div class="tl2-task-name">'+escapeHtml(task.taskName)+'</div>' +
+                    '<div class="tl2-task-meta">'+escapeHtml(task.categoryName)+' · '+task.startText+' - '+task.endText+'</div>' +
                 '</div>' +
-                '<span class="tl2-task-dur">'+_tl2FmtShort(task.totalSec)+'</span>';
+                '<div class="tl2-task-side">' +
+                    '<span class="tl2-task-dur">'+_tl2FmtShort(task.totalSec)+'</span>' +
+                    '<span class="tl2-task-actions">' +
+                        '<span class="text-btn edit" onclick="editFocusRecord(\''+recId+'\')">'+ICON_EDIT+'</span>' +
+                        '<span class="text-btn delete" onclick="deleteFocusRecord(\''+recId+'\')">'+ICON_DELETE+'</span>' +
+                    '</span>' +
+                '</div>';
             listEl.appendChild(row);
         });
     }
