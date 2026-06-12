@@ -1691,16 +1691,16 @@ body {
                 <div class="section-title">🔮 理政统计</div>
                 <div class="stat-wrapper">
                     <div class="stat-box" style="border-top-color: var(--primary-color);">
-                        <div class="stat-box-title">📅 本周</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-w-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-w-time">0 min</span></div>
+                        <div class="stat-box-title">📅 本周</div><div class="stat-row"><span>⏱️ 学习时间:</span> <span id="stat-w-time">0 min</span></div>
                     </div>
                     <div class="stat-box" style="border-top-color: var(--title-color);">
-                        <div class="stat-box-title">🗓️ 本月</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-m-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-m-time">0 min</span></div>
+                        <div class="stat-box-title">🗓️ 本月</div><div class="stat-row"><span>⏱️ 学习时间:</span> <span id="stat-m-time">0 min</span></div>
                     </div>
                     <div class="stat-box" style="border-top-color: var(--accent-color);">
-                        <div class="stat-box-title">📈 本年</div><div class="stat-row"><span>✅ 批阅:</span> <span id="stat-y-todo">0</span></div><div class="stat-row"><span>⏱️ 时长:</span> <span id="stat-y-time">0 min</span></div>
+                        <div class="stat-box-title">📈 本年</div><div class="stat-row"><span>⏱️ 学习时间:</span> <span id="stat-y-time">0 min</span></div>
                     </div>
                 </div>
-                <div class="stats-subtitle">📉 近7天批阅趋势</div>
+                <div class="stats-subtitle">📉 近7天学习时间趋势</div>
                 <div class="chart-container"><canvas id="trendChart"></canvas></div>
                 <div class="stats-subtitle">⏱️ 专注时间轴</div>
                 <!-- 时间轴导航 -->
@@ -4115,7 +4115,7 @@ function renderCalendar() {
     for (let d = 1; d <= daysInMonth; d++) {
         const ds = getDateKey(new Date(y, m, d));
         let cellHtml = `<div class="calendar-cell${ds === todayKey ? ' today' : ''}"><div class="calendar-date">${d}</div>`;
-        (db.todos || []).filter(t => t.status === 'done' && t.dateCompleted && getDateKey(t.dateCompleted) === ds).forEach(t => { cellHtml += `<div class="calendar-task">${escapeHtml(t.text)}</div>`; });
+        (db.todos || []).filter(t => t.status === 'done' && t.dateCompleted && getDateKey(t.dateCompleted) === ds).forEach(t => { cellHtml += `<div class="calendar-task" title="${escapeHtml(t.text)}">${escapeHtml(t.text)}</div>`; });
         cellHtml += `</div>`; grid.innerHTML += cellHtml;
     }
 }
@@ -4224,12 +4224,11 @@ function syncFocusYearBreakdownHeight() {
     year.classList.toggle('scroll-lock', year.scrollHeight > targetHeight + 1);
 }
 function renderStats() {
-    const st = { w: {t:0,m:0}, m: {t:0,m:0}, y: {t:0,m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
+    const st = { w: {m:0}, m: {m:0}, y: {m:0} }; const now = new Date(); const y = now.getFullYear(), mo = now.getMonth();
     const weekStart = getMondayWeekStart(now);
     const check = (ds, p) => { const d = new Date(ds); if (p === 'y') return d.getFullYear() === y; if (p === 'm') return d.getFullYear() === y && d.getMonth() === mo; return d >= weekStart; };
-    (db.todos||[]).filter(t => t.status==='done' && t.dateCompleted).forEach(t => ['w','m','y'].forEach(p => { if (check(t.dateCompleted, p)) st[p].t++; }));
     (db.focusRecords||[]).forEach(r => ['w','m','y'].forEach(p => { if (r.date && check(r.date, p)) st[p].m += Math.floor((r.seconds || 0)/60); }));
-    ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-todo`).textContent = st[p].t; document.getElementById(`stat-${p}-time`).textContent = formatMinutesHuman(st[p].m); });
+    ['w','m','y'].forEach(p => { document.getElementById(`stat-${p}-time`).textContent = formatMinutesHuman(st[p].m); });
     drawTrendChart();
     renderFocusDistributionCharts();
     if(typeof renderFocusTimeline==="function") renderFocusTimeline();
@@ -4240,8 +4239,14 @@ function drawTrendChart() {
     cvs.width = rect.width * 2; cvs.height = 440; cvs.style.width = rect.width + 'px'; cvs.style.height = '220px'; ctx.scale(2, 2);
     const w = rect.width, h = 220, pad = 30; ctx.clearRect(0, 0, w, h);
     const dts = [], cts = [];
-    for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dts.push(`${d.getMonth()+1}/${d.getDate()}`); cts.push((db.todos||[]).filter(t => t.status==='done' && t.dateCompleted && getDateKey(t.dateCompleted) === getDateKey(d)).length); }
-    const max = Math.max(...cts, 5); ctx.fillStyle = '#999'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dayKey = getDateKey(d);
+        dts.push(`${d.getMonth()+1}/${d.getDate()}`);
+        cts.push(Math.floor((db.focusRecords||[]).filter(r => r.date && getDateKey(r.date) === dayKey).reduce((sum, r) => sum + (r.seconds || 0), 0) / 60));
+    }
+    const max = Math.max(...cts, 60); ctx.fillStyle = '#999'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
     for (let i = 0; i <= 5; i++) { const yPos = h - pad - (i/5)*(h-pad*2); ctx.fillText(Math.round((i/5)*max), pad-5, yPos+3); ctx.beginPath(); ctx.moveTo(pad, yPos); ctx.lineTo(w-pad, yPos); ctx.strokeStyle = '#E2EAE8'; ctx.stroke(); }
     ctx.beginPath(); cts.forEach((v, i) => { const x = pad + (i/6)*(w-pad*2), y2 = h - pad - (v/max)*(h-pad*2); if (i === 0) ctx.moveTo(x, y2); else ctx.lineTo(x, y2); ctx.fillStyle = '#999'; ctx.textAlign = 'center'; ctx.fillText(dts[i], x, h-5); });
     ctx.strokeStyle = '#6C8D87'; ctx.lineWidth = 3; ctx.stroke();
